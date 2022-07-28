@@ -1,0 +1,16 @@
+.wrapper{
+    /* essa medida não leva em consideração aparelho de tamanhos diferentes */
+    /* max-width: 70rem;  */
+    /* cima-baixo/lados (auto deixa centralizado) */
+    margin: 2rem auto; 
+    /* padding: 0 1rem; */
+
+    /* background-color: bisque; */
+  
+    display: grid;
+    /* grid-template-columns: 256px 1fr; */
+    /* grid-template-columns: 1fr; */
+    grid-template-rows: 1fr;
+    /* gap: 2rem; */
+    /* align-items: flex-start */
+}
