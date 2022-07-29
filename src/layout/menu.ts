@@ -1,0 +1,50 @@
+import { ROUTES, USER_TYPE } from '../commons/constants';
+import { Horse, Person, Cube, Graph, Database, Storefront, PuzzlePiece } from "phosphor-react";
+
+export const menuEvolve = [
+  {
+    title: 'Grafos de Metadados', 
+    icon: Graph,
+    href: ROUTES.METAGRAPHS,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
+    title: 'Tópicos', 
+    icon: Cube,
+    href: ROUTES.TOPICS,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
+    title: 'Organizações', 
+    icon: Storefront,
+    href: ROUTES.ORGANIZATIONS,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
+    title: 'Autores', 
+    icon: Person,
+    href: ROUTES.AUTHORS,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
+    title: 'Fontes de Dados',
+    icon: Database,
+    href: ROUTES.DATASOURCES,
+    type: [USER_TYPE.ADMIN]
+  }
+];
+
+export const menuConsuming = [
+  {
+    title: 'Consulta', 
+    icon: PuzzlePiece,
+    href: ROUTES.HOME,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
+    title: 'Visualização', 
+    icon: Graph,
+    href: ROUTES.HOME,
+    type: [USER_TYPE.ADMIN]
+  },
+];

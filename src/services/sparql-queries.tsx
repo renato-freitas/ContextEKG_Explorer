@@ -82,7 +82,7 @@ export async function findOrganisationFromDBPedia(name: string) {
       params: { query }
     })
 
-    console.log(response.data.results.bindings)
+    //console.log(response.data.results.bindings)
     return response.data.results.bindings;
   } catch (error) {
     console.error(error)
@@ -108,7 +108,7 @@ export async function getComment(label: String) {
       params: { query }
     })
 
-    console.log(response.data.results.bindings)
+    //console.log(response.data.results.bindings)
     return response.data.results.bindings;
   } catch (error) {
     console.error(error)

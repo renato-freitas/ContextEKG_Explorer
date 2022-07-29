@@ -21,6 +21,7 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 // import { NavLink } from 'react-router-dom';
 import { Test } from '../test/Test';
+import { MButton } from '../../components/MButton';
 
 const drawerWidth = 200;
 
@@ -103,6 +104,7 @@ export function Organization() {
             Metagraph
           </Typography>
           <Button color="inherit">Login</Button>
+          <MButton label="Salvar" variant="primary"/>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -127,9 +129,6 @@ export function Organization() {
         <List>
           {['Grafos de Metadados', 'Organizações', 'Criadores', 'Tópicos'].map((text, index) => (
             <ListItem key={text} disablePadding
-              // component={NavLink}
-              // component={"li"}
-              // to={"/home"}
             >
               <ListItemButton>
                 <ListItemIcon>

@@ -1,15 +1,18 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Box  from "@mui/material/Box";
+import Box from "@mui/material/Box";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 import styles from '../kg/ListKG.module.css';
 import { loadCountries, findOrganisationFromDBPedia, getComment } from '../../services/sparql-queries'
+import { MButton } from "../../components/MButton";
+import { ThemeProvider } from "styled-components";
+import { defaultTheme } from "../../styles/themes/default";
 
 interface ElementOfRdfClass {
   value: string,
@@ -53,7 +56,7 @@ export function Test() {
         setLoading(true)
         setOpen(false)
         let organisations = await findOrganisationFromDBPedia(inputValueOrganization);
-        setOptionsOrganization(organisations);
+        // setOptionsOrganization(organisations);
         setOpen(true)
       } catch (error) {
         console.log(error)
@@ -83,9 +86,15 @@ export function Test() {
   };
 
   return (
-
     <div className={styles.listkg}>
       <div>
+        <ThemeProvider theme={defaultTheme}>
+          <MButton label="Salver" />
+          <MButton label="salvoe" variant="warning" />
+          <MButton label="tode" />
+          <MButton label="secondary" variant="secondary" />
+        </ThemeProvider>
+
         <Grid container spacing={2}>
           <Grid item sm={10}>
             <Autocomplete
@@ -141,8 +150,9 @@ export function Test() {
               }}
             />
           </Grid>
+
+
           <Grid item sm={2}>
-            {/* <Chip label={valueCountry?.label.value} /> */}
             <Chip label={valueOrganization?.label.value} />
           </Grid>
         </Grid>

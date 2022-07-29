@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-import s from './ListKG.module.css';
+import styles from './ListMokg.module.css';
 import { PREFIXIES_SPARQL } from '../../commons/constants';
 
 interface ElementOfRdfClass {
@@ -21,7 +21,7 @@ interface IRdfClasses {
 }
 
 
-export function ListKG() {
+export function MetagraphList() {
   const [rdfClasses, setRdfClasses] = useState<IRdfClasses[]>([] as IRdfClasses[]);
   useEffect(() => {
     async function loadClasses() {
@@ -47,7 +47,7 @@ export function ListKG() {
   }, [])
 
   return (
-    <div className={s.listkg}>
+    <div className={styles.listkg}>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
