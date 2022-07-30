@@ -7,6 +7,30 @@ interface ElementOfRdfClass {
   type: string
 }
 
+export async function findAllGraphsOfMetadata() {
+  try {
+    let query = PREFIXIES_SPARQL.DC
+      + PREFIXIES_SPARQL.DCT
+      + PREFIXIES_SPARQL.MOKG
+      + `SELECT * WHERE { 
+          ?s a mokg:MetadataGraph ; 
+            rdfs:label ?l ;
+            dcterms:created ?c ;
+            dcterms:modified ?m .
+        }`
+
+    const response = await axios({
+      method: 'GET',
+      url: ENDPOINTS.MOKG,
+      params: { query }
+    })
+
+    //console.log(response.data.results.bindings)
+    return response.data.results.bindings;
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 export async function loadCountries() {
   try {

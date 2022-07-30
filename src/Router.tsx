@@ -2,6 +2,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import { Home } from './view/home/Home';
 import { Topics } from './view/topics/Topics';
 import { MetagraphList } from './view/mokg/MetagraphList';
+import { MetagraphForm } from './view/mokg/MetagraphForm';
 import { Organization } from './view/organisations/Organisation';
 import { About } from './view/About';
 import { MainLayout } from './layout/MainLayout';
@@ -18,6 +19,7 @@ export default function Router() {
         <Route path={ROUTES.HOME} element={<Home />} />
         <Route path={ROUTES.TOPICS} element={<Topics />} />
         <Route path={ROUTES.METAGRAPHS} element={<MetagraphList />} />
+        <Route path={ROUTES.METAGRAPHS_FORM} element={<MetagraphForm />} />
         <Route path={ROUTES.ABOUT} element={<About />} />
       </Route>
 

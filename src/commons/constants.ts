@@ -2,11 +2,15 @@
 const TXT_PREFIX = "PREFIX"
 
 export const ENDPOINTS = {
+  MOKG: "http://localhost:7200/repositories/metagraph",
   DBPEDIA: "https://dbpedia.org/sparql",
   WIKIDATA: "https://query.wikidata.org/sparql"
 },
 
   PREFIXIES_SPARQL = {
+    MOKG: TXT_PREFIX + " mokg: <http://arida.ufc.org/metagraph#>\n",
+    DC: TXT_PREFIX + " dc: <http://purl.org/dc/elements/1.1/>\n",
+    DCT: TXT_PREFIX + " dcterms: <http://purl.org/dc/terms/>\n",
     OWL: TXT_PREFIX + " owl: <http://www.w3.org/2002/07/owl#>\n",
     RDFS: TXT_PREFIX + " rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n",
     RDF: TXT_PREFIX + " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n",

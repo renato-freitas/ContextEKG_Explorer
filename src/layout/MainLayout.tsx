@@ -11,16 +11,17 @@ import { Sidebar } from './Sibebar';
 
 
 export const MainLayout = () => {
-  return (<>
-    <TopBar />
-    <Grid container>
-      <Grid item sm={2}>
-        <Sidebar />
+  return (
+    <>
+      <TopBar />
+      <Grid container>
+        <Grid item sm={2}>
+          <Sidebar />
+        </Grid>
+        <Grid item sm={10} sx={{background: "#f9f9f9", height: "100vh"}}>
+          <Outlet />
+        </Grid>
       </Grid>
-      <Grid item sm={10}>
-        <Outlet />
-      </Grid>
-    </Grid>
-  </>
+    </>
   );
 };
