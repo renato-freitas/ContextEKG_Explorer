@@ -8,7 +8,7 @@ import { useLocation } from 'react-router';
 
 import { SidebarContainer } from './Sidebar.styles'
 
-import { menuEvolve, menuConsuming } from './menu';
+import { menuEvolve, menuConsuming, menuConfig } from './menu';
 import { NavLink } from 'react-router-dom';
 
 export function Sidebar() {
@@ -30,6 +30,19 @@ export function Sidebar() {
       <Divider />
       <List>
         {menuConsuming.map((item, index) => (
+          <ListItem key={item.title} disablePadding>
+            <ListItemButton component={NavLink} to={item.href}>
+              <ListItemIcon>
+                <item.icon size={22} />
+              </ListItemIcon>
+              <ListItemText primary={item.title} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        {menuConfig.map((item, index) => (
           <ListItem key={item.title} disablePadding>
             <ListItemButton component={NavLink} to={item.href}>
               <ListItemIcon>

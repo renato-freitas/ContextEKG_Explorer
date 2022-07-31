@@ -26,7 +26,7 @@ import DeleteForever from '@mui/icons-material/DeleteForever';
 import { Link, useNavigate } from 'react-router-dom';
 
 import styles from './ListMokg.module.css';
-import { findAllGraphsOfMetadata } from '../../services/sparql-queries';
+import { findAllMetadataGraphs } from '../../services/sparql-queries';
 import { ENDPOINTS, PREFIXIES_SPARQL, ROUTES } from '../../commons/constants';
 
 
@@ -49,7 +49,7 @@ export function MetagraphList() {
   const [rdfClasses, setRdfClasses] = useState<IRdfClasses[]>([] as IRdfClasses[]);
   useEffect(() => {
     async function loadClasses() {
-      const response = await findAllGraphsOfMetadata();
+      const response = await findAllMetadataGraphs();
       console.log(response)
       setRdfClasses(response)
     }

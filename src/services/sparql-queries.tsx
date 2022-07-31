@@ -7,12 +7,12 @@ interface ElementOfRdfClass {
   type: string
 }
 
-export async function findAllGraphsOfMetadata() {
+export async function findAllMetadataGraphs() {
   try {
-    let query = PREFIXIES_SPARQL.DC
-      + PREFIXIES_SPARQL.DCT
-      + PREFIXIES_SPARQL.MOKG
-      + `SELECT * WHERE { 
+    let query = `PREFIX mokg: <http://arida.ufc.org/metagraph#>
+      PREFIX dcterms: <http://purl.org/dc/terms/>
+      PREFIX dc: <http://purl.org/dc/elements/1.1/>
+      SELECT * WHERE { 
           ?s a mokg:MetadataGraph ; 
             rdfs:label ?l ;
             dcterms:created ?c ;

@@ -21,6 +21,7 @@
     "phosphor-react": "^1.4.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-hook-form": "^7.34.0",
     "react-router-dom": "6",
     "sparql-http-client": "^2.4.1",
     "sparqljs": "^3.5.2",

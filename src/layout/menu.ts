@@ -3,25 +3,25 @@ import { Horse, Person, Cube, Graph, Database, Storefront, PuzzlePiece } from "p
 
 export const menuEvolve = [
   {
-    title: 'Grafos de Metadados', 
+    title: 'Grafos de Metadados',
     icon: Graph,
     href: ROUTES.METAGRAPHS,
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: 'Tópicos', 
+    title: 'Tópicos',
     icon: Cube,
     href: ROUTES.TOPICS,
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: 'Organizações', 
+    title: 'Organizações',
     icon: Storefront,
     href: ROUTES.ORGANIZATIONS,
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: 'Autores', 
+    title: 'Autores',
     icon: Person,
     href: ROUTES.AUTHORS,
     type: [USER_TYPE.ADMIN]
@@ -36,15 +36,24 @@ export const menuEvolve = [
 
 export const menuConsuming = [
   {
-    title: 'Consulta', 
+    title: 'Consulta',
     icon: PuzzlePiece,
     href: ROUTES.HOME,
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: 'Visualização', 
+    title: 'Visualização',
     icon: Graph,
     href: ROUTES.HOME,
     type: [USER_TYPE.ADMIN]
   },
 ];
+
+export const menuConfig = [
+  {
+    title: 'Configuração',
+    icon: PuzzlePiece,
+    href: ROUTES.HOME,
+    type: [USER_TYPE.ADMIN]
+  }
+]

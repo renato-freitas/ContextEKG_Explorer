@@ -1,0 +1,15 @@
+query=PREFIX mokg: <http://arida.ufc.org/metagraph#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+DELETE {}
+INSERT { 
+  mokg:Test rdf:type mokg:MetadataGraph ; 
+    rdfs:label "Test" ;
+    dcterms:created "2022-01-21" ;
+    dcterms:modified "2022-01-21" .
+}
+WHERE {  }
+
+
+# curl -X POST --data-binary @file.sparql -H "Accept: application/rdf+xml" -H "Content-type: application/x-www-form-urlencoded" http://localhost:7200/repositories/metagraph
