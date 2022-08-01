@@ -20,14 +20,15 @@ import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
+import EditTwoTone from '@mui/icons-material/EditTwoTone';
 import Construction from '@mui/icons-material/Construction';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import styles from './ListMokg.module.css';
-import { findAllMetadataGraphs } from '../../services/sparql-queries';
-import { ENDPOINTS, PREFIXIES_SPARQL, ROUTES } from '../../commons/constants';
+import { findAllMetadataGraphs, remove } from '../../services/sparql-metagraph';
+import { ROUTES } from '../../commons/constants';
 
 
 interface ElementOfRdfClass {
@@ -35,30 +36,28 @@ interface ElementOfRdfClass {
   type: string
 }
 
-interface IRdfClasses {
-  s: ElementOfRdfClass;
-  l: ElementOfRdfClass;
-  c: ElementOfRdfClass;
-  m: ElementOfRdfClass;
+interface IMetagraph {
+  uri: ElementOfRdfClass;
+  title: ElementOfRdfClass;
+  creator: ElementOfRdfClass;
+  created: ElementOfRdfClass;
+  modified: ElementOfRdfClass;
 }
-
 
 export function MetagraphList() {
   const navigate = useNavigate();
 
-  const [rdfClasses, setRdfClasses] = useState<IRdfClasses[]>([] as IRdfClasses[]);
+  const [metagraphs, setMetagraphs] = useState<IMetagraph[]>([] as IMetagraph[]);
   useEffect(() => {
-    async function loadClasses() {
+    async function loadMetagraphs() {
       const response = await findAllMetadataGraphs();
-      console.log(response)
-      setRdfClasses(response)
+      setMetagraphs(response)
     }
-    loadClasses()
+    loadMetagraphs()
   }, [])
 
   const openForm = () => navigate(ROUTES.METAGRAPHS_FORM);
-
-
+  const handleRemove = (title: string) => remove(title);
 
 
   interface TablePaginationActionsProps {
@@ -127,14 +126,12 @@ export function MetagraphList() {
     );
   }
 
-
-
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rdfClasses.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - metagraphs.length) : 0;
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number,
@@ -153,11 +150,11 @@ export function MetagraphList() {
     <div className={styles.listkg}>
 
       <h1>Grafos de Metadados</h1>
-      <Grid container spacing={4} gap={2}>
+      <Grid container spacing={2}>
         <Grid item sm={12} justifyContent="flex-end" display="flex">
           <Button variant="contained" onClick={openForm}>+ Novo Grafo de Metadados</Button>
         </Grid>
-        <Grid sm={12} justifyContent="flex-end" display="flex">
+        <Grid item sm={12} justifyContent="flex-end" display="flex">
           <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 500 }} />
         </Grid>
       </Grid>
@@ -170,34 +167,41 @@ export function MetagraphList() {
           <TableHead>
             <TableRow>
               <TableCell>#</TableCell>
-              <TableCell>Nome</TableCell>
-              <TableCell>URI</TableCell>
+              <TableCell>Título</TableCell>
+              <TableCell>Criador</TableCell>
               <TableCell>Criado em</TableCell>
               <TableCell>Atualizado em</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rdfClasses.map((row) => (
+            {metagraphs.map((row) => (
               <TableRow
-                key={row.s.value}
+                key={row.title.value}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                <TableCell align='center'>
+                <TableCell>
                   <Tooltip title="Editar">
+                    <IconButton onClick={() => navigate(ROUTES.METAGRAPHS_FORM, { state: row})}>
+                      <EditTwoTone />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Construir">
                     <IconButton onClick={() => alert("")}>
                       <Construction />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Excluir">
-                    <IconButton onClick={() => alert("category")}>
+                    <IconButton onClick={() => handleRemove(row.uri.value)}>
                       <DeleteForever />
                     </IconButton>
                   </Tooltip>
                 </TableCell>
-                <TableCell>{row.l.value}</TableCell>
-                <TableCell>{row.s.value}</TableCell>
-                <TableCell>{row.c.value}</TableCell>
-                <TableCell>{row.m.value}</TableCell>
+                <TableCell>
+                  {row.title.value}
+                </TableCell>
+                <TableCell>{row.creator?.value}</TableCell>
+                <TableCell>{new Date(row.created.value).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(row.modified.value).toLocaleDateString()}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -206,7 +210,7 @@ export function MetagraphList() {
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                 colSpan={3}
-                count={rdfClasses.length}
+                count={metagraphs.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 SelectProps={{

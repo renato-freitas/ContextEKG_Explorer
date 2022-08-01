@@ -7,30 +7,7 @@ interface ElementOfRdfClass {
   type: string
 }
 
-export async function findAllMetadataGraphs() {
-  try {
-    let query = `PREFIX mokg: <http://arida.ufc.org/metagraph#>
-      PREFIX dcterms: <http://purl.org/dc/terms/>
-      PREFIX dc: <http://purl.org/dc/elements/1.1/>
-      SELECT * WHERE { 
-          ?s a mokg:MetadataGraph ; 
-            rdfs:label ?l ;
-            dcterms:created ?c ;
-            dcterms:modified ?m .
-        }`
 
-    const response = await axios({
-      method: 'GET',
-      url: ENDPOINTS.MOKG,
-      params: { query }
-    })
-
-    //console.log(response.data.results.bindings)
-    return response.data.results.bindings;
-  } catch (error) {
-    console.error(error)
-  }
-}
 
 export async function loadCountries() {
   try {
