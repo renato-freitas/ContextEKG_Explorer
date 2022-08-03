@@ -15,6 +15,7 @@ import Grid from '@mui/material/Grid';
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
+import Stack from "@mui/material/Stack";
 
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
@@ -29,6 +30,8 @@ import { useNavigate } from 'react-router-dom';
 import styles from './ListMokg.module.css';
 import { findAllMetadataGraphs, remove } from '../../services/sparql-metagraph';
 import { ROUTES } from '../../commons/constants';
+import { Typography } from "@mui/material";
+
 
 
 interface ElementOfRdfClass {
@@ -38,6 +41,7 @@ interface ElementOfRdfClass {
 
 interface IMetagraph {
   uri: ElementOfRdfClass;
+  identifier: ElementOfRdfClass;
   title: ElementOfRdfClass;
   creator: ElementOfRdfClass;
   created: ElementOfRdfClass;
@@ -48,16 +52,24 @@ export function MetagraphList() {
   const navigate = useNavigate();
 
   const [metagraphs, setMetagraphs] = useState<IMetagraph[]>([] as IMetagraph[]);
+  async function loadMetagraphs() {
+    const response = await findAllMetadataGraphs();
+    setMetagraphs(response)
+  }
   useEffect(() => {
-    async function loadMetagraphs() {
-      const response = await findAllMetadataGraphs();
-      setMetagraphs(response)
-    }
-    loadMetagraphs()
+    console.log("\n *** Carregando os Grafos de Metadados ***\n")
+    loadMetagraphs();
   }, [])
 
-  const openForm = () => navigate(ROUTES.METAGRAPHS_FORM);
-  const handleRemove = (title: string) => remove(title);
+  const openForm = () => {
+    console.log("*** call: Abrir formulário de Metadados de GC ***")
+    navigate(ROUTES.METAGRAPHS_FORM);
+  }
+
+  const handleRemove = async (identifier: string) => {
+    await remove(identifier);
+    loadMetagraphs();
+  }
 
 
   interface TablePaginationActionsProps {
@@ -168,7 +180,7 @@ export function MetagraphList() {
             <TableRow>
               <TableCell>#</TableCell>
               <TableCell>Título</TableCell>
-              <TableCell>Criador</TableCell>
+              <TableCell>Criador por</TableCell>
               <TableCell>Criado em</TableCell>
               <TableCell>Atualizado em</TableCell>
             </TableRow>
@@ -176,32 +188,45 @@ export function MetagraphList() {
           <TableBody>
             {metagraphs.map((row) => (
               <TableRow
-                key={row.title.value}
+                key={row.identifier.value}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell>
                   <Tooltip title="Editar">
-                    <IconButton onClick={() => navigate(ROUTES.METAGRAPHS_FORM, { state: row})}>
+                    <IconButton onClick={() => navigate(ROUTES.METAGRAPHS_FORM, { state: row })}>
                       <EditTwoTone />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Construir">
-                    <IconButton onClick={() => alert("")}>
+                    <IconButton onClick={() => navigate(ROUTES.MANAGE_METAGRAPH, { state: row })}>
                       <Construction />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Excluir">
-                    <IconButton onClick={() => handleRemove(row.uri.value)}>
+                    <IconButton onClick={() => handleRemove(row.identifier.value)}>
                       <DeleteForever />
                     </IconButton>
                   </Tooltip>
                 </TableCell>
                 <TableCell>
-                  {row.title.value}
+                  <Stack>
+                    <Typography>{row.title.value}</Typography>
+                    <Typography variant="caption" display="block" gutterBottom>{row.identifier.value}</Typography>
+                  </Stack>
                 </TableCell>
                 <TableCell>{row.creator?.value}</TableCell>
-                <TableCell>{new Date(row.created.value).toLocaleDateString()}</TableCell>
-                <TableCell>{new Date(row.modified.value).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  <Stack>
+                    <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
+                    <Typography variant="caption" display="block" gutterBottom>{new Date(row.created.value).toLocaleTimeString()}</Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>
+                  <Stack>
+                    <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
+                    <Typography variant="caption" display="block" gutterBottom>{new Date(row.modified.value).toLocaleTimeString()}</Typography>
+                  </Stack>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

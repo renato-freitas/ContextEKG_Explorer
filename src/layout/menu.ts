@@ -21,9 +21,9 @@ export const menuEvolve = [
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: 'Autores',
+    title: 'Pessoas',
     icon: Person,
-    href: ROUTES.AUTHORS,
+    href: ROUTES.PERSONS,
     type: [USER_TYPE.ADMIN]
   },
   {
@@ -50,6 +50,12 @@ export const menuConsuming = [
 ];
 
 export const menuConfig = [
+  {
+    title: 'Usuários',
+    icon: Database,
+    href: ROUTES.PERSONS,
+    type: [USER_TYPE.ADMIN]
+  },
   {
     title: 'Configuração',
     icon: PuzzlePiece,

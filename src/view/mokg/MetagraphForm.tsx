@@ -8,7 +8,8 @@ import Grid from "@mui/material/Grid";
 import LinearProgress from "@mui/material/LinearProgress";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { insert } from "../../services/sparql-metagraph";
+import { insert, update } from "../../services/sparql-metagraph";
+import { PreviewTwoTone } from "@mui/icons-material";
 
 // interface MetagraphFormProps {
 //   children?: React.ReactNode;
@@ -21,6 +22,7 @@ interface ElementOfRdfClass {
 
 interface IMetagraph {
   uri: ElementOfRdfClass;
+  identifier: ElementOfRdfClass;
   title: ElementOfRdfClass;
   creator: ElementOfRdfClass;
   created: ElementOfRdfClass;
@@ -28,6 +30,8 @@ interface IMetagraph {
 }
 
 interface IFormInput {
+  uri: string;
+  identifier: string;
   title: string;
   creator: string;
   created: string;
@@ -48,28 +52,32 @@ export function MetagraphForm() {
   const [loading, setLoading] = useState(false);
 
   const { control, handleSubmit, setValue } = useForm<IFormInput>();
-  // const { control, handleSubmit } = useForm({
-  //   defaultValues: {
-  //     name: '',
-  //     label: ''
-  //   }
-  // });
+  
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+    // event?.preventDefault();
+    console.log(data);
     setLoading(true);
-    await insert(data)
+    if (data.identifier) {
+      console.log("*** UPDATE ***")
+      await update(data)
+    } else {
+      console.log("*** INSERT ***")
+      await insert(data)
+    }
     setLoading(false);
+    navigate(-1);
   };
 
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
-          // formik.setValues(location.state);
           let state = location.state as IMetagraph;
           console.log(location)
           setValue("title", state.title.value);
           setValue("creator", state.creator.value);
-
+          setValue("created", state.created.value);
+          setValue("identifier", state.identifier.value);
         }
       } catch (err) {
         console.log(err);

@@ -31,13 +31,15 @@ export const ENDPOINTS = {
 /**APPLICATION */
 export const ROUTES = {
   HOME: "/",
+  ABOUT: '/about',
   METAGRAPHS: "/metagrahs",
   METAGRAPHS_FORM: "/metagraph-form",
-  ABOUT: '/about',
   ORGANIZATIONS: "/organizations",
-  AUTHORS: "/authors",
+  PERSONS: "/persons",
+  USERS: "/users",
   DATASOURCES: "/datasources",
   TOPICS: "/topics",
+  MANAGE_METAGRAPH: '/manage-metagraph'
 },
 
   USER_TYPE = {
