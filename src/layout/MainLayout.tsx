@@ -18,7 +18,7 @@ export const MainLayout = () => {
         <Grid item sm={2}>
           <Sidebar />
         </Grid>
-        <Grid item sm={10} sx={{background: "#f9f9f9", height: "100vh"}}>
+        <Grid item sm={10} sx={{background: "#f6f6f6", height: "100vh"}}>
           <Outlet />
         </Grid>
       </Grid>

@@ -4,23 +4,22 @@ import { v4 as uuidv4 } from 'uuid';
 //405 - method not allowed
 //415 - mime type
 
-interface IMetagraph {
+interface IFormInput {
   uri: string;
   identifier: string;
   title: string;
-  creator?: string;
+  creator: string;
   created: string;
   modified: string;
 }
 
-export async function insert(data: IMetagraph) {
+export async function insert(data: IFormInput) {
   try {
     const uuid = uuidv4();
     const currentDate: Date = new Date();
 
-    // console.log(data.title)
     const uri = data.title.replace(/ /g, "_");
-    console.log(uri)
+    // console.log(uri)
     let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -36,7 +35,7 @@ export async function insert(data: IMetagraph) {
         dcterms:modified '${currentDate.toISOString()}' .
     }`
 
-    const response = await axios({
+    return await axios({
       method: 'POST',
       url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
       params: { update: query },
@@ -48,7 +47,7 @@ export async function insert(data: IMetagraph) {
   }
 }
 
-export async function update(data: IMetagraph) {
+export async function update(data: IFormInput) {
   try {
     const uri = data.title.replace(/ /g, "_");
     const currentDate: Date = new Date();
@@ -59,23 +58,23 @@ export async function update(data: IMetagraph) {
     PREFIX mokg: <http://arida.ufc.org/metagraph#>
     DELETE { 
       ?s rdf:type mokg:MetadataGraph ;
-        dc:identifier '${data.identifier}' .
+        dc:identifier "${data.identifier}" .
     }
     INSERT { 
       mokg:${uri} rdf:type mokg:MetadataGraph ; 
-        rdfs:label '${data.title}' ;
-        dc:identifier '${data.identifier}' ;
-        dc:title '${data.title}' ;
-        dc:creator '${data.creator}' ;
-        dcterms:created '${data.created}' ;
-        dcterms:modified '${currentDate.toISOString()}' .
+        rdfs:label "${data.title}" ;
+        dc:identifier "${data.identifier}" ;
+        dc:title "${data.title}" ;
+        dc:creator "${data.creator}" ;
+        dcterms:created "${data.created}" ;
+        dcterms:modified "${currentDate.toISOString()}" .
     }
     WHERE { 
       ?s rdf:type mokg:MetadataGraph ;
-       dc:identifier '${data.identifier}' .
+       dc:identifier "${data.identifier}" .
     }`
 
-    const response = await axios({
+    return await axios({
       method: 'POST',
       url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
       params: { update: query },
@@ -127,7 +126,7 @@ export async function findAllMetadataGraphs() {
       params: { query }
     })
 
-    console.log(response.data.results.bindings)
+    // console.log(response.data.results.bindings)
     return response.data.results.bindings;
   } catch (error) {
     console.error(error)

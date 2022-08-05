@@ -5,7 +5,11 @@ import Paper from '@mui/material/Paper';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
-import { Button, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
+
+import { CaretCircleRight } from 'phosphor-react'
+
+import styles from './Manage.module.css'
 
 interface ElementOfRdfClass {
   value: string,
@@ -52,27 +56,29 @@ export function ManageMetagraph() {
   return (
     <Container fixed>
       <h1>Gerenciar Grafo de Metadados</h1>
-      <h2>"{metagraph?.title.value}"</h2>
+      <h2 style={{textAlign:"center"}}>** {metagraph?.title.value} **</h2>
 
       {layers.map(layer => {
         return (
-          <Card sx={{ minWidth: 275, mb: 1 }}>
+          <Card className={styles.card}>
             <CardContent>
-              <Typography variant="h5" component="div">
-                {layer.title}
-              </Typography>
-              <Typography color="text.secondary">
-                {layer.subTitle}
-              </Typography>
+              <Grid container className={styles.gridItem}>
+                <Grid item>
+                  <Typography variant="h6" component="div">
+                    {layer.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {layer.subTitle}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <CaretCircleRight size={22} />
+                </Grid>
+              </Grid>
             </CardContent>
-            <CardActions>
-              <Button size="small">Learn More</Button>
-            </CardActions>
           </Card>
         )
       })}
-
-
     </Container>
   );
 }

@@ -32,8 +32,6 @@ import { findAllMetadataGraphs, remove } from '../../services/sparql-metagraph';
 import { ROUTES } from '../../commons/constants';
 import { Typography } from "@mui/material";
 
-
-
 interface ElementOfRdfClass {
   value: string,
   type: string
@@ -48,102 +46,80 @@ interface IMetagraph {
   modified: ElementOfRdfClass;
 }
 
+interface TablePaginationActionsProps {
+  count: number;
+  page: number;
+  rowsPerPage: number;
+  onPageChange: (
+    event: React.MouseEvent<HTMLButtonElement>,
+    newPage: number,
+  ) => void;
+}
+
+function TablePaginationActions(props: TablePaginationActionsProps) {
+  const theme = useTheme();
+  const { count, page, rowsPerPage, onPageChange } = props;
+
+  const handleFirstPageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    onPageChange(event, 0);
+  };
+
+  const handleBackButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onPageChange(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
+      </IconButton>
+    </Box>
+  );
+}
+
 export function MetagraphList() {
   const navigate = useNavigate();
-
-  const [metagraphs, setMetagraphs] = useState<IMetagraph[]>([] as IMetagraph[]);
-  async function loadMetagraphs() {
-    const response = await findAllMetadataGraphs();
-    setMetagraphs(response)
-  }
-  useEffect(() => {
-    console.log("\n *** Carregando os Grafos de Metadados ***\n")
-    loadMetagraphs();
-  }, [])
-
-  const openForm = () => {
-    console.log("*** call: Abrir formulário de Metadados de GC ***")
-    navigate(ROUTES.METAGRAPHS_FORM);
-  }
-
-  const handleRemove = async (identifier: string) => {
-    await remove(identifier);
-    loadMetagraphs();
-  }
-
-
-  interface TablePaginationActionsProps {
-    count: number;
-    page: number;
-    rowsPerPage: number;
-    onPageChange: (
-      event: React.MouseEvent<HTMLButtonElement>,
-      newPage: number,
-    ) => void;
-  }
-
-  function TablePaginationActions(props: TablePaginationActionsProps) {
-    const theme = useTheme();
-    const { count, page, rowsPerPage, onPageChange } = props;
-
-    const handleFirstPageButtonClick = (
-      event: React.MouseEvent<HTMLButtonElement>,
-    ) => {
-      onPageChange(event, 0);
-    };
-
-    const handleBackButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      onPageChange(event, page - 1);
-    };
-
-    const handleNextButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      onPageChange(event, page + 1);
-    };
-
-    const handleLastPageButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
-    };
-
-    return (
-      <Box sx={{ flexShrink: 0, ml: 2.5 }}>
-        <IconButton
-          onClick={handleFirstPageButtonClick}
-          disabled={page === 0}
-          aria-label="first page"
-        >
-          {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
-        </IconButton>
-        <IconButton
-          onClick={handleBackButtonClick}
-          disabled={page === 0}
-          aria-label="previous page"
-        >
-          {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-        </IconButton>
-        <IconButton
-          onClick={handleNextButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="next page"
-        >
-          {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-        </IconButton>
-        <IconButton
-          onClick={handleLastPageButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-          aria-label="last page"
-        >
-          {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
-        </IconButton>
-      </Box>
-    );
-  }
-
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [metagraphs, setMetagraphs] = useState<IMetagraph[]>([] as IMetagraph[]);
 
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - metagraphs.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - metagraphs.length) : 0;
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number,
@@ -157,6 +133,29 @@ export function MetagraphList() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+
+  async function loadMetagraphs() {
+    console.log("\n *** Lista dos Grafos de Metadados ***\n")
+    const response = await findAllMetadataGraphs();
+    const new_set = [...new Set<IMetagraph>(response)];
+    console.log(new_set)
+    // setMetagraphs([...new Set<IMetagraph>(response)])
+    setMetagraphs(new_set)
+  }
+  useEffect(() => {
+    loadMetagraphs();
+  }, [])
+
+  const openForm = () => {
+    console.log("*** call: Abrir formulário de Metadados de GC ***")
+    navigate(ROUTES.METAGRAPHS_FORM);
+  }
+
+  const handleRemove = async (identifier: string) => {
+    await remove(identifier);
+    // loadMetagraphs();
+  }
 
   return (
     <div className={styles.listkg}>
@@ -186,14 +185,20 @@ export function MetagraphList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {metagraphs.map((row) => (
+            {(rowsPerPage > 0
+              ? metagraphs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : metagraphs
+            ).map((row) => (
               <TableRow
                 key={row.identifier.value}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell>
                   <Tooltip title="Editar">
-                    <IconButton onClick={() => navigate(ROUTES.METAGRAPHS_FORM, { state: row })}>
+                    <IconButton onClick={() => {
+                      console.log("*** Selecionando Grafo de Metadados ***")
+                      navigate(ROUTES.METAGRAPHS_FORM, { state: row })
+                    }}>
                       <EditTwoTone />
                     </IconButton>
                   </Tooltip>
@@ -229,12 +234,17 @@ export function MetagraphList() {
                 </TableCell>
               </TableRow>
             ))}
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={12} />
+              </TableRow>
+            )}
           </TableBody>
           <TableFooter>
             <TableRow>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={3}
+                colSpan={5}
                 count={metagraphs.length}
                 rowsPerPage={rowsPerPage}
                 page={page}

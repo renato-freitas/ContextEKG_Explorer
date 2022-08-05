@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import React, { useState } from "react";
-import { Box, Button, FormLabel, Stack, TextField } from "@mui/material";
+import { Box, Button, FormControl, FormLabel, Stack, TextField } from "@mui/material";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -8,8 +8,9 @@ import Grid from "@mui/material/Grid";
 import LinearProgress from "@mui/material/LinearProgress";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as zod from 'zod';
 import { insert, update } from "../../services/sparql-metagraph";
-import { PreviewTwoTone } from "@mui/icons-material";
 
 // interface MetagraphFormProps {
 //   children?: React.ReactNode;
@@ -46,18 +47,34 @@ export interface LocationParams {
   key: string;
 }
 
+const MetadataGraphSchema = zod.object({
+  title: zod.string().min(1, 'Digite ao menos 1 caracter'),
+  creator: zod.string().min(2, 'Digite ao menos 1 caracter'),
+  uri: zod.string().optional(),
+  identifier: zod.string().optional(),
+  created: zod.string().optional(),
+  modified: zod.string().optional(),
+});
+
 export function MetagraphForm() {
   const location = useLocation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const { control, handleSubmit, setValue } = useForm<IFormInput>();
-  
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    // event?.preventDefault();
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IFormInput>({
+    resolver: zodResolver(MetadataGraphSchema), 
+    defaultValues: {
+      title: '',
+      creator: '',
+      identifier: ''
+    }
+  });
+
+  const handleSubmitMetadataGraph: SubmitHandler<IFormInput> = async (data) => {
+    console.log("*** Enviando Grafo de Metadados ***")
     console.log(data);
     setLoading(true);
-    if (data.identifier) {
+    if (data.identifier !== "") {
       console.log("*** UPDATE ***")
       await update(data)
     } else {
@@ -65,7 +82,8 @@ export function MetagraphForm() {
       await insert(data)
     }
     setLoading(false);
-    navigate(-1);
+    // navigate(-1);
+    reset();
   };
 
   useEffect(() => {
@@ -73,6 +91,7 @@ export function MetagraphForm() {
       try {
         if (location.state) {
           let state = location.state as IMetagraph;
+          console.log("*** Colocando o Grafo de Metadados Selecionado no Formulário ***")
           console.log(location)
           setValue("title", state.title.value);
           setValue("creator", state.creator.value);
@@ -85,6 +104,8 @@ export function MetagraphForm() {
     }
     onEdit();
   }, [location.state]);
+
+  const title = watch('title');
 
   return (
     <Container fixed>
@@ -99,64 +120,41 @@ export function MetagraphForm() {
             sx={{ p: 0 }}
           >
             <CardContent sx={{ padding: '30px' }}>
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(handleSubmitMetadataGraph)}>
                 <Grid container spacing={2}>
                   <Grid item sm={6}>
-                    <FormLabel htmlFor="title">Título</FormLabel>
-                    <Controller
-                      name="title"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) =>
-                        <TextField
-                          {...field}
-                          // inputRef={inputCategoryRef}
-                          // id="name"
-                          // name="name"
-                          // error={formik.touched.name && Boolean(formik.errors.name)}
-                          // helperText={formik.touched.name && formik.errors.name}
-                          variant="outlined"
-                          placeholder="Ex: Metadados-SEFAZ-MA"
-                          fullWidth
-                          size="small"
-                        // onChange={formik.handleChange}
-                        // value={formik.values.name}
-                        />
-                      }
-                    />
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="title">Título</FormLabel>
+                      <TextField
+                        variant="outlined"
+                        placeholder="Ex: Metadados-SEFAZ-MA"
+                        size="small"
+                        {...register('title')}
+                      />
+                      <p>{errors.title?.message}</p>
+                    </FormControl>
                   </Grid>
                   <Grid item sm={6}>
-                    <FormLabel htmlFor="creator">Criador</FormLabel>
-                    <Controller
-                      name="creator"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) =>
-                        <TextField
-                          {...field}
-                          // inputRef={inputCategoryRef}
-                          // id="name"
-                          // name="name"
-                          // error={formik.touched.name && Boolean(formik.errors.name)}
-                          // helperText={formik.touched.name && formik.errors.name}
-                          variant="outlined"
-                          placeholder="Ex: Apelido"
-                          fullWidth
-                          size="small"
-                        // onChange={formik.handleChange}
-                        // value={formik.values.name}
-                        />
-                      }
-                    />
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="creator">Criador</FormLabel>
+                      <TextField
+                        variant="outlined"
+                        placeholder="Ex: Apelido"
+                        required
+                        size="small"
+                        {...register("creator")}
+                      />
+                      <p>{errors.creator?.message}</p>
+                    </FormControl>
                   </Grid>
                   <Grid item sm={12}>
                     <Box display="flex" justifyContent="flex-start">
                       <Stack spacing={1} direction={{ xs: "column", sm: "row" }}>
-                        <Button type="submit" color="primary" variant="contained">
+                        <Button type="submit" color="primary" variant="contained" disabled={!title}>
                           Salvar
                         </Button>
                         <Button color="secondary" variant="contained"
-                          onClick={() => location.state && navigate(-1)}>
+                          onClick={() => navigate(-1)}>
                           Cancelar
                         </Button>
                       </Stack>

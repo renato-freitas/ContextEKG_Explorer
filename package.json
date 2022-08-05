@@ -10,6 +10,7 @@
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
+    "@hookform/resolvers": "^2.9.7",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.8.7",
     "@rdfjs/fetch": "^3.1.0",
@@ -28,7 +29,8 @@
     "sparqljs": "^3.5.2",
     "styled-components": "^5.3.5",
     "uuid": "^8.3.2",
-    "wikidata-sdk": "^8.0.0"
+    "wikidata-sdk": "^8.0.0",
+    "zod": "^3.17.10"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
