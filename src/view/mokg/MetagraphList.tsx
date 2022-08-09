@@ -30,7 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './ListMokg.module.css';
 import { findAllMetadataGraphs, remove } from '../../services/sparql-metagraph';
 import { ROUTES } from '../../commons/constants';
-import { Typography } from "@mui/material";
+import { LinearProgress, Typography } from "@mui/material";
 
 interface ElementOfRdfClass {
   value: string,
@@ -41,6 +41,7 @@ interface IMetagraph {
   uri: ElementOfRdfClass;
   identifier: ElementOfRdfClass;
   title: ElementOfRdfClass;
+  comment: ElementOfRdfClass;
   creator: ElementOfRdfClass;
   created: ElementOfRdfClass;
   modified: ElementOfRdfClass;
@@ -116,6 +117,7 @@ export function MetagraphList() {
   const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [loading, setLoading] = React.useState(false);
   const [metagraphs, setMetagraphs] = useState<IMetagraph[]>([] as IMetagraph[]);
 
   // Avoid a layout jump when reaching the last page with empty rows.
@@ -137,8 +139,10 @@ export function MetagraphList() {
 
   async function loadMetagraphs() {
     console.log("\n *** Lista dos Grafos de Metadados ***\n")
+    setLoading(true);
     const response = await findAllMetadataGraphs();
     const new_set = [...new Set<IMetagraph>(response)];
+    setLoading(false);
     console.log(new_set)
     // setMetagraphs([...new Set<IMetagraph>(response)])
     setMetagraphs(new_set)
@@ -162,13 +166,12 @@ export function MetagraphList() {
 
       <h1>Grafos de Metadados</h1>
       <Grid container spacing={2}>
-        <Grid item sm={12} justifyContent="flex-end" display="flex">
+        <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
+          <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
           <Button variant="contained" onClick={openForm}>+ Novo Grafo de Metadados</Button>
         </Grid>
-        <Grid item sm={12} justifyContent="flex-end" display="flex">
-          <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 500 }} />
-        </Grid>
       </Grid>
+      
 
       <TableContainer component={Paper} sx={{ mt: 2 }}>
         <Table
@@ -177,13 +180,15 @@ export function MetagraphList() {
           sx={{ whiteSpace: 'nowrap', minWidth: 650 }}>
           <TableHead>
             <TableRow>
-              <TableCell>#</TableCell>
+              <TableCell align="center">Ações</TableCell>
               <TableCell>Título</TableCell>
+              <TableCell>Comentário</TableCell>
               <TableCell>Criador por</TableCell>
-              <TableCell>Criado em</TableCell>
-              <TableCell>Atualizado em</TableCell>
+              <TableCell align="right">Criado em</TableCell>
+              <TableCell align="right">Atualizado em</TableCell>
             </TableRow>
           </TableHead>
+          {/* <LinearProgress /> */}
           <TableBody>
             {(rowsPerPage > 0
               ? metagraphs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -193,6 +198,7 @@ export function MetagraphList() {
                 key={row.identifier.value}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
+                {/* Botões */}
                 <TableCell>
                   <Tooltip title="Editar">
                     <IconButton onClick={() => {
@@ -216,17 +222,18 @@ export function MetagraphList() {
                 <TableCell>
                   <Stack>
                     <Typography>{row.title.value}</Typography>
-                    <Typography variant="caption" display="block" gutterBottom>{row.identifier.value}</Typography>
+                    {/* <Typography variant="caption" display="block" gutterBottom>{row.identifier.value}</Typography> */}
                   </Stack>
                 </TableCell>
+                <TableCell style={{ whiteSpace: 'break-spaces' }}>{row.comment?.value}</TableCell>
                 <TableCell>{row.creator?.value}</TableCell>
-                <TableCell>
+                <TableCell align="right">
                   <Stack>
                     <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
                     <Typography variant="caption" display="block" gutterBottom>{new Date(row.created.value).toLocaleTimeString()}</Typography>
                   </Stack>
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   <Stack>
                     <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
                     <Typography variant="caption" display="block" gutterBottom>{new Date(row.modified.value).toLocaleTimeString()}</Typography>

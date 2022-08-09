@@ -37,9 +37,13 @@ export const ROUTES = {
   ORGANIZATIONS: "/organizations",
   PERSONS: "/persons",
   USERS: "/users",
-  DATASOURCES: "/datasources",
+  DATASOURCE_LIST: "/datasources",
+  DATASOURCE_FORM: "/datasources-form",
+  TABLE_LIST: "/tables",
+  TABLE_FORM: "/table-form",
   TOPICS: "/topics",
-  MANAGE_METAGRAPH: '/manage-metagraph'
+  MANAGE_METAGRAPH: '/manage-metagraph',
+  MANAGE_META_DATASOURCES: '/manage-meta-datasources',
 },
 
   USER_TYPE = {

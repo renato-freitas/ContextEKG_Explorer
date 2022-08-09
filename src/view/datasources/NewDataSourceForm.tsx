@@ -10,12 +10,9 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { insert, update } from "../../services/sparql-metagraph";
 import { RDF_Node } from "../../models/RDF_Node";
+import { IFormInput, insert } from "../../services/sparql-datasource";
 
-// interface MetagraphFormProps {
-//   children?: React.ReactNode;
-// }
 
 interface IMetagraphEntity {
   uri: RDF_Node;
@@ -27,15 +24,15 @@ interface IMetagraphEntity {
   modified: RDF_Node;
 }
 
-interface IFormInput {
-  uri: string;
-  identifier: string;
-  title: string;
-  comment: string;
-  creator: string;
-  created: string;
-  modified: string;
-}
+// interface IFormInput {
+//   // uri: string;
+//   identifier: string;
+//   title: string;
+//   // comment: string;
+//   // creator: string;
+//   created: string;
+//   modified: string;
+// }
 
 export interface LocationParams {
   pathname: string;
@@ -45,38 +42,38 @@ export interface LocationParams {
   key: string;
 }
 
-const MetadataGraphSchema = zod.object({
+const DataSourceSchema = zod.object({
   identifier: zod.string().optional(),
-  uri: zod.string().optional(),
+  // uri: zod.string().optional(),
   title: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  comment: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  creator: zod.string().min(2, 'Digite ao menos 1 caracter'),
-  created: zod.string().optional(),
-  modified: zod.string().optional(),
+  // comment: zod.string().min(1, 'Digite ao menos 1 caracter'),
+  // creator: zod.string().min(2, 'Digite ao menos 1 caracter'),
+  // created: zod.string().optional(),
+  // modified: zod.string().optional(),
 });
 
-export function MetagraphForm() {
+export function NewDataSourceForm() {
   const location = useLocation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IFormInput>({
-    resolver: zodResolver(MetadataGraphSchema),
+    resolver: zodResolver(DataSourceSchema),
     defaultValues: {
       identifier: '',
       title: '',
-      comment: '',
-      creator: ''
+      // comment: '',
+      // creator: ''
     }
   });
 
   const handleSubmitMetadataGraph: SubmitHandler<IFormInput> = async (data) => {
-    console.log("*** Enviando dados de Grafo de Metadados ***")
+    console.log("*** Enviando dados da Fonte de Dados ***")
     console.log(data);
     setLoading(true);
-    if (data.identifier !== "") {
+    if (data.identifier !== '') {
       console.log("*** UPDATE ***")
-      await update(data)
+      // await update(data)
     } else {
       console.log("*** INSERT ***")
       await insert(data)
@@ -94,8 +91,8 @@ export function MetagraphForm() {
           console.log("*** Colocando o Grafo de Metadados Selecionado no Formulário ***")
           console.log(location)
           setValue("title", state.title.value);
-          setValue("comment", state.comment.value);
-          setValue("creator", state.creator.value);
+          // setValue("comment", state.comment.value);
+          // setValue("creator", state.creator.value);
           setValue("created", state.created.value);
           setValue("identifier", state.identifier.value);
         }
@@ -106,11 +103,11 @@ export function MetagraphForm() {
     onEdit();
   }, [location.state]);
 
-  const title = watch('title');
+  // const title = watch('title');
 
   return (
     <Container fixed>
-      <h1>Instanciar Grafo de Metadados</h1>
+      <h1>Cadastrar Fonte de Dados</h1>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -132,36 +129,12 @@ export function MetagraphForm() {
                       <p>{errors.title?.message}</p>
                     </FormControl>
                   </Grid>
-                  <Grid item sm={6}>
-                    <FormControl fullWidth>
-                      <FormLabel htmlFor="creator">Criador</FormLabel>
-                      <TextField
-                        variant="outlined"
-                        placeholder="Ex: Apelido"
-                        required
-                        size="small"
-                        {...register("creator")}
-                      />
-                      <p>{errors.creator?.message}</p>
-                    </FormControl>
-                  </Grid>
-                  <Grid item sm={12}>
-                    <FormControl fullWidth>
-                      <FormLabel htmlFor="comment">Comentário</FormLabel>
-                      <TextField
-                        variant="outlined"
-                        placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
-                        size="small"
-                        {...register('comment')}
-                      />
-                      <p>{errors.comment?.message}</p>
-                    </FormControl>
-                  </Grid>
+
                   {/* Botões */}
                   <Grid item sm={12}>
                     <Box display="flex" justifyContent="flex-start">
                       <Stack spacing={1} direction={{ xs: "column", sm: "row" }}>
-                        <Button type="submit" color="primary" variant="contained" disabled={!title}>
+                        <Button type="submit" color="primary" variant="contained">
                           Salvar
                         </Button>
                         <Button color="secondary" variant="contained"

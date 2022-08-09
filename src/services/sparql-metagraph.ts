@@ -8,6 +8,7 @@ interface IFormInput {
   uri: string;
   identifier: string;
   title: string;
+  comment: string;
   creator: string;
   created: string;
   modified: string;
@@ -17,9 +18,8 @@ export async function insert(data: IFormInput) {
   try {
     const uuid = uuidv4();
     const currentDate: Date = new Date();
-
     const uri = data.title.replace(/ /g, "_");
-    // console.log(uri)
+
     let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -30,6 +30,7 @@ export async function insert(data: IFormInput) {
         rdfs:label '${data.title}' ;
         dc:identifier '${uuid}' ;
         dc:title '${data.title}' ;
+        rdfs:comment "${data.comment}" ;
         dc:creator '${data.creator}' ;
         dcterms:created '${currentDate.toISOString()}' ;
         dcterms:modified '${currentDate.toISOString()}' .
@@ -57,21 +58,22 @@ export async function update(data: IFormInput) {
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     PREFIX mokg: <http://arida.ufc.org/metagraph#>
     DELETE { 
-      ?s rdf:type mokg:MetadataGraph ;
-        dc:identifier "${data.identifier}" .
+      ?s dc:identifier "${data.identifier}" ;
+       dcterms:created "${data.created}" .
     }
     INSERT { 
       mokg:${uri} rdf:type mokg:MetadataGraph ; 
         rdfs:label "${data.title}" ;
         dc:identifier "${data.identifier}" ;
         dc:title "${data.title}" ;
+        rdfs:comment "${data.comment}" ;
         dc:creator "${data.creator}" ;
         dcterms:created "${data.created}" ;
         dcterms:modified "${currentDate.toISOString()}" .
     }
     WHERE { 
-      ?s rdf:type mokg:MetadataGraph ;
-       dc:identifier "${data.identifier}" .
+      ?s dc:identifier "${data.identifier}" ;
+        dcterms:created "${data.created}" .
     }`
 
     return await axios({
@@ -109,6 +111,7 @@ export async function remove(identifier: string) {
 export async function findAllMetadataGraphs() {
   try {
     let query = `PREFIX mokg: <http://arida.ufc.org/metagraph#>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       PREFIX dcterms: <http://purl.org/dc/terms/>
       PREFIX dc: <http://purl.org/dc/elements/1.1/>
       SELECT * WHERE { 
@@ -118,8 +121,9 @@ export async function findAllMetadataGraphs() {
             dcterms:created ?created ;
             dcterms:modified ?modified .
             OPTIONAL { ?uri dc:creator ?creator . }
-        }`
-
+            OPTIONAL { ?uri rdfs:comment ?comment . }
+          }`
+          
     const response = await axios({
       method: 'GET',
       url: encodeURI("http://localhost:7200/repositories/metagraph"),
@@ -132,23 +136,3 @@ export async function findAllMetadataGraphs() {
     console.error(error)
   }
 }
-
-
-
-// PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-//     PREFIX dcterms: <http://purl.org/dc/terms/>
-//     PREFIX dc: <http://purl.org/dc/elements/1.1/>
-//     PREFIX mokg: <http://arida.ufc.org/metagraph#>
-//     DELETE { 
-//       ?s a mokg:MetadataGraph .
-//     }
-//     INSERT { 
-//       mokg:TestUpdate a mokg:MetadataGraph ; 
-//         dc:identifier: '1e5ee2e7-8841-4b5d-b786-e9cfbc95ee39' ;
-//         dc:title 'ratau' ;
-//         dc:creator 'renatous' .
-//     }
-//     WHERE { 
-//       ?s a mokg:MetadataGraph ;
-//        dc:identifier: '1e5ee2e7-8841-4b5d-b786-e9cfbc95ee39' .
-//     }

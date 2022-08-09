@@ -6,10 +6,14 @@ import { MetagraphList } from './view/mokg/MetagraphList';
 import { MetagraphForm } from './view/mokg/MetagraphForm';
 import { Organizations } from './view/organizations/Organization';
 import { Persons } from './view/persons/Persons';
-import { DataSources } from './view/datasources/DataSources';
+import { DataSourceList } from './view/datasources/DataSourceList';
+// import { DataSourceForm } from './view/datasources/DataSourceForm';
+import { NewDataSourceForm } from './view/datasources/NewDataSourceForm';
+import { NewTableList } from './view/datasources/tables/NewTableList';
 import { Topics } from './view/topics/Topics';
 
 import { ManageMetagraph } from './view/manage/ManageMetagraph';
+import { MetaDataSources } from './view/manage/datasources/MetaDataSources';
 
 
 import { ROUTES } from './commons/constants';
@@ -28,8 +32,12 @@ export default function Router() {
         <Route path={ROUTES.TOPICS} element={<Topics />} />
         <Route path={ROUTES.ORGANIZATIONS} element={<Organizations />} />
         <Route path={ROUTES.PERSONS} element={<Persons />} />
-        <Route path={ROUTES.DATASOURCES} element={<DataSources />} />
+        <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} />
+        <Route path={ROUTES.DATASOURCE_FORM} element={<NewDataSourceForm />} />
+        <Route path={ROUTES.TABLE_LIST} element={<NewTableList />} />
+        {/* Build Metadata */}
         <Route path={ROUTES.MANAGE_METAGRAPH} element={<ManageMetagraph />} />
+        <Route path={ROUTES.MANAGE_META_DATASOURCES} element={<MetaDataSources />} />
       </Route>
 
       {/* Para um painel de administração eu posso ter um layout diferente 

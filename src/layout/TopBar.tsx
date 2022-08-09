@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import { LinearProgress } from '@mui/material';
 
 export function TopBar() {
   return (
@@ -28,6 +29,9 @@ export function TopBar() {
           <Button color="inherit">Login</Button>
         </Toolbar>
       </AppBar>
+      {/* <LinearProgress color="secondary" /> */}
+      {/* <LinearProgress color="success" /> */}
+      {/* <LinearProgress color="inherit" /> */}
     </Box>
   );
 }

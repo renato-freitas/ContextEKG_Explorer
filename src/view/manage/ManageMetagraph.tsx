@@ -10,6 +10,7 @@ import { Button, Grid, Typography } from "@mui/material";
 import { CaretCircleRight } from 'phosphor-react'
 
 import styles from './Manage.module.css'
+import { ROUTES } from "../../commons/constants";
 
 interface ElementOfRdfClass {
   value: string,
@@ -27,6 +28,7 @@ interface IMetagraph {
 
 export function ManageMetagraph() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [metagraph, setMetagraph] = useState<IMetagraph>();
 
   useEffect(() => {
@@ -46,23 +48,24 @@ export function ManageMetagraph() {
   }, [location.state]);
 
   const layers = [
-    { title: "Metadados de Fontes de Dados", subTitle: "Quantidade:" },
-    { title: "Metadados de Visão Semântica", subTitle: "Ontologia de Domínio, Grafos Locais e Ligações" },
-    { title: "Metadados de Acesso e Integração", subTitle: "Enpoint e Wrapper" },
-    { title: "Metadados de Aplicações & Ferramentas", subTitle: "..." },
-    { title: "Metadados de Grafo de Conhecimento", subTitle: "Prefixo, Namespace" },
+    { title: "Metadados de Fontes de Dados", subTitle: "Quantidade:", route: ROUTES.MANAGE_META_DATASOURCES },
+    { title: "Metadados de Visão Semântica", subTitle: "Ontologia de Domínio, Grafos Locais e Ligações", route: "" },
+    { title: "Metadados de Acesso e Integração", subTitle: "Enpoint e Wrapper", route: "" },
+    { title: "Metadados de Aplicações & Ferramentas", subTitle: "...", route: "" },
+    { title: "Metadados de Grafo de Conhecimento", subTitle: "Prefixo, Namespace", route: "" },
   ]
 
   return (
     <Container fixed>
       <h1>Gerenciar Grafo de Metadados</h1>
-      <h2 style={{textAlign:"center"}}>** {metagraph?.title.value} **</h2>
+      <h2 style={{ textAlign: "center" }}>** {metagraph?.title.value} **</h2>
 
       {layers.map(layer => {
         return (
           <Card className={styles.card}>
             <CardContent>
-              <Grid container className={styles.gridItem}>
+              <Grid container className={styles.gridItem}
+                onClick={() => navigate(ROUTES.MANAGE_META_DATASOURCES, { state: metagraph })}>
                 <Grid item>
                   <Typography variant="h6" component="div">
                     {layer.title}
@@ -71,6 +74,7 @@ export function ManageMetagraph() {
                     {layer.subTitle}
                   </Typography>
                 </Grid>
+                {/* </Link> */}
                 <Grid item>
                   <CaretCircleRight size={22} />
                 </Grid>

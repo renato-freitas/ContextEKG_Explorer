@@ -29,7 +29,7 @@ export const menuEvolve = [
   {
     title: 'Fontes de Dados',
     icon: Database,
-    href: ROUTES.DATASOURCES,
+    href: ROUTES.DATASOURCE_LIST,
     type: [USER_TYPE.ADMIN]
   }
 ];
