@@ -105,14 +105,14 @@ export function DataSourceTablesTab(props: DataSourceProps, tableProps: TablePro
 
 
       <TableForm //Dialog
-        open={openDialog}
-        onClose={handleCloseMDialog}
+        // open={openDialog}
+        // onClose={handleCloseMDialog}
         // tables={myTables}
         // setLocalTables={setMyTables}
-        count={count}
-        setCount={setCount}
-        tables={props.tableNames}
-        setLocalTables={props.setTableNames}
+        // count={count}
+        // setCount={setCount}
+        // tables={props.tableNames}
+        // setLocalTables={props.setTableNames}
       />
 
       {/* <List>

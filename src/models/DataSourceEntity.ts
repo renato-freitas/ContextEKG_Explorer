@@ -5,5 +5,7 @@ export interface DataSourceEntity {
   identifier: RDF_Node;
   title: RDF_Node;
   created: RDF_Node;
+  modified: RDF_Node;
+  uri: RDF_Node;
   // tables: TableEntity[];
 }

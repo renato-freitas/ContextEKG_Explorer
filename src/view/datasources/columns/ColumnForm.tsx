@@ -25,7 +25,7 @@ import DialogActions from "@mui/material/DialogActions";
 import { TableEntity } from "../../../models/TableEntity";
 import { Table } from "phosphor-react";
 import { RDF_Node } from "../../../models/RDF_Node";
-import { insertTable } from '../../../services/sparql-datasource';
+import { insertColumn, insertTable } from '../../../services/sparql-datasource';
 import { DataSourceEntity } from "../../../models/DataSourceEntity";
 
 // interface ITableEntity {
@@ -66,7 +66,7 @@ const INITIAL_STATE = {
  * i) Atualizar globalmente, tal que reflita em todos os GM
  * ii) Ou atualizar individualmente cada GM
  */
-export function TableForm() {
+export function ColumnForm() {
   const [tableName, setTableName] = useState<string>("");
   // const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity|undefined>(undefined);
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>({
@@ -104,7 +104,7 @@ export function TableForm() {
         // await update(data)
       } else {
         console.log("*** INSERT TABLE***")
-        await insertTable(data, selectedDataSource.identifier.value);
+        await insertColumn(data, selectedDataSource.identifier.value);
       }
       setLoading(false);
       // navigate(-1);
@@ -160,7 +160,7 @@ export function TableForm() {
                 <Grid container spacing={2}>
                   <Grid item sm={12}>
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="title">Nome da Tabela</FormLabel>
+                      <FormLabel htmlFor="title">Nome da Coluna</FormLabel>
                       <TextField
                         variant="outlined"
                         placeholder="Ex: REDESIM"

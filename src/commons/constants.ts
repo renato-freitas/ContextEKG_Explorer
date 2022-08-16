@@ -41,6 +41,8 @@ export const ROUTES = {
   DATASOURCE_FORM: "/datasources-form",
   TABLE_LIST: "/tables",
   TABLE_FORM: "/table-form",
+  COLUMN_LIST: "/columns",
+  COLUMN_FORM: "/column-form",
   TOPICS: "/topics",
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',

@@ -10,6 +10,10 @@ import { DataSourceList } from './view/datasources/DataSourceList';
 // import { DataSourceForm } from './view/datasources/DataSourceForm';
 import { NewDataSourceForm } from './view/datasources/NewDataSourceForm';
 import { NewTableList } from './view/datasources/tables/NewTableList';
+import { TableForm } from './view/datasources/tables/TableForm';
+import { ColumnList } from './view/datasources/columns/ColumnList';
+import { ColumnForm } from './view/datasources/columns/ColumnForm';
+
 import { Topics } from './view/topics/Topics';
 
 import { ManageMetagraph } from './view/manage/ManageMetagraph';
@@ -35,6 +39,9 @@ export default function Router() {
         <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} />
         <Route path={ROUTES.DATASOURCE_FORM} element={<NewDataSourceForm />} />
         <Route path={ROUTES.TABLE_LIST} element={<NewTableList />} />
+        <Route path={ROUTES.TABLE_FORM} element={<TableForm />} />
+        <Route path={ROUTES.COLUMN_LIST} element={<ColumnList />} />
+        <Route path={ROUTES.COLUMN_FORM} element={<ColumnForm />} />
         {/* Build Metadata */}
         <Route path={ROUTES.MANAGE_METAGRAPH} element={<ManageMetagraph />} />
         <Route path={ROUTES.MANAGE_META_DATASOURCES} element={<MetaDataSources />} />

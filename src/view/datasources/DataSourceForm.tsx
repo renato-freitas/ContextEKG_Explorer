@@ -28,11 +28,6 @@ import { DataSourceCredentialsTab } from "./DataSourceCredentialsTab";
 import { TableEntity } from "../../models/TableEntity";
 import { RDF_Node } from "../../models/RDF_Node";
 
-// interface RDF_Node {
-//   value: string,
-//   type: string
-// }
-
 interface IDataSource {
   uri: RDF_Node;
   identifier: RDF_Node;
@@ -110,9 +105,9 @@ export function DataSourceForm() {
       // await update(data)
     } else {
       console.log("*** INSERT ***")
-      // const response = await insert(data)
+      const response = await insert(data)
       console.log("*** RESPOSTA DO INSERT ***")
-      // console.log(response)
+      console.log(response)
     }
     setLoading(false);
     // navigate(-1);

@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Box, Button, FormControl, FormLabel, Stack, TextField } from "@mui/material";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
@@ -12,10 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
 import { insert, update } from "../../services/sparql-metagraph";
 import { RDF_Node } from "../../models/RDF_Node";
-
-// interface MetagraphFormProps {
-//   children?: React.ReactNode;
-// }
+import { LoadingContext } from "../../App";
 
 interface IMetagraphEntity {
   uri: RDF_Node;
@@ -58,7 +54,7 @@ const MetadataGraphSchema = zod.object({
 export function MetagraphForm() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { isLoading, setIsLoading } = useContext(LoadingContext);
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IFormInput>({
     resolver: zodResolver(MetadataGraphSchema),
@@ -73,7 +69,7 @@ export function MetagraphForm() {
   const handleSubmitMetadataGraph: SubmitHandler<IFormInput> = async (data) => {
     console.log("*** Enviando dados de Grafo de Metadados ***")
     console.log(data);
-    setLoading(true);
+    setIsLoading(true);
     if (data.identifier !== "") {
       console.log("*** UPDATE ***")
       await update(data)
@@ -81,7 +77,7 @@ export function MetagraphForm() {
       console.log("*** INSERT ***")
       await insert(data)
     }
-    setLoading(false);
+    setIsLoading(false);
     // navigate(-1);
     reset();
   };

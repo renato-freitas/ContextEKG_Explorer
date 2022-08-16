@@ -24,7 +24,7 @@ export async function insert(data: IFormInput) {
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX dcterms: <http://purl.org/dc/terms/>
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
-    PREFIX mokg: <http://arida.ufc.org/metagraph#>
+    PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
     INSERT DATA { 
       mokg:${uri} rdf:type mokg:MetadataGraph ; 
         rdfs:label '${data.title}' ;
@@ -56,7 +56,7 @@ export async function update(data: IFormInput) {
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX dcterms: <http://purl.org/dc/terms/>
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
-    PREFIX mokg: <http://arida.ufc.org/metagraph#>
+    PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
     DELETE { 
       ?s dc:identifier "${data.identifier}" ;
        dcterms:created "${data.created}" .
@@ -110,7 +110,7 @@ export async function remove(identifier: string) {
 
 export async function findAllMetadataGraphs() {
   try {
-    let query = `PREFIX mokg: <http://arida.ufc.org/metagraph#>
+    let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       PREFIX dcterms: <http://purl.org/dc/terms/>
       PREFIX dc: <http://purl.org/dc/elements/1.1/>

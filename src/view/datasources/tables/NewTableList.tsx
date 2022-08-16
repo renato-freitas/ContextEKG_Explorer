@@ -15,6 +15,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import { IconButton, TableCell, Tooltip } from '@mui/material';
 import Grid from "@mui/material/Grid";
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -23,71 +24,154 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CaretCircleLeft, Columns, Table } from "phosphor-react";
 import styles from '../DataSource.module.css';
-import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { ListItemButton, ListItemIcon, ListItemText, TableRow } from "@mui/material";
+import { MTable } from "../../../components/MTable";
+import { ROUTES } from "../../../commons/constants";
+import { DeleteForever, EditTwoTone } from "@mui/icons-material";
+import { TableEntity } from "../../../models/TableEntity";
+import { DataSourceEntity } from "../../../models/DataSourceEntity";
+import { findAllTables } from "../../../services/sparql-datasource";
 
 export function NewTableList() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [tables, setTables] = useState<TableEntity[]>([]);
+  const [selectedTable, setSelectedTable] = useState();
+  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>({
+    identifier: { type: '', value: '' },
+    title: { type: '', value: '' },
+    created: { type: '', value: '' },
+    modified: { type: '', value: '' },
+    uri: { type: '', value: '' }
+  });
+
+
+  async function loadTables() {
+    try {
+      console.log("\n *** LISTA DE TABELAS ***\n")
+      setLoading(true);
+      const response = await findAllTables();
+      console.log(response)
+      setTables(response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadTables();
+  }, [])
+
+  useEffect(() => {
+    function onEdit() {
+      try {
+        if (location.state) {
+          let state = location.state as DataSourceEntity;
+          console.log("*** Colocando tabelas da FD na lista de tabeas ***")
+          console.log(state)
+          setSelectedDataSource(state);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    onEdit();
+  }, [location.state]);
+
+  const openForm = (row: any) => {
+    console.log("*** call: Abrir formulário de Fonte de Dados ***")
+    navigate(ROUTES.TABLE_FORM, { state: row });
+  }
+  const handleRemove = async (identifier: string) => {
+    // await remove(identifier);
+    // loadMetagraphs();
+  }
+
+  /**Pagination */
+  const [page, setPage] = useState(0);
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value)
+    setRowsPerPage(parseInt(event.target.value, 10));
+    // setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
     <div className={styles.listkg}>
+
       <h1>
         <CaretCircleLeft onClick={() => navigate(-1)} />
-        Tabelas</h1>
+        {`New Tabelas da Fonte de Dados`}
+      </h1>
+      <h2>{selectedDataSource.title.value}</h2>
+
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
           {/* <Button variant="contained" onClick={handleShowTableForm}>+ Nova Tabela</Button> */}
-          <Button variant="contained" color="secondary" onClick={() => { }}>+ Nova Tabela</Button>
+          <Button variant="contained" color="secondary"
+            onClick={() => navigate(ROUTES.TABLE_FORM, { state: selectedDataSource })}>+ Nova Tabela</Button>
         </Grid>
       </Grid>
 
-      <Grid container>
-        <Grid item>
-          <Box sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-            <List component="nav" aria-label="main mailbox folders">
-              <ListItemButton
-                // selected={selectedIndex === 0}
-                // onClick={(event) => handleListItemClick(event, 0)}
-              >
-                <ListItemIcon>
-                  <Table size={22} />
-                </ListItemIcon>
-                <ListItemText primary="Inbox" />
-              </ListItemButton>
-              <ListItemButton
-                // selected={selectedIndex === 1}
-                // onClick={(event) => handleListItemClick(event, 1)}
-              >
-                <ListItemIcon>
-                  <Table size={22} />
-                </ListItemIcon>
-                <ListItemText primary="Drafts" />
-              </ListItemButton>
-            </List>
-          </Box>
-        </Grid>
-      </Grid>
-
-
-
-      {
-        ["renato", "Eliene"].map((ele, idx) => <Accordion key={idx} sx={{ width: 300 }}>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
-            <Stack direction={"row"} spacing={1}>
-              <Table size={22} />
-              <Typography>{ele}</Typography>
-            </Stack>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Button variant="text" color="error">Remover</Button>
-            <Button variant="text">Add Coluna</Button>
-          </AccordionDetails>
-        </Accordion>
-        )}
-
-      {/* {`Contagem: ${count}`} */}
+      <MTable
+        header={[["Tabela", "left"], ["Criada em", "right"], ["Modificada em", "right"]]}
+        size={tables.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        handleChangePage={handleChangePage}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
+        hasActions
+        loading={false}
+      >
+        {
+          (rowsPerPage > 0
+            ? tables.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            : tables
+          ).map(row => (
+            <TableRow key={row.identifier.value}>
+              <TableCell>
+                <Typography component={"p"}>{row.title.value}</Typography>
+              </TableCell>
+              <TableCell align='right'>
+                <Typography component={"p"}>{new Date(row.created.value).toLocaleDateString()}</Typography>
+              </TableCell>
+              <TableCell align='right'>
+                <Typography component={"p"}>{new Date(row.modified.value).toLocaleDateString()}</Typography>
+              </TableCell>
+              <TableCell align='center'>
+                <Tooltip title="Colunas">
+                  <IconButton onClick={() => {
+                    navigate(ROUTES.COLUMN_LIST, { state: row })
+                    console.log(row)
+                  }}>
+                    <Columns size={22} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Editar">
+                  <IconButton onClick={() => {
+                    console.log("*** Selecionando Grafo de Metadados ***")
+                  }}>
+                    <EditTwoTone />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Excluir">
+                  <IconButton onClick={() => handleRemove(row.identifier.value)}>
+                    <DeleteForever />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          ))}
+      </MTable>
     </div>
   );
 }
+

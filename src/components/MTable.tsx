@@ -1,14 +1,26 @@
+import React from 'react';
 import {
-  Card, CardContent,
   Typography,
-  Box,
-  TableHead, Table, TableBody, TableCell, TablePagination, TableRow, TableFooter, TableContainer, Paper
+  TableHead, Table, TableBody, TableCell, TablePagination, TableRow, TableFooter, TableContainer, Paper,
 } from '@mui/material';
+import LinearProgress from '@mui/material/LinearProgress';
 import { TablePaginationActions } from '../commons/pagination';
 
 type typeAlignOfCell = "right" | "left" | "inherit" | "center" | "justify" | undefined
 
-export function MTable(props: any) {
+interface MTable {
+  header: Array<[string, typeAlignOfCell]>;
+  hasActions?: boolean;
+  loading?: boolean;
+  size: number,
+  rowsPerPage: number;
+  page: number;
+  children: React.ReactNode;
+  handleChangePage: (event: unknown, newPage: number) => void;
+  handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export function MTable(props: MTable) {
   return (
     <TableContainer component={Paper} sx={{ mt: 2 }}>
       <Table
@@ -20,16 +32,17 @@ export function MTable(props: any) {
           <TableRow>
             {props.header.map((column: [string, typeAlignOfCell]) =>
               <TableCell key={column[0]} align={column[1]}>
-                <Typography component={'span'} variant="body1" fontWeight="600">{column[0]}</Typography>
+                <Typography component={'p'} variant="h6" fontWeight="800">{column[0]}</Typography>
               </TableCell>
             )}
             {
-              props.hasActions === undefined &&
+              props.hasActions &&
               <TableCell key={'Ações'} align='center'>
-                <Typography component={'span'} variant="body1" fontWeight="600">Ações</Typography>
+                <Typography component={'p'} variant="h6" fontWeight="800">Ações</Typography>
               </TableCell>
             }
           </TableRow>
+          {props.loading && <LinearProgress />}
         </TableHead>
         <TableBody>
           {props.size ? props.children :
@@ -44,16 +57,16 @@ export function MTable(props: any) {
           <TableRow>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25, { label: 'Todas', value: -1 }]}
-              colSpan={props.header.lenght}
+              colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
               count={props.size}
               rowsPerPage={props.rowsPerPage}
               page={props.page}
-              // SelectProps={{
-              //   inputprops: {
-              //     'aria-label': 'Linhas por página',
-              //   },
-              //   native: false,
-              // }}
+              SelectProps={{
+                inputProps: {
+                  "aria-label": "oxi"
+                },
+                native: false,
+              }}
               onPageChange={props.handleChangePage}
               onRowsPerPageChange={props.handleChangeRowsPerPage}
               ActionsComponent={TablePaginationActions}

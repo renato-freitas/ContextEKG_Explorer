@@ -11,6 +11,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
 import { RDF_Node } from "../../models/RDF_Node";
+
 import { IFormInput, insert } from "../../services/sparql-datasource";
 
 
@@ -67,20 +68,29 @@ export function NewDataSourceForm() {
     }
   });
 
-  const handleSubmitMetadataGraph: SubmitHandler<IFormInput> = async (data) => {
+  const handleSubmitDataSource: SubmitHandler<IFormInput> = async (data) => {
     console.log("*** Enviando dados da Fonte de Dados ***")
     console.log(data);
-    setLoading(true);
-    if (data.identifier !== '') {
-      console.log("*** UPDATE ***")
-      // await update(data)
-    } else {
-      console.log("*** INSERT ***")
-      await insert(data)
+    try {
+      setLoading(true);
+      if (data.identifier !== '') {
+        console.log("*** ATUALIZANDO FD ***")
+        // await update(data)
+      } else {
+        console.log("*** INSERINDO FD ***")
+        const response = await insert(data)
+        console.log(response);
+        setTimeout(() => {
+          navigate(-1)
+        }, 500);
+      }
+      reset();
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    // navigate(-1);
-    reset();
+
   };
 
   useEffect(() => {
@@ -107,7 +117,7 @@ export function NewDataSourceForm() {
 
   return (
     <Container fixed>
-      <h1>Cadastrar Fonte de Dados</h1>
+      <h1>{`Novo ${'Cadastrar*'} Fonte de Dados`}</h1>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -115,7 +125,7 @@ export function NewDataSourceForm() {
             sx={{ p: 0 }}
           >
             <CardContent sx={{ padding: '30px' }}>
-              <form onSubmit={handleSubmit(handleSubmitMetadataGraph)}>
+              <form onSubmit={handleSubmit(handleSubmitDataSource)}>
                 <Grid container spacing={2}>
                   <Grid item sm={6}>
                     <FormControl fullWidth>
