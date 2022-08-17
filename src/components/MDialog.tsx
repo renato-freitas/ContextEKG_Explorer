@@ -5,7 +5,8 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { DialogActions } from "@mui/material";
+import { DialogActions, DialogContent, DialogContentText, Divider } from "@mui/material";
+import WarningIcon from "@mui/icons-material/Warning"
 
 interface MDailogProps {
   open: boolean;
@@ -13,6 +14,13 @@ interface MDailogProps {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
+}
+
+interface IMDailogToConfirmDelete {
+  openConfirmDeleteDialog: boolean,
+  setOpenConfirmDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>,
+  deleteInstance: (instante: any) => void,
+  instance: any
 }
 
 export function MDialog(props: MDailogProps) {
@@ -49,4 +57,71 @@ export function MDialog(props: MDailogProps) {
       </DialogActions>
     </Dialog>
   );
+}
+
+
+export const MDialogToConfirmDelete = (props: IMDailogToConfirmDelete) => {
+
+  const handleDeleteInstance = async () => {
+    const deleted = props.deleteInstance(props.instance.identifier?.value);
+    console.log("*** deletando")
+    handleCloseDialog();
+  }
+
+  const handleCloseDialog = () => {
+    props.setOpenConfirmDeleteDialog(false);
+  }
+
+  return (
+    <Dialog
+      open={props.openConfirmDeleteDialog}
+      onClose={handleCloseDialog}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+      <DialogTitle id="alert-dialog-title">
+        <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }}>
+          <WarningIcon color='warning' sx={{ mr: 2 }} />
+          <Typography
+            variant="h6"
+            fontWeight="00"
+          >
+            Deletar
+          </Typography>
+        </Stack>
+      </DialogTitle>
+      <Divider />
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          {`Excluir definitivamente o item `}
+          <Typography
+            variant="button"
+            fontWeight="00"
+          >
+            "{props.instance.label?.value}" ?
+          </Typography>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Box sx={{}}>
+          <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCloseDialog}
+            >
+              Não
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleDeleteInstance}
+            >
+              Sim
+            </Button>
+          </Stack>
+        </Box>
+      </DialogActions>
+    </Dialog>
+  )
 }

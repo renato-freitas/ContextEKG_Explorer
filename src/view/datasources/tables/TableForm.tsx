@@ -104,7 +104,7 @@ export function TableForm() {
         // await update(data)
       } else {
         console.log("*** INSERT TABLE***")
-        await insertTable(data, selectedDataSource.identifier.value);
+        await insertTable(data, selectedDataSource.identifier.value, selectedDataSource.uri.value);
       }
       setLoading(false);
       // navigate(-1);

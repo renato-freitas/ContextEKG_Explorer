@@ -7,13 +7,15 @@ import Typography from '@mui/material/Typography';
 
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import { LinearProgress } from '@mui/material';
+import { LinearProgress, styled } from '@mui/material';
+
+const Offset = styled('div')(({ theme }) => theme.mixins.toolbar)
 
 export function TopBar() {
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-      {/* <AppBar position="fixed"> */}
+      {/* <AppBar position="static"> */}
+      <AppBar position="fixed">
         <Toolbar>
           <IconButton
             size="large"
@@ -30,6 +32,7 @@ export function TopBar() {
           <Button color="inherit">Login</Button>
         </Toolbar>
       </AppBar>
+      <Offset />
       {/* <LinearProgress color="secondary" /> */}
       {/* <LinearProgress color="success" /> */}
       {/* <LinearProgress color="inherit" /> */}

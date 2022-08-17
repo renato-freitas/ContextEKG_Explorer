@@ -30,7 +30,7 @@ import { ROUTES } from "../../../commons/constants";
 import { DeleteForever, EditTwoTone } from "@mui/icons-material";
 import { TableEntity } from "../../../models/TableEntity";
 import { DataSourceEntity } from "../../../models/DataSourceEntity";
-import { findAllTables } from "../../../services/sparql-datasource";
+import { findAllTables, removeTable, findAllTablesByDataSource } from "../../../services/sparql-datasource";
 
 export function NewTableList() {
   const navigate = useNavigate();
@@ -51,7 +51,8 @@ export function NewTableList() {
     try {
       console.log("\n *** LISTA DE TABELAS ***\n")
       setLoading(true);
-      const response = await findAllTables();
+      // const response = await findAllTables();
+      const response = await findAllTablesByDataSource(selectedDataSource.identifier.value);
       console.log(response)
       setTables(response);
     } catch (error) {
@@ -66,16 +67,23 @@ export function NewTableList() {
   }, [])
 
   useEffect(() => {
-    function onEdit() {
+    async function onEdit() {
       try {
         if (location.state) {
+          setLoading(true);
           let state = location.state as DataSourceEntity;
-          console.log("*** Colocando tabelas da FD na lista de tabeas ***")
+          console.log("*** Colocando tabelas da FD na lista ***")
           console.log(state)
           setSelectedDataSource(state);
+
+          const response = await findAllTablesByDataSource(state.identifier.value);
+          console.log(response)
+          setTables(response);
         }
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false)
       }
     }
     onEdit();
@@ -86,8 +94,8 @@ export function NewTableList() {
     navigate(ROUTES.TABLE_FORM, { state: row });
   }
   const handleRemove = async (identifier: string) => {
-    // await remove(identifier);
-    // loadMetagraphs();
+    await removeTable(identifier);
+    loadTables();
   }
 
   /**Pagination */
@@ -109,9 +117,8 @@ export function NewTableList() {
 
       <h1>
         <CaretCircleLeft onClick={() => navigate(-1)} />
-        {`New Tabelas da Fonte de Dados`}
+        {`${selectedDataSource.title.value}/Tabelas`}
       </h1>
-      <h2>{selectedDataSource.title.value}</h2>
 
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">

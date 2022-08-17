@@ -29,6 +29,7 @@ import { ColumnEntity } from "../../../models/ColumnEntity";
 import { TableEntity } from "../../../models/TableEntity";
 import { DeleteForever, EditTwoTone } from "@mui/icons-material";
 import { ROUTES } from "../../../commons/constants";
+import { findColumnsByTable } from "../../../services/sparql-datasource";
 
 export function ColumnList() {
   const navigate = useNavigate();
@@ -60,16 +61,22 @@ export function ColumnList() {
     title: { type: '', value: '' },
     created: { type: '', value: '' },
     modified: { type: '', value: '' },
-    type: { type: '', value: '' },
+    uri: { type: '', value: '' },
+    type: { type: '', value: '' }
   });
+
   useEffect(() => {
-    function onEdit() {
+    async function onEdit() {
       try {
         if (location.state) {
           let state = location.state as TableEntity;
           console.log("*** Colocando tabelas da FD na lista de tabeas ***")
           console.log(state)
           setSelectedTable(state);
+
+          const response = await findColumnsByTable(state.identifier.value);
+          console.log(response)
+          setColumns(response);
         }
       } catch (err) {
         console.log(err);
@@ -101,12 +108,12 @@ export function ColumnList() {
     <div className={styles.listkg}>
       <h1>
         <CaretCircleLeft onClick={() => navigate(-1)} />
-        {`Colunas da Tabela ${selectedTable.title.value}`}
+        {`${selectedTable.title.value}/Colunas`}
       </h1>
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
           {/* <Button variant="contained" onClick={handleShowTableForm}>+ Nova Tabela</Button> */}
-          <Button variant="contained" color="secondary" onClick={() => navigate(ROUTES.COLUMN_FORM)}>+ Nova Coluna</Button>
+          <Button variant="contained" color="secondary" onClick={() => navigate(ROUTES.COLUMN_FORM, { state: selectedTable })}>+ Nova Coluna</Button>
         </Grid>
 
         <Grid item sm={12}>

@@ -9,19 +9,10 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { insert, update } from "../../services/sparql-metagraph";
+import { insertMetadataGraph, updateMetadataGraph } from "../../services/sparql-metagraph";
 import { RDF_Node } from "../../models/RDF_Node";
 import { LoadingContext } from "../../App";
-
-interface IMetagraphEntity {
-  uri: RDF_Node;
-  identifier: RDF_Node;
-  title: RDF_Node;
-  comment: RDF_Node;
-  creator: RDF_Node;
-  created: RDF_Node;
-  modified: RDF_Node;
-}
+import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
 
 interface IFormInput {
   uri: string;
@@ -35,7 +26,7 @@ interface IFormInput {
 
 export interface LocationParams {
   pathname: string;
-  state: IMetagraphEntity;
+  state: MetadataGraphEntity;
   search: string;
   hash: string;
   key: string;
@@ -45,8 +36,8 @@ const MetadataGraphSchema = zod.object({
   identifier: zod.string().optional(),
   uri: zod.string().optional(),
   title: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  comment: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  creator: zod.string().min(2, 'Digite ao menos 1 caracter'),
+  comment: zod.string().optional(),
+  creator: zod.string().optional(),
   created: zod.string().optional(),
   modified: zod.string().optional(),
 });
@@ -67,26 +58,33 @@ export function MetagraphForm() {
   });
 
   const handleSubmitMetadataGraph: SubmitHandler<IFormInput> = async (data) => {
-    console.log("*** Enviando dados de Grafo de Metadados ***")
-    console.log(data);
-    setIsLoading(true);
-    if (data.identifier !== "") {
-      console.log("*** UPDATE ***")
-      await update(data)
-    } else {
-      console.log("*** INSERT ***")
-      await insert(data)
+    try {
+      setIsLoading(true);
+      console.log("*** Enviando dados de Grafo de Metadados ***")
+      console.log(data);
+      if (data.identifier !== "") {
+        console.log("*** Atulizando MetadataGraph ***")
+        await updateMetadataGraph(data)
+      } else {
+        console.log("*** Criando MetadataGraph ***")
+        await insertMetadataGraph(data)
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => {
+        reset();
+        setIsLoading(false);
+        navigate(-1)
+      }, 300);
     }
-    setIsLoading(false);
-    // navigate(-1);
-    reset();
   };
 
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as IMetagraphEntity;
+          let state = location.state as MetadataGraphEntity;
           console.log("*** Colocando o Grafo de Metadados Selecionado no Formulário ***")
           console.log(location)
           setValue("title", state.title.value);
@@ -102,11 +100,10 @@ export function MetagraphForm() {
     onEdit();
   }, [location.state]);
 
-  const title = watch('title');
 
   return (
     <Container fixed>
-      <h1>Instanciar Grafo de Metadados</h1>
+      <h1>{`${"Criar"} Grafo de Metadados`}</h1>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -120,6 +117,7 @@ export function MetagraphForm() {
                     <FormControl fullWidth>
                       <FormLabel htmlFor="title">Título</FormLabel>
                       <TextField
+                        required
                         variant="outlined"
                         placeholder="Ex: Metadados-SEFAZ-MA"
                         size="small"
@@ -134,7 +132,6 @@ export function MetagraphForm() {
                       <TextField
                         variant="outlined"
                         placeholder="Ex: Apelido"
-                        required
                         size="small"
                         {...register("creator")}
                       />
@@ -157,7 +154,7 @@ export function MetagraphForm() {
                   <Grid item sm={12}>
                     <Box display="flex" justifyContent="flex-start">
                       <Stack spacing={1} direction={{ xs: "column", sm: "row" }}>
-                        <Button type="submit" color="primary" variant="contained" disabled={!title}>
+                        <Button type="submit" color="primary" variant="contained">
                           Salvar
                         </Button>
                         <Button color="secondary" variant="contained"
@@ -171,7 +168,7 @@ export function MetagraphForm() {
 
               </form>
             </CardContent>
-            {loading && <LinearProgress />}
+            {/* {isLoading && <LinearProgress />} */}
           </Card>
         </Grid>
       </Grid>

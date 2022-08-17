@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import React, { useState } from "react";
 import { Box, Button, FormControl, FormLabel, Stack, TextField } from "@mui/material";
 import Container from "@mui/material/Container";
@@ -12,32 +12,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
 import { RDF_Node } from "../../models/RDF_Node";
 
-import { IFormInput, insert } from "../../services/sparql-datasource";
+import { IDataSourceForm, insertDataSource, updateDataSource } from "../../services/sparql-datasource";
+import { LoadingContext } from "../../App";
+import { DataSourceEntity } from "../../models/DataSourceEntity";
+import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
 
-
-interface IMetagraphEntity {
-  uri: RDF_Node;
-  identifier: RDF_Node;
-  title: RDF_Node;
-  comment: RDF_Node;
-  creator: RDF_Node;
-  created: RDF_Node;
-  modified: RDF_Node;
-}
-
-// interface IFormInput {
-//   // uri: string;
-//   identifier: string;
-//   title: string;
-//   // comment: string;
-//   // creator: string;
-//   created: string;
-//   modified: string;
+// interface IMetagraphEntity {
+//   uri: RDF_Node;
+//   identifier: RDF_Node;
+//   title: RDF_Node;
+//   comment: RDF_Node;
+//   creator: RDF_Node;
+//   created: RDF_Node;
+//   modified: RDF_Node;
 // }
 
 export interface LocationParams {
   pathname: string;
-  state: IMetagraphEntity;
+  state: MetadataGraphEntity;
   search: string;
   hash: string;
   key: string;
@@ -47,8 +39,8 @@ const DataSourceSchema = zod.object({
   identifier: zod.string().optional(),
   // uri: zod.string().optional(),
   title: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  // comment: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  // creator: zod.string().min(2, 'Digite ao menos 1 caracter'),
+  comment: zod.string().optional(),
+  created: zod.string().optional(),
   // created: zod.string().optional(),
   // modified: zod.string().optional(),
 });
@@ -56,53 +48,51 @@ const DataSourceSchema = zod.object({
 export function NewDataSourceForm() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { isLoading, setIsLoading } = useContext(LoadingContext);
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IFormInput>({
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IDataSourceForm>({
     resolver: zodResolver(DataSourceSchema),
     defaultValues: {
       identifier: '',
       title: '',
-      // comment: '',
-      // creator: ''
+      comment: '',
+      created: ''
     }
   });
 
-  const handleSubmitDataSource: SubmitHandler<IFormInput> = async (data) => {
+  const handleSubmitDataSource: SubmitHandler<IDataSourceForm> = async (data) => {
     console.log("*** Enviando dados da Fonte de Dados ***")
     console.log(data);
     try {
-      setLoading(true);
-      if (data.identifier !== '') {
-        console.log("*** ATUALIZANDO FD ***")
-        // await update(data)
+      setIsLoading(true);
+      if (data.identifier !== "") {
+        console.log("*** Atualizando Fonte de Dados ***")
+        await updateDataSource(data)
       } else {
-        console.log("*** INSERINDO FD ***")
-        const response = await insert(data)
-        console.log(response);
-        setTimeout(() => {
-          navigate(-1)
-        }, 500);
+        console.log("*** Criando Fonte de Dados ***")
+        await insertDataSource(data)
       }
-      reset();
     } catch (error) {
       console.error(error)
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        reset();
+        setIsLoading(false);
+        navigate(-1)
+      }, 300);
     }
-
   };
+
 
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as IMetagraphEntity;
-          console.log("*** Colocando o Grafo de Metadados Selecionado no Formulário ***")
-          console.log(location)
+          let state = location.state as DataSourceEntity;
+          console.log("*** Colocando a Fonde de Dados selecionada no formulário ***")
+          console.log(state)
           setValue("title", state.title.value);
-          // setValue("comment", state.comment.value);
-          // setValue("creator", state.creator.value);
+          setValue("comment", state.comment.value);
           setValue("created", state.created.value);
           setValue("identifier", state.identifier.value);
         }
@@ -117,7 +107,7 @@ export function NewDataSourceForm() {
 
   return (
     <Container fixed>
-      <h1>{`Novo ${'Cadastrar*'} Fonte de Dados`}</h1>
+      <h1>{`${'Cadastrar'} Fonte de Dados`}</h1>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -139,6 +129,18 @@ export function NewDataSourceForm() {
                       <p>{errors.title?.message}</p>
                     </FormControl>
                   </Grid>
+                  <Grid item sm={12}>
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="comment">Comentário</FormLabel>
+                      <TextField
+                        variant="outlined"
+                        placeholder="Ex: Fonte da Receita Federal ..."
+                        size="small"
+                        {...register('comment')}
+                      />
+                      <p>{errors.comment?.message}</p>
+                    </FormControl>
+                  </Grid>
 
                   {/* Botões */}
                   <Grid item sm={12}>
@@ -158,7 +160,7 @@ export function NewDataSourceForm() {
 
               </form>
             </CardContent>
-            {loading && <LinearProgress />}
+            {/* {isLoading && <LinearProgress />} */}
           </Card>
         </Grid>
       </Grid>

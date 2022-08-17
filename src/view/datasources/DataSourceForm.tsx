@@ -22,7 +22,7 @@ import Typography from '@mui/material/Typography';
 import { DataSourceDescriptionTab } from './DataSourceDescriptionTab'
 import { DataSourceColumnsTab } from "./DataSourceColumnsTab";
 
-import { insert } from "../../services/sparql-datasource";
+import { insertDataSource } from "../../services/sparql-datasource";
 import { DataSourceTablesTab } from "./DataSourceTablesTab";
 import { DataSourceCredentialsTab } from "./DataSourceCredentialsTab";
 import { TableEntity } from "../../models/TableEntity";
@@ -105,7 +105,7 @@ export function DataSourceForm() {
       // await update(data)
     } else {
       console.log("*** INSERT ***")
-      const response = await insert(data)
+      const response = await insertDataSource(data)
       console.log("*** RESPOSTA DO INSERT ***")
       console.log(response)
     }

@@ -28,39 +28,22 @@ import { RDF_Node } from "../../../models/RDF_Node";
 import { insertColumn, insertTable } from '../../../services/sparql-datasource';
 import { DataSourceEntity } from "../../../models/DataSourceEntity";
 
-// interface ITableEntity {
-//   name: RDF_Node;
-// }
-
-interface ITableForm {
+interface IFormColumn {
   identifier: string;
   title: string;
   created: string;
   modified: string;
 }
 
-export interface TableProps {
-  selectedTable: ITableForm;
-  tables: TableEntity[];
-  hideTableForm: () => void;
-}
 
-
-const TableSchema = zod.object({
+const ColumnSchema = zod.object({
   identifier: zod.string().optional(),
-  // uri: zod.string().optional(),
+  uri: zod.string().optional(),
   title: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  // comment: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  // creator: zod.string().min(2, 'Digite ao menos 1 caracter'),
-  // created: zod.string().optional(),
-  // modified: zod.string().optional(),
+  name: zod.string().optional(),
+  created: zod.string().optional(),
+  modified: zod.string().optional(),
 });
-const INITIAL_STATE = {
-  identifier: '',
-  title: '',
-  created: '',
-  modified: '',
-};
 
 /**Tenho que decidir como fazer a anotação das tabelas/csv das fontes de dados
  * i) Atualizar globalmente, tal que reflita em todos os GM
@@ -69,12 +52,14 @@ const INITIAL_STATE = {
 export function ColumnForm() {
   const [tableName, setTableName] = useState<string>("");
   // const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity|undefined>(undefined);
-  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>({
+  const [selectedTable, setSelectedTable] = useState<TableEntity>({
     identifier: { type: '', value: '' },
+    name: { type: '', value: '' },
     title: { type: '', value: '' },
     created: { type: '', value: '' },
     modified: { type: '', value: '' },
-    uri: { type: '', value: '' }
+    uri: { type: '', value: '' },
+    type: { type: '', value: '' }
   });
   const location = useLocation();
   const navigate = useNavigate();
@@ -82,8 +67,8 @@ export function ColumnForm() {
 
   const [tables, setTables] = useState([]);
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ITableForm>({
-    resolver: zodResolver(TableSchema),
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IFormColumn>({
+    resolver: zodResolver(ColumnSchema),
     defaultValues: {
       identifier: '',
       title: '',
@@ -94,17 +79,17 @@ export function ColumnForm() {
 
   // const handleSubmitTable: SubmitHandler<IFormInputTable> = async (data) => {
   const [list, setList] = useState<{ name: string }[]>([]);
-  const handleSubmitTableForm: SubmitHandler<ITableForm> = async (data, e) => {
+  const handleSubmitTableForm: SubmitHandler<IFormColumn> = async (data, e) => {
     try {
       console.log("*** Enviando dados de tabela ***")
       console.log(data);
       setLoading(true);
       if (data.identifier !== "") {
-        console.log("*** UPDATETABLE ***")
+        console.log("*** ATUALIZANDO COLUNA ***")
         // await update(data)
       } else {
-        console.log("*** INSERT TABLE***")
-        await insertColumn(data, selectedDataSource.identifier.value);
+        console.log("*** INSERINDO COLUNA ***")
+        await insertColumn(data, selectedTable.uri.value);
       }
       setLoading(false);
       // navigate(-1);
@@ -120,35 +105,20 @@ export function ColumnForm() {
   useEffect(() => {
     async function onEditTable() {
       if (location?.state) {
-        let state = location.state as DataSourceEntity;
-        console.log("*** Colocando tabelas da FD na lista de tabeas ***")
+        let state = location.state as TableEntity;
+        console.log("*** Colocando colunas da tb na lista  ***")
         console.log(state)
-        setSelectedDataSource(state);
+        setSelectedTable(state);
         // setSelectedDataSource(location.state)
       }
     };
     onEditTable();
   }, [location?.state]);
 
-  // const [valueTab, setValueTab] = React.useState(0);
-  // const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-  // const handleChange = (event: React.SyntheticEvent) => {
-  // const handleChange = (event: React.BaseSyntheticEvent) => {
-  //   console.log(event.target.name)
-  //   console.log(event.target.value)
-  //   // setTableName()
-  //   if (event.target.name === "name") setTableName(event.target.value)
-  // };
-
-  // const submit = () => {
-  // props.setCount(old => old + 2)
-  // props.setLocalTables([...props.tables, tableName])
-  // console.log(tableName)
-  // }
 
   return (
     <Container fixed>
-      <h1>{`${'Cadastrar'} Tabela na Fonte: ${selectedDataSource.title.value}`}</h1>
+      <h1>{`${'Cadastrar'} Tabela na Fonte: ${selectedTable.title.value}`}</h1>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card

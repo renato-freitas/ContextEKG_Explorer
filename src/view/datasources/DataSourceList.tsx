@@ -3,28 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { IconButton, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
+import { IconButton, Stack, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
 import { DeleteForever, EditTwoTone } from '@mui/icons-material';
 
 import { Table } from 'phosphor-react';
 
 import { ROUTES } from '../../commons/constants';
-import { findAllDataSources, remove } from '../../services/sparql-datasource';
+import { findGlobalDataSources, removeDataSource } from '../../services/sparql-datasource';
 import { DataSourceEntity } from '../../models/DataSourceEntity';
 import { MTable } from '../../components/MTable';
 import styles from '../datasources/DataSource.module.css';
 import { TablePaginationActions } from '../../commons/pagination';
+import { MDialogToConfirmDelete } from '../../components/MDialog';
 
 export function DataSourceList() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [dataSources, setDataSources] = useState<DataSourceEntity[]>([]);
-  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>();
+  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>({} as DataSourceEntity);
 
   async function loadDataSources() {
     console.log("\n *** Lista dos Grafos de Metadados ***\n")
     setLoading(true);
-    const response = await findAllDataSources();
+    const response = await findGlobalDataSources();
+    console.log(response[0])
     setLoading(false);
     setDataSources(response);
   }
@@ -36,9 +38,6 @@ export function DataSourceList() {
   const openForm = () => {
     console.log("*** call: Abrir formulário de Fonte de Dados ***")
     navigate(ROUTES.DATASOURCE_FORM);
-  }
-  const handleRemove = async (identifier: string) => {
-    await remove(identifier);
   }
 
 
@@ -56,10 +55,25 @@ export function DataSourceList() {
     setPage(0);
   };
 
+  /**Dialog to Delete */
+  const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
+  const handleClickOpenDialogToConfirmDelete = (row: DataSourceEntity) => {
+    console.log(row)
+    setSelectedDataSource(row)
+    setOpenDialogToConfirmDelete(true);
+  };
+
+  const handleRemove = async (identifier: string) => {
+    await removeDataSource(identifier);
+    await loadDataSources();
+  }
+  /**Dialog to Delete */
+
   return (
     <div className={styles.listkg}>
 
       <h1>Fontes de Dados</h1>
+      <Typography variant='caption'>Nessa tela são listas as fontes de dados cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography>
 
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
@@ -88,10 +102,16 @@ export function DataSourceList() {
                 <Typography>{row.title.value}</Typography>
               </TableCell>
               <TableCell align='right'>
-                <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
+                <Stack>
+                  <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
+                  <Typography variant="caption" display="block" gutterBottom>{new Date(row.created.value).toLocaleTimeString()}</Typography>
+                </Stack>
               </TableCell>
               <TableCell align='right'>
-                <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
+                <Stack>
+                  <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
+                  <Typography variant="caption" display="block" gutterBottom>{new Date(row.modified.value).toLocaleTimeString()}</Typography>
+                </Stack>
               </TableCell>
               <TableCell align='center'>
                 <Tooltip title="Tabelas">
@@ -106,12 +126,13 @@ export function DataSourceList() {
                 <Tooltip title="Editar">
                   <IconButton onClick={() => {
                     console.log("*** Selecionando Grafo de Metadados ***")
+                    navigate(ROUTES.DATASOURCE_FORM, { state: row })
                   }}>
                     <EditTwoTone />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Excluir">
-                  <IconButton onClick={() => handleRemove(row.identifier.value)}>
+                  <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
                     <DeleteForever />
                   </IconButton>
                 </Tooltip>
@@ -119,6 +140,13 @@ export function DataSourceList() {
             </TableRow>
           ))}
       </MTable>
+
+      <MDialogToConfirmDelete
+        openConfirmDeleteDialog={openDialogToConfirmDelete}
+        setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
+        deleteInstance={handleRemove}
+        instance={selectedDataSource}
+      />
     </div >
   );
 }

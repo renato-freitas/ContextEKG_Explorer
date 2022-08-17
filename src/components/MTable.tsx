@@ -32,13 +32,13 @@ export function MTable(props: MTable) {
           <TableRow>
             {props.header.map((column: [string, typeAlignOfCell]) =>
               <TableCell key={column[0]} align={column[1]}>
-                <Typography component={'p'} variant="h6" fontWeight="800">{column[0]}</Typography>
+                <Typography component={'p'} variant="body1" fontWeight="800">{column[0]}</Typography>
               </TableCell>
             )}
             {
               props.hasActions &&
               <TableCell key={'Ações'} align='center'>
-                <Typography component={'p'} variant="h6" fontWeight="800">Ações</Typography>
+                <Typography component={'p'} variant="body1" fontWeight="800">Ações</Typography>
               </TableCell>
             }
           </TableRow>

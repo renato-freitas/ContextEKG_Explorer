@@ -1,22 +1,20 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-export interface IFormInput {
-  // uri: string;
+export interface IDataSourceForm {
   identifier: string;
   title: string;
-  // comment: string;
-  // page: string;
-  // creator: string;
+  label: string;
+  comment: string;
   created: string;
   modified: string;
 }
 
 /**Criar uma fonte de dados no GM */
-export async function insert(data: IFormInput) {
+export async function insertDataSource(data: IDataSourceForm) {
   const uuid = uuidv4();
   const currentDate: Date = new Date();
-  const uri = data.title.replace(/ /g, "_");
+  // const uri = data.title.replace(/ /g, "_");
 
   let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -25,15 +23,15 @@ export async function insert(data: IFormInput) {
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
     INSERT DATA { 
-      mokg:${uri} a mokg:DataSource ; 
-        rdfs:label '${data.title}' ;
+      mokg:${uuid} a mokg:DataSource ; 
         dc:identifier '${uuid}' ;
+        rdfs:label '${data.title}' ;
         dc:title '${data.title}' ;
+        rdfs:comment "${data.comment}" ;
         dcterms:created '${currentDate.toISOString()}' ;
         dcterms:modified '${currentDate.toISOString()}' .
     }`
 
-  // rdfs:comment "${data.comment}" ;
   // foaf:page "${data.page}" ;
   // dc:creator '${data.creator}' ;
 
@@ -48,49 +46,46 @@ export async function insert(data: IFormInput) {
   return created[0];
 }
 
-// export async function update(data: IFormInput) {
-//   try {
-//     const uri = data.title.replace(/ /g, "_");
-//     const currentDate: Date = new Date();
-//     let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-//     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-//     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-//     PREFIX dcterms: <http://purl.org/dc/terms/>
-//     PREFIX dc: <http://purl.org/dc/elements/1.1/>
-//     PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
-//     DELETE { 
-//       ?s dc:identifier "${data.identifier}" ;
-//        dcterms:created "${data.created}" .
-//     }
-//     INSERT { 
-//       mokg:${uri} rdf:type mokg:MetadataGraph ; 
-//         rdfs:label "${data.title}" ;
-//         dc:identifier "${data.identifier}" ;
-//         dc:title "${data.title}" ;
-//         rdfs:comment "${data.comment}" ;
-//         dc:creator "${data.creator}" ;
-//         dcterms:created "${data.created}" ;
-//         dcterms:modified "${currentDate.toISOString()}" .
-//     }
-//     WHERE { 
-//       ?s dc:identifier "${data.identifier}" ;
-//         dcterms:created "${data.created}" .
-//     }`
+export async function updateDataSource(data: IDataSourceForm) {
+  try {
+    // const uri = data.title.replace(/ /g, "_");
+    const currentDate: Date = new Date();
+    let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
+    DELETE { 
+      mokg:${data.identifier} ?o ?p .
+    }
+    INSERT { 
+      mokg:${data.identifier} rdf:type mokg:DataSource ; 
+        rdfs:label "${data.title}" ;
+        dc:identifier "${data.identifier}" ;
+        dc:title "${data.title}" ;
+        rdfs:comment "${data.comment}" ;
+        dcterms:created "${data.created}" ;
+        dcterms:modified "${currentDate.toISOString()}" .
+    }
+    WHERE { 
+      mokg:${data.identifier} ?o ?p .
+    }`
 
-//     return await axios({
-//       method: 'POST',
-//       url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
-//       params: { update: query },
-//       headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
-//     })
+    return await axios({
+      method: 'POST',
+      url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
+      params: { update: query },
+      headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
+    })
 
-//   } catch (error) {
-//     console.error(error)
-//   }
-// }
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 /**Esta função remove todas as triplas do sujeito informado */
-export async function remove(identifier: string) {
+export async function removeDataSource(identifier: string) {
   try {
     console.log("identifier")
     console.log(identifier)
@@ -106,7 +101,7 @@ export async function remove(identifier: string) {
 }
 
 
-export async function findAllDataSources() {
+export async function findGlobalDataSources() {
   try {
     let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -117,6 +112,7 @@ export async function findAllDataSources() {
           ?uri a mokg:DataSource ; 
             dc:identifier ?identifier ;
             dc:title ?title ;
+            rdfs:label ?label ;
             dcterms:created ?created ;
             dcterms:modified ?modified .
             OPTIONAL { ?uri dc:creator ?creator . }
@@ -136,6 +132,9 @@ export async function findAllDataSources() {
     console.error(error)
   }
 }
+
+
+
 
 
 /**Esta função retornar um recuros com o ID informado no parâmetro*/
@@ -166,15 +165,6 @@ export async function findOne(identifier: string) {
   }
 }
 
-
-/**TABELAS */
-export interface IFormTable {
-  identifier: string;
-  title: string;
-  created: string;
-  modified: string;
-}
-
 /**Esta função retornar um recuros com o ID informado no parâmetro*/
 export async function findOneResourceByIdentifier(identifier: string, owlClass: string) {
   try {
@@ -203,16 +193,26 @@ export async function findOneResourceByIdentifier(identifier: string, owlClass: 
   }
 }
 
+
+/** TABELAS */
+export interface IFormTable {
+  identifier: string;
+  title: string;
+  created: string;
+  modified: string;
+}
+
+
 /**Criar uma tabela no GM */
-export async function insertTable(data: IFormTable, datasourceIdentifier: string) {
-    console.log("*** Dados de tabale para salvar ****")
-    console.log(data)
+export async function insertTable(data: IFormTable, datasourceIdentifier: string, dataSourceUri: string) {
+  console.log("*** Dados de tabale para salvar ****")
+  console.log(data)
 
-    const uuid = uuidv4();
-    const currentDate: Date = new Date();
-    const uri = data.title.replace(/ /g, "_");
+  const uuid = uuidv4();
+  const currentDate: Date = new Date();
+  const uri = data.title.replace(/ /g, "_");
 
-    let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -225,18 +225,18 @@ export async function insertTable(data: IFormTable, datasourceIdentifier: string
         dc:title '${data.title}' ;
         dcterms:created '${currentDate.toISOString()}' ;
         dcterms:modified '${currentDate.toISOString()}' .
-      mokg:${uri} mokg:belongsToDataSource mokg:${datasourceIdentifier} .
+      mokg:${uri} mokg:belongsToDataSource <${dataSourceUri}> .
     }`
 
-    await axios({
-      method: 'POST',
-      url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
-      params: { update: query },
-      headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
-    })
+  await axios({
+    method: 'POST',
+    url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
+    params: { update: query },
+    headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
+  })
 
-    const created = await findOneResourceByIdentifier(uuid, "Table");
-    return created[0];
+  const created = await findOneResourceByIdentifier(uuid, "Table");
+  return created[0];
 }
 
 export async function findAllTables() {
@@ -269,10 +269,67 @@ export async function findAllTables() {
   }
 }
 
+export async function findAllTablesByDataSource(identifier: string) {
+  try {
+    let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dcterms: <http://purl.org/dc/terms/>
+      PREFIX dc: <http://purl.org/dc/elements/1.1/>
+      SELECT * WHERE { 
+        ?uri a mokg:Table ;
+            dc:title ?title ;
+            rdfs:label ?label ;
+            dc:identifier ?identifier ;
+            dc:title ?title ;
+            dcterms:created ?created ;
+            dcterms:modified ?modified ;
+            mokg:belongsToDataSource ?datasource .
+        ?datasource dc:identifier "${identifier}" .
+      }`
 
+    const response = await axios({
+      method: 'GET',
+      url: encodeURI("http://localhost:7200/repositories/metagraph"),
+      params: { query }
+    })
+
+    // console.log(response.data.results.bindings)
+    return response.data.results.bindings;
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+
+
+/**Remove uma tabela */
+export async function removeTable(identifier: string) {
+  try {
+    console.log("identifier")
+    console.log(identifier)
+    const response = await axios({
+      method: 'DELETE',
+      url: "http://localhost:7200/repositories/metagraph/statements",
+      params: { pred: '<http://purl.org/dc/elements/1.1/identifier>', obj: `"${identifier}"` },
+      headers: { 'Accept': 'application/json' }
+    })
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+
+/** COLUNAS - INÍCIO*/
+export interface IFormColumn {
+  identifier: string;
+  title: string;
+  created: string;
+  modified: string;
+}
 
 /**Criar uma Coluna no GM */
-export async function insertColumn(data: IFormTable, datasourceIdentifier: string) {
+export async function insertColumn(data: IFormColumn, tableUri: string) {
   console.log("*** Dados de coluna para salvar ****")
   console.log(data)
 
@@ -288,12 +345,12 @@ export async function insertColumn(data: IFormTable, datasourceIdentifier: strin
   PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
   INSERT DATA { 
     mokg:${uri} a mokg:Column ; 
-      rdfs:label '${data.title}' ;
       dc:identifier '${uuid}' ;
+      rdfs:label '${data.title}' ;
       dc:title '${data.title}' ;
       dcterms:created '${currentDate.toISOString()}' ;
-      dcterms:modified '${currentDate.toISOString()}' .
-    mokg:${uri} mokg:belongsToTable mokg:${datasourceIdentifier} .
+      dcterms:modified '${currentDate.toISOString()}' ;
+      mokg:belongsToTable <${tableUri}> .
   }`
 
   await axios({
@@ -306,3 +363,38 @@ export async function insertColumn(data: IFormTable, datasourceIdentifier: strin
   const created = await findOneResourceByIdentifier(uuid, "Column");
   return created[0];
 }
+
+
+export async function findColumnsByTable(identifier: string) {
+  try {
+    let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dcterms: <http://purl.org/dc/terms/>
+      PREFIX dc: <http://purl.org/dc/elements/1.1/>
+      SELECT * WHERE { 
+        ?uri a mokg:Column ;
+            dc:title ?title ;
+            rdfs:label ?label ;
+            dc:identifier ?identifier ;
+            dc:title ?title ;
+            dcterms:created ?created ;
+            dcterms:modified ?modified ;
+            mokg:belongsToTable ?table .
+        ?table dc:identifier "${identifier}" .
+      }`
+
+    const response = await axios({
+      method: 'GET',
+      url: encodeURI("http://localhost:7200/repositories/metagraph"),
+      params: { query }
+    })
+
+    // console.log(response.data.results.bindings)
+    return response.data.results.bindings;
+  } catch (error) {
+    console.error(error)
+  }
+}
+/** COLUNAS - FIM */
+

@@ -22,7 +22,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Columns, Table } from "phosphor-react";
-import { update } from "../../services/sparql-metagraph";
+import { updateMetadataGraph } from "../../services/sparql-metagraph";
 import { TableForm } from "./tables/TableForm";
 import { TableEntity } from "../../models/TableEntity";
 import { MDialog } from '../../components/MDialog';
