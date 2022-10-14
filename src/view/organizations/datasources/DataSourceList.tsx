@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -8,36 +8,62 @@ import { DeleteForever, EditTwoTone } from '@mui/icons-material';
 
 import { CaretCircleLeft, Table } from 'phosphor-react';
 
-import { ROUTES } from '../../commons/constants';
-import { findGlobalDataSources, removeDataSource } from '../../services/sparql-datasource';
-import { DataSourceEntity } from '../../models/DataSourceEntity';
-import { MTable } from '../../components/MTable';
-import styles from '../../datasources/DataSource.module.css';
-import { TablePaginationActions } from '../../commons/pagination';
-import { MDialogToConfirmDelete } from '../../components/MDialog';
+import { ROUTES } from '../../../commons/constants';
+import { OrganizationEntity } from '../../../models/OrganizationEntity';
+import { MTable } from '../../../components/MTable';
+import styles from './DataSource.module.css';
+import { TablePaginationActions } from '../../../commons/pagination';
+import { MDialogToConfirmDelete } from '../../../components/MDialog';
+
+import { findGlobalDataSources, findDataSourcesByOrganization, removeDataSource } from '../../../services/sparql-datasource';
 
 export function DataSourceList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState<boolean>(false);
-  const [dataSources, setDataSources] = useState<DataSourceEntity[]>([]);
-  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>({} as DataSourceEntity);
+  const [dataSources, setDataSources] = useState<OrganizationEntity[]>([]);
+  // const [selectedDataSource, setSelectedDataSource] = useState<OrganizationEntity>({} as OrganizationEntity);
+  const [selectedOrganization, setSelectedOrganization] = useState<OrganizationEntity>({} as OrganizationEntity);
 
-  async function loadDataSources() {
-    console.log("\n *** Lista dos Grafos de Metadados ***\n")
-    setLoading(true);
-    const response = await findGlobalDataSources();
-    console.log(response[0])
-    setLoading(false);
-    setDataSources(response);
-  }
+  // async function loadDataSources() {
+  //   console.log("\n *** Lista de Fontes de Dados ***\n")
+  //   setLoading(true);
+  //   const response = await findGlobalDataSources();
+  //   console.log(response[0])
+  //   setLoading(false);
+  //   setDataSources(response);
+  // }
+
+  // useEffect(() => {
+  //   loadDataSources();
+  // }, [])
 
   useEffect(() => {
-    loadDataSources();
-  }, [])
+    async function onEdit() {
+      try {
+        if (location.state) {
+          setLoading(true);
+          let state = location.state as OrganizationEntity;
+          console.log("*** Recebendo a Organização selecionada ***")
+          console.log(state)
+          setSelectedOrganization(state);
+
+          const response = await findDataSourcesByOrganization(state.identifier.value);
+          console.log(response)
+          setDataSources(response);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false)
+      }
+    }
+    onEdit();
+  }, [location.state]);
 
   const openForm = () => {
-    console.log("*** call: Abrir formulário de Fonte de Dados ***")
-    navigate(ROUTES.DATASOURCE_FORM);
+    console.log("*** Abrir formulário de Fonte de Dados ***")
+    navigate(ROUTES.DATASOURCE_FORM, { state: { organization: selectedOrganization } });
   }
 
 
@@ -57,15 +83,15 @@ export function DataSourceList() {
 
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
-  const handleClickOpenDialogToConfirmDelete = (row: DataSourceEntity) => {
+  const handleClickOpenDialogToConfirmDelete = (row: OrganizationEntity) => {
     console.log(row)
-    setSelectedDataSource(row)
+    setSelectedOrganization(row)
     setOpenDialogToConfirmDelete(true);
   };
 
   const handleRemove = async (identifier: string) => {
     await removeDataSource(identifier);
-    await loadDataSources();
+    // await loadDataSources();
   }
   /**Dialog to Delete */
 
@@ -75,7 +101,7 @@ export function DataSourceList() {
       {/* <h1>Fontes de Dados</h1> */}
       <h1>
         <CaretCircleLeft onClick={() => navigate(-1)} />
-        {`${selectedDataSource.title.value}/Fontes de Dados`}
+        {`${selectedOrganization?.title?.value}/Fontes de Dados`}
       </h1>
       <Typography variant='caption'>Nessa tela são listas as fontes de dados cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography>
 
@@ -105,6 +131,9 @@ export function DataSourceList() {
               <TableCell>
                 <Typography>{row.title.value}</Typography>
               </TableCell>
+              {/* <TableCell>
+                <Typography>{row.type.value}</Typography>
+              </TableCell> */}
               <TableCell align='right'>
                 <Stack>
                   <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
@@ -149,7 +178,7 @@ export function DataSourceList() {
         openConfirmDeleteDialog={openDialogToConfirmDelete}
         setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
         deleteInstance={handleRemove}
-        instance={selectedDataSource}
+        instance={selectedOrganization}
       />
     </div >
   );

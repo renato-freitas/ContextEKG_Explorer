@@ -1,43 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { IconButton, Stack, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
 import { DeleteForever, EditTwoTone } from '@mui/icons-material';
+import Storage from '@mui/icons-material/Storage';
 
-import { CaretCircleLeft, Table } from 'phosphor-react';
+import { Table, Database } from 'phosphor-react';
 
-import { ROUTES } from '../../commons/constants';
-import { findGlobalDataSources, removeDataSource } from '../../services/sparql-datasource';
-import { DataSourceEntity } from '../../models/DataSourceEntity';
 import { MTable } from '../../components/MTable';
-import styles from '../../datasources/DataSource.module.css';
 import { TablePaginationActions } from '../../commons/pagination';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 
-export function DataSourceList() {
+import { DataSourceEntity } from '../../models/DataSourceEntity';
+import { OrganizationEntity } from '../../models/OrganizationEntity';
+
+import { findAllOrganizations } from '../../services/sparql-organization';
+import { ROUTES } from '../../commons/constants';
+import styles from '../datasources/DataSource.module.css';
+
+export function OrganizationList() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
-  const [dataSources, setDataSources] = useState<DataSourceEntity[]>([]);
-  const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>({} as DataSourceEntity);
+  const [organizations, setOrganizations] = useState<OrganizationEntity[]>([]);
+  const [selectedOrganization, setSelectedOrganization] = useState<OrganizationEntity>({} as OrganizationEntity);
 
-  async function loadDataSources() {
-    console.log("\n *** Lista dos Grafos de Metadados ***\n")
-    setLoading(true);
-    const response = await findGlobalDataSources();
-    console.log(response[0])
-    setLoading(false);
-    setDataSources(response);
+  async function loadOrganizations() {
+    try {
+      setLoading(true);
+      console.log("\n *** Lista de Organizações ***\n")
+      const response = await findAllOrganizations();
+      console.log(response)
+      setOrganizations(response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+
   }
 
   useEffect(() => {
-    loadDataSources();
+    loadOrganizations();
   }, [])
 
   const openForm = () => {
     console.log("*** call: Abrir formulário de Fonte de Dados ***")
-    navigate(ROUTES.DATASOURCE_FORM);
+    navigate(ROUTES.ORGANIZATION_FORM);
   }
 
 
@@ -59,36 +69,33 @@ export function DataSourceList() {
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
   const handleClickOpenDialogToConfirmDelete = (row: DataSourceEntity) => {
     console.log(row)
-    setSelectedDataSource(row)
+    setSelectedOrganization(row)
     setOpenDialogToConfirmDelete(true);
   };
 
   const handleRemove = async (identifier: string) => {
-    await removeDataSource(identifier);
-    await loadDataSources();
+    // await removeDataSource(identifier);
+    await loadOrganizations();
   }
   /**Dialog to Delete */
 
   return (
     <div className={styles.listkg}>
 
-      {/* <h1>Fontes de Dados</h1> */}
-      <h1>
-        <CaretCircleLeft onClick={() => navigate(-1)} />
-        {`${selectedDataSource.title.value}/Fontes de Dados`}
-      </h1>
-      <Typography variant='caption'>Nessa tela são listas as fontes de dados cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography>
+      <h1>Organizações</h1> 
+      <nav><Link to={ROUTES.ORGANIZATION_DOC}>Documento</Link></nav>
+      <Typography variant='caption'>Nessa tela são listas as organizações cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography>
 
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
           <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
-          <Button variant="contained" onClick={openForm}>+ Nova Fonte de Dados</Button>
+          <Button variant="contained" onClick={openForm}>+ Nova Organização</Button>
         </Grid>
       </Grid>
 
       <MTable
         header={[["Título", "left"], ["Criado em", "right"], ["Modificado em", "right"]]}
-        size={dataSources.length}
+        size={organizations.length}
         rowsPerPage={rowsPerPage}
         page={page}
         handleChangePage={handleChangePage}
@@ -98,8 +105,8 @@ export function DataSourceList() {
       >
         {
           (rowsPerPage > 0
-            ? dataSources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : dataSources
+            ? organizations.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            : organizations
           ).map(row => (
             <TableRow key={row.identifier.value}>
               <TableCell>
@@ -118,19 +125,21 @@ export function DataSourceList() {
                 </Stack>
               </TableCell>
               <TableCell align='center'>
-                <Tooltip title="Tabelas">
+                <Tooltip title="Fontes de Dados">
                   <IconButton onClick={() => {
-                    navigate(ROUTES.TABLE_LIST, { state: row })
+                    navigate(ROUTES.DATASOURCE_LIST, { state: row })
+                    console.log("*** Selecionando a Organização ***")
                     console.log(row)
                     // setSelectedDataSource(row);
                   }}>
-                    <Table size={22} />
+                    <Database size={22} />
+                    {/* <Storage /> */}
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Editar">
                   <IconButton onClick={() => {
-                    console.log("*** Selecionando Grafo de Metadados ***")
-                    navigate(ROUTES.DATASOURCE_FORM, { state: row })
+                    console.log("*** Selecionando a Organização ***")
+                    navigate(ROUTES.ORGANIZATION_FORM, { state: row })
                   }}>
                     <EditTwoTone />
                   </IconButton>
@@ -149,7 +158,7 @@ export function DataSourceList() {
         openConfirmDeleteDialog={openDialogToConfirmDelete}
         setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
         deleteInstance={handleRemove}
-        instance={selectedDataSource}
+        instance={selectedOrganization}
       />
     </div >
   );

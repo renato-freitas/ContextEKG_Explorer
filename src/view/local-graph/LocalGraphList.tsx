@@ -7,9 +7,9 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import { Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
 
-import { CaretCircleRight } from 'phosphor-react'
+import { CaretCircleLeft, CaretCircleRight } from 'phosphor-react'
 
-import styles from './Manage.module.css'
+import styles from '../manage/Manage.module.css'
 import { ROUTES } from "../../commons/constants";
 import { findAllLocalGraphs } from "../../services/sparql-localgraph";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
@@ -28,7 +28,7 @@ interface IMetagraph {
   modified: ElementOfRdfClass;
 }
 
-export function ManageMetagraph() {
+export function LocalGraphList() {
   const location = useLocation();
   const navigate = useNavigate();
   const [metagraph, setMetagraph] = useState<IMetagraph>();
@@ -49,39 +49,14 @@ export function ManageMetagraph() {
     onEdit();
   }, [location.state]);
 
-  let dataSourcelayer = {
-    title: "Fontes de Dados", subTitle: "Quantidade:", route: ROUTES.MANAGE_META_DATASOURCES,
-    buttons: [
-      <Button variant="contained">+ Fonte de Dados</Button>
-    ], items: ["Fonte 01", "Fonte 02"]
-  }
 
-  // {
-  //   title: "Grafo de Conhecimento", subTitle: "Prefixo, Namespace", route: "manage-metagraph", buttons: [
-  //     <Button variant="contained">+ Ontologia</Button>
-  //   ], items: ["Fonte 01", "Fonte 02"]
-  // },
-  // ]
-
-  let semanticViewLayer = {
-    title: "Visão Semântica", subTitle: "Ontologia de Domínio, Grafos Locais e Ligações", route: ROUTES.SEMANTIC_VIEW,
+  let localGraphMetadata = {
+    title: "Grafo Local", subTitle: "Vocabulário, TriplesMap e LinkSpec", route: ROUTES.SEMANTIC_VIEW,
     buttons: [
-      <Button variant="contained" onClick={() => false}>+ Ontologia</Button>,
-      <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_FORM)}>+ Grafo Local</Button>,
-      <Button variant="contained">+ Links Semânticos</Button>,
+      <Button variant="contained" onClick={() => false}>+ Vocabulário</Button>,
+      <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_FORM)}>+ TriplesMap</Button>,
+      <Button variant="contained">+ LinkSpec</Button>,
     ]
-  }
-
-  let applicationLayer = {
-    title: "Aplicações & Ferramentas", subTitle: "...", route: "manage-metagraph", buttons: [
-      <Button variant="contained">+ Ontologia</Button>
-    ], items: ["Fonte 01", "Fonte 02"]
-  }
-
-  let accessLayer = {
-    title: "Acesso e Integração", subTitle: "Enpoint e Wrapper", route: "manage-metagraph", buttons: [
-      <Button variant="contained">+ Ontologia</Button>
-    ], items: ["Fonte 01", "Fonte 02"]
   }
 
 
@@ -106,7 +81,10 @@ export function ManageMetagraph() {
 
   return (
     <Container fixed>
-      <h1>Gerenciar Metadados do EKG</h1>
+      <h1>
+        <CaretCircleLeft onClick={() => navigate(-1)} />
+        Gerenciar Metadados do Grafo Local
+      </h1>
       <h2 style={{ textAlign: "center", marginBottom: 10 }}>
         <Chip label={`** ${metagraph?.title.value} **`} color="primary" sx={{ fontSize: 20 }} />
       </h2>
@@ -116,15 +94,15 @@ export function ManageMetagraph() {
           <Grid container className={styles.gridItem}>
             <Grid item sm={6}>
               <Typography variant="h6" component="div">
-                {semanticViewLayer.title}
+                {localGraphMetadata.title}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {semanticViewLayer.subTitle}
+                {localGraphMetadata.subTitle}
               </Typography>
             </Grid>
             <Grid item sm={6}>
               <Stack direction="row" gap={1}>
-                {semanticViewLayer.buttons.map((btn) => btn)}
+                {localGraphMetadata.buttons.map((btn) => btn)}
               </Stack>
             </Grid>
             <Grid item sm={12}>
@@ -137,7 +115,7 @@ export function ManageMetagraph() {
                     label={item.title?.value}
                     color="secondary"
                     onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: item })}
-                    />)}
+                  />)}
                 </Box>
                 <Box sx={{ width: "100%" }}>
                   {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" />)}
@@ -147,33 +125,6 @@ export function ManageMetagraph() {
           </Grid>
         </CardContent>
       </Card>
-
-      {/* {layers.map(layer => {
-        return (
-          <Card className={styles.card}>
-            <CardContent>
-              <Grid container className={styles.gridItem}>
-                <Grid item>
-                  <Typography variant="h6" component="div">
-                    {layer.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {layer.subTitle}
-                  </Typography>
-                  <Stack direction="row" gap={1}>
-                    {layer.items.map((item) => <Chip label={item.title?.value} />)}
-                  </Stack>
-                </Grid>
-                <Grid item display='flex' justifyContent="flex-start" alignItems={"flex-start"}>
-                  <Stack direction="row" gap={1}>
-                    {layer.buttons.map((btn) => btn)}
-                  </Stack>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        )
-      })} */}
     </Container>
   );
 }

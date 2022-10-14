@@ -17,7 +17,7 @@ export const menuEvolve = [
   {
     title: 'Organizações',
     icon: Storefront,
-    href: ROUTES.ORGANIZATIONS,
+    href: ROUTES.ORGANIZATION_LIST,
     type: [USER_TYPE.ADMIN]
   },
   {
@@ -26,12 +26,12 @@ export const menuEvolve = [
     href: ROUTES.PERSONS,
     type: [USER_TYPE.ADMIN]
   },
-  {
-    title: 'Fontes de Dados',
-    icon: Database,
-    href: ROUTES.DATASOURCE_LIST,
-    type: [USER_TYPE.ADMIN]
-  }
+  // {
+  //   title: 'Fontes de Dados',
+  //   icon: Database,
+  //   href: ROUTES.DATASOURCE_LIST,
+  //   type: [USER_TYPE.ADMIN]
+  // }
 ];
 
 export const menuConsuming = [
