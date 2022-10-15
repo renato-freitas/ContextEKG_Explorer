@@ -79,7 +79,7 @@ export function MetagraphList() {
   return (
     <div className={styles.listkg}>
 
-      <h1>Grafos de Metadados</h1>
+      <h1>EKG - Enterprise Knowledge Graphs</h1>
       <Grid container spacing={2}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
           <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />

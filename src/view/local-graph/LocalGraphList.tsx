@@ -1,46 +1,95 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import Container from "@mui/material/Container";
-import Paper from '@mui/material/Paper';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import { Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import { IconButton, Stack, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
+import { Construction, DeleteForever, EditTwoTone } from '@mui/icons-material';
+import Storage from '@mui/icons-material/Storage';
 
-import { CaretCircleLeft, CaretCircleRight } from 'phosphor-react'
+import { Table, Database, CaretCircleLeft } from 'phosphor-react';
 
-import styles from '../manage/Manage.module.css'
-import { ROUTES } from "../../commons/constants";
-import { findAllLocalGraphs } from "../../services/sparql-localgraph";
-import { LocalGraphEntity } from "../../models/LocalGraphEntity";
+import { MTable } from '../../components/MTable';
+import { TablePaginationActions } from '../../commons/pagination';
+import { MDialogToConfirmDelete } from '../../components/MDialog';
 
-interface ElementOfRdfClass {
-  value: string,
-  type: string
-}
+import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
+import { DataSourceEntity } from '../../models/DataSourceEntity';
+import { LocalGraphEntity } from '../../models/LocalGraphEntity';
 
-interface IMetagraph {
-  uri: ElementOfRdfClass;
-  identifier: ElementOfRdfClass;
-  title: ElementOfRdfClass;
-  creator: ElementOfRdfClass;
-  created: ElementOfRdfClass;
-  modified: ElementOfRdfClass;
-}
+import { findAllOrganizations } from '../../services/sparql-organization';
+import { ROUTES } from '../../commons/constants';
+import styles from '../datasources/DataSource.module.css';
+import { findAllLocalGraphs } from '../../services/sparql-localgraph';
 
 export function LocalGraphList() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [metagraph, setMetagraph] = useState<IMetagraph>();
+  const location = useLocation();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [localGraphs, setLocalGraphs] = useState<LocalGraphEntity[]>([]);
+  const [selectedOrganization, setSelectedOrganization] = useState<LocalGraphEntity>({} as LocalGraphEntity);
 
+  async function loadLocalGraphs() {
+    try {
+      setLoading(true);
+      console.log("\n *** Lista de Grafos Locais ***\n")
+      const response = await findAllLocalGraphs();
+      console.log(response)
+      setLocalGraphs(response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+
+  }
+
+  useEffect(() => {
+    loadLocalGraphs();
+  }, [])
+
+  const openForm = () => {
+    console.log("*** Abrir formulário de Grafo Local ***")
+    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: { ekg: location.state, from: 'localGraphList' } });
+  }
+
+
+  /**Pagination */
+  const [page, setPage] = useState(0);
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value)
+    setRowsPerPage(parseInt(event.target.value, 10));
+    // setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  /**Dialog to Delete */
+  const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
+  const handleClickOpenDialogToConfirmDelete = (row: DataSourceEntity) => {
+    console.log(row)
+    setSelectedOrganization(row)
+    setOpenDialogToConfirmDelete(true);
+  };
+
+  const handleRemove = async (identifier: string) => {
+    // await removeDataSource(identifier);
+    await loadLocalGraphs();
+  }
+
+  /**EDIT */
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as IMetagraph;
-          console.log("\n*** Carregando o Grafo de Metadados selecionado que será gerenciado ***\n")
-          console.log(location)
-          setMetagraph(state)
+          let state = location.state as MetadataGraphEntity;
+          console.log(`*** Carregando o EKG selecionado necessário para registrar seu grafo local ***`, state)
+          // console.log(state)
+          // setMetagraph(state)
         }
       } catch (err) {
         console.log(err);
@@ -49,82 +98,97 @@ export function LocalGraphList() {
     onEdit();
   }, [location.state]);
 
-
-  let localGraphMetadata = {
-    title: "Grafo Local", subTitle: "Vocabulário, TriplesMap e LinkSpec", route: ROUTES.SEMANTIC_VIEW,
-    buttons: [
-      <Button variant="contained" onClick={() => false}>+ Vocabulário</Button>,
-      <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_FORM)}>+ TriplesMap</Button>,
-      <Button variant="contained">+ LinkSpec</Button>,
-    ]
-  }
-
-
-  const [localgraphs, setLocalgraphs] = useState<LocalGraphEntity[]>([]);
-  async function loadLocalGraphs() {
-    try {
-      // setLoading(true);
-      console.log("\n *** Lista de Grafos Locais ***\n")
-      const response = await findAllLocalGraphs();
-      console.log(response)
-      setLocalgraphs(response);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      // setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadLocalGraphs();
-  }, [location?.state])
-
   return (
-    <Container fixed>
+    <div className={styles.listkg}>
+
       <h1>
         <CaretCircleLeft onClick={() => navigate(-1)} />
-        Gerenciar Metadados do Grafo Local
+        Grafos Locais
       </h1>
-      <h2 style={{ textAlign: "center", marginBottom: 10 }}>
-        <Chip label={`** ${metagraph?.title.value} **`} color="primary" sx={{ fontSize: 20 }} />
-      </h2>
+      {/* <nav><Link to={ROUTES.ORGANIZATION_DOC}>Documento</Link></nav> */}
+      {/* <Typography variant='caption'>Nessa tela são listas as organizações cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography> */}
 
-      <Card className={styles.card}>
-        <CardContent>
-          <Grid container className={styles.gridItem}>
-            <Grid item sm={6}>
-              <Typography variant="h6" component="div">
-                {localGraphMetadata.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {localGraphMetadata.subTitle}
-              </Typography>
-            </Grid>
-            <Grid item sm={6}>
-              <Stack direction="row" gap={1}>
-                {localGraphMetadata.buttons.map((btn) => btn)}
-              </Stack>
-            </Grid>
-            <Grid item sm={12}>
-              <Stack gap={1}>
-                <Stack direction="row" gap={1}>
-                  <Chip label='Ontologia de Dominio' color="info" />
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
+          <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
+          <Button variant="contained" onClick={openForm}>+ Novo Grafo Local</Button>
+        </Grid>
+      </Grid>
+
+      <MTable
+        header={[["Título", "left"], ["Prefixo", "right"], ["Comentário", "left"],
+        ["Criado em", "right"], ["Modificado em", "right"]]}
+        size={localGraphs.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        handleChangePage={handleChangePage}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
+        hasActions
+        loading={false}
+      >
+        {
+          (rowsPerPage > 0
+            ? localGraphs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            : localGraphs
+          ).map(row => (
+            <TableRow key={row.identifier.value}>
+              <TableCell>
+                <Typography>{row.title.value}</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography>{row.prefix.value}</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography>{row.comment.value}</Typography>
+              </TableCell>
+              <TableCell align='right'>
+                <Stack>
+                  <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
+                  <Typography variant="caption" display="block" gutterBottom>{new Date(row.created.value).toLocaleTimeString()}</Typography>
                 </Stack>
-                <Box sx={{ width: "100%" }}>
-                  {localgraphs.map((item) => <Chip
-                    label={item.title?.value}
-                    color="secondary"
-                    onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: item })}
-                  />)}
-                </Box>
-                <Box sx={{ width: "100%" }}>
-                  {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" />)}
-                </Box>
-              </Stack>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-    </Container>
+              </TableCell>
+              <TableCell align='right'>
+                <Stack>
+                  <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
+                  <Typography variant="caption" display="block" gutterBottom>{new Date(row.modified.value).toLocaleTimeString()}</Typography>
+                </Stack>
+              </TableCell>
+              <TableCell align='center'>
+                <Tooltip title="Editar">
+                  <IconButton onClick={() => {
+                    console.log("*** Selecionando um grafo local ***")
+                    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: row })
+                  }}>
+                    <EditTwoTone />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Construir">
+                  <IconButton onClick={() => {
+                    navigate(ROUTES.LOCAL_GRAPH_CONSTRUCT, { state: row })
+                    console.log("*** Selecionando um grafo local ***")
+                    console.log(row)
+                    // setSelectedDataSource(row);
+                  }}>
+                    <Construction />
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip title="Excluir">
+                  <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
+                    <DeleteForever />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          ))}
+      </MTable>
+
+      <MDialogToConfirmDelete
+        openConfirmDeleteDialog={openDialogToConfirmDelete}
+        setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
+        deleteInstance={handleRemove}
+        instance={selectedOrganization}
+      />
+    </div >
   );
 }

@@ -30,6 +30,7 @@ import { ManageMetagraph } from './view/manage/ManageMetagraph';
 import { MetaDataSources } from './view/manage/datasources/MetaDataSources';
 
 import { SemanticView } from './view/semantic-view/SemanticView';
+import { LocalGraph } from './view/local-graph/LocalGraph';
 import { LocalGraphForm } from './view/local-graph/LocalGraphForm';
 import { LocalGraphList } from './view/local-graph/LocalGraphList';
 
@@ -65,6 +66,8 @@ export default function Router() {
         <Route path={ROUTES.MANAGE_METAGRAPH} element={<ManageMetagraph />} />
         <Route path={ROUTES.MANAGE_META_DATASOURCES} element={<MetaDataSources />} />
         <Route path={ROUTES.SEMANTIC_VIEW} element={<SemanticView />} />
+
+        <Route path={ROUTES.LOCAL_GRAPH_CONSTRUCT} element={<LocalGraph />} />
         <Route path={ROUTES.LOCAL_GRAPH_FORM} element={<LocalGraphForm />} />
         <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<LocalGraphList />} />
       </Route>

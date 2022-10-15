@@ -17,6 +17,7 @@ import { DataSourceEntity } from "../../models/DataSourceEntity";
 import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
 import { IOrganizationForm, insertOrganization } from "../../services/sparql-organization";
 import { addLocalGraph } from "../../services/sparql-localgraph";
+import { LocalGraphEntity } from "../../models/LocalGraphEntity";
 
 export interface LocationParams {
   pathname: string;
@@ -82,13 +83,16 @@ export function LocalGraphForm() {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as DataSourceEntity;
-          console.log("*** Colocando a Fonde de Dados selecionada no formulário ***")
+          let state = location.state as LocalGraphEntity;
+          console.log("*** Colocando o Grafo Local selecionado no formulário ***")
           console.log(state)
           setValue("title", state.title.value);
           setValue("comment", state.comment.value);
+          setValue("prefix", state.prefix.value);
           setValue("created", state.created.value);
           setValue("identifier", state.identifier.value);
+
+          console.log(`*** ekg ***`, location.state?.ekg)
         }
       } catch (err) {
         console.log(err);
@@ -137,7 +141,7 @@ export function LocalGraphForm() {
                   </Grid>
                   <Grid item sm={12}>
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="prefix">Prefixo Preferêncial</FormLabel>
+                      <FormLabel htmlFor="prefix">Prefixo de Preferência</FormLabel>
                       <TextField
                         variant="outlined"
                         placeholder="Ex: rdf:"

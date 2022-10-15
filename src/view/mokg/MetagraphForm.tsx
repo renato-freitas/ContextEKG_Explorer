@@ -9,7 +9,7 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { insertMetadataGraph, updateMetadataGraph } from "../../services/sparql-metagraph";
+import { addtMetadataGraph, updateMetadataGraph } from "../../services/sparql-metagraph";
 import { RDF_Node } from "../../models/RDF_Node";
 import { LoadingContext } from "../../App";
 import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
@@ -67,7 +67,7 @@ export function MetagraphForm() {
         await updateMetadataGraph(data)
       } else {
         console.log("*** Criando MetadataGraph ***")
-        await insertMetadataGraph(data)
+        await addtMetadataGraph(data)
       }
     } catch (error) {
       console.log(error);

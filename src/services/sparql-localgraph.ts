@@ -11,7 +11,7 @@ export interface ILocalGraphForm {
   prefix: string
 }
 
-/**Criar um Grafo Local na Visão Semântica no GM */
+/**Criar um Grafo Local na Visão Semântica no EKG */
 export async function addLocalGraph(data: ILocalGraphForm) {
   const uuid = uuidv4();
   const currentDate: Date = new Date();

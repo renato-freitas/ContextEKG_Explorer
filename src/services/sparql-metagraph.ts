@@ -14,7 +14,7 @@ interface IFormMetadataGraph {
   modified: string;
 }
 
-export async function insertMetadataGraph(data: IFormMetadataGraph) {
+export async function addtMetadataGraph(data: IFormMetadataGraph) {
   const uuid = uuidv4();
   const currentDate: Date = new Date();
 

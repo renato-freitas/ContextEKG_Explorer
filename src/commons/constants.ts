@@ -68,6 +68,7 @@ export const ROUTES = {
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
   
   SEMANTIC_VIEW: '/semantic-view',
+  LOCAL_GRAPH_CONSTRUCT: '/localgraph-construct',
   LOCAL_GRAPH_FORM: '/localgraph-form',
   LOCAL_GRAPH_LIST: '/localgraphs',
 },
