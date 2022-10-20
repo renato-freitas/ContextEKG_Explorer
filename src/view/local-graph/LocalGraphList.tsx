@@ -50,7 +50,9 @@ export function LocalGraphList() {
 
   const openForm = () => {
     console.log("*** Abrir formulário de Grafo Local ***")
-    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: { ekg: location.state, from: 'localGraphList' } });
+    let ekg = location.state as MetadataGraphEntity;
+    console.log(`*** ekg que tá saíndo da lista e indo para o form`, ekg)
+    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: { ...ekg, from: "d" } });
   }
 
 
@@ -87,7 +89,7 @@ export function LocalGraphList() {
       try {
         if (location.state) {
           let state = location.state as MetadataGraphEntity;
-          console.log(`*** Carregando o EKG selecionado necessário para registrar seu grafo local ***`, state)
+          console.log(`*** Carregando o EKG selecionado ***`, state)
           // console.log(state)
           // setMetagraph(state)
         }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Paper from '@mui/material/Paper';
@@ -13,6 +13,7 @@ import styles from './Manage.module.css'
 import { ROUTES } from "../../commons/constants";
 import { findAllLocalGraphs } from "../../services/sparql-localgraph";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
+import { SemanticViewForm } from "../semantic-view/SemanticViewForm";
 
 interface ElementOfRdfClass {
   value: string,
@@ -32,13 +33,14 @@ export function ManageMetagraph() {
   const location = useLocation();
   const navigate = useNavigate();
   const [metagraph, setMetagraph] = useState<IMetagraph>();
+  const [semanticViewName, setSemanticViewName] = useState<string>('');
 
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
           let state = location.state as IMetagraph;
-          console.log("\n*** Carregando o Grafo de Metadados selecionado que será gerenciado ***\n")
+          console.log("*** Carregando o Grafo de Metadados selecionado ***\n")
           console.log(location)
           setMetagraph(state)
         }
@@ -104,6 +106,13 @@ export function ManageMetagraph() {
     loadLocalGraphs();
   }, [location?.state])
 
+  /** ABRE FORM DA VISÃO SEMANTICA */
+  const [openSemanticViewDialog, setOpenSemanticViewDialog] = useState<boolean>(false);
+  // const handleClickOpenSemanticViewDialog = () => {
+  //   setOpenSemanticViewDialog(true);
+  // };
+
+
   return (
     <Container fixed>
       <h1>
@@ -119,7 +128,13 @@ export function ManageMetagraph() {
           <Grid container className={styles.gridItem}>
             <Grid item sm={6}>
               <Typography variant="h6" component="div">
-                Visão Semântica
+                Visão Semântica {' '}
+                <span>
+                  <Chip label="Instaciar" onClick={setOpenSemanticViewDialog} />
+                </span>
+              </Typography>
+              <Typography variant="caption" component="div">
+                {semanticViewName}
               </Typography>
             </Grid>
             <Grid item sm={6}>
@@ -160,6 +175,11 @@ export function ManageMetagraph() {
           </Grid>
         </CardContent>
       </Card>
+
+      <SemanticViewForm open={openSemanticViewDialog} 
+        setOpenSemanticViewDialog={setOpenSemanticViewDialog}
+        ekg={metagraph}
+        />
 
       {/* {layers.map(layer => {
         return (

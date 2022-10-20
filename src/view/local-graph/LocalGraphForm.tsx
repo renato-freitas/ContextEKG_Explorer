@@ -15,7 +15,7 @@ import { RDF_Node } from "../../models/RDF_Node";
 import { LoadingContext } from "../../App";
 import { DataSourceEntity } from "../../models/DataSourceEntity";
 import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
-import { IOrganizationForm, insertOrganization } from "../../services/sparql-organization";
+import { ILocalGraphForm, insertOrganization } from "../../services/sparql-organization";
 import { addLocalGraph } from "../../services/sparql-localgraph";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
 
@@ -27,7 +27,7 @@ export interface LocationParams {
   key: string;
 }
 
-const DataSourceSchema = zod.object({
+const LocalGraphSchema = zod.object({
   identifier: zod.string().optional(),
   // uri: zod.string().optional(),
   title: zod.string().min(1, 'Digite ao menos 1 caracter'),
@@ -35,6 +35,7 @@ const DataSourceSchema = zod.object({
   created: zod.string().optional(),
   prefix: zod.string().optional(),
   modified: zod.string().optional(),
+  belongsTo: zod.string().optional(),
 });
 
 export function LocalGraphForm() {
@@ -42,19 +43,20 @@ export function LocalGraphForm() {
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IOrganizationForm>({
-    resolver: zodResolver(DataSourceSchema),
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ILocalGraphForm>({
+    resolver: zodResolver(LocalGraphSchema),
     defaultValues: {
       identifier: '',
       title: '',
       comment: '',
       created: '',
       modified: '',
-      prefix: ''
+      prefix: '',
+      belongsTo: ''
     }
   });
 
-  const handleSubmitDataSource: SubmitHandler<IOrganizationForm> = async (data) => {
+  const handleSubmitDataSource: SubmitHandler<ILocalGraphForm> = async (data) => {
     console.log("*** Enviando dados da Fonte de Dados ***")
     console.log(data);
     try {
@@ -83,16 +85,22 @@ export function LocalGraphForm() {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as LocalGraphEntity;
-          console.log("*** Colocando o Grafo Local selecionado no formulário ***")
-          console.log(state)
-          setValue("title", state.title.value);
-          setValue("comment", state.comment.value);
-          setValue("prefix", state.prefix.value);
-          setValue("created", state.created.value);
-          setValue("identifier", state.identifier.value);
-
-          console.log(`*** ekg ***`, location.state?.ekg)
+          let state;
+          console.log(location.state);
+          if (location.state?.from === "d") {
+            state = location.state as MetadataGraphEntity;
+            console.log(`*** EKG selecionado *** `, state)
+            setValue("belongsTo", state.identifier.value)
+          } else {
+            state = location.state as LocalGraphEntity;
+            console.log("*** Colocando o Grafo Local selecionado no formulário ***")
+            console.log(state)
+            setValue("title", state.title.value);
+            setValue("comment", state.comment.value);
+            setValue("prefix", state.prefix.value);
+            setValue("created", state.created.value);
+            setValue("identifier", state.identifier.value);
+          }
         }
       } catch (err) {
         console.log(err);

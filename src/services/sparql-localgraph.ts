@@ -8,7 +8,8 @@ export interface ILocalGraphForm {
   comment: string;
   created: string;
   modified: string;
-  prefix: string
+  prefix: string,
+  belongsTo: string
 }
 
 /**Criar um Grafo Local na Visão Semântica no EKG */
@@ -32,7 +33,9 @@ export async function addLocalGraph(data: ILocalGraphForm) {
         rdfs:comment "${data.comment}" ;
         vann:preferredNamespacePrefix "${data.prefix}" ;
         dcterms:created "${currentDate.toISOString()}" ;
-        dcterms:modified "${currentDate.toISOString()}" .
+        dcterms:modified "${currentDate.toISOString()}" ;
+        mokg:belgonsTo mokg:${uuid}.
+      mokg:${data.belongsTo} mokg:hasLocalView mokg:${uuid}.
     }`
 
   await axios({
@@ -64,6 +67,7 @@ export async function findAllLocalGraphs() {
             OPTIONAL { ?uri dc:creator ?creator . }
             OPTIONAL { ?uri rdfs:comment ?comment . }
             OPTIONAL { ?uri foaf:page ?comment . }
+            OPTIONAL { ?uri mokg:belongsTo ?belonsTo . }
           }`
 
   const response = await axios({
@@ -72,7 +76,6 @@ export async function findAllLocalGraphs() {
     params: { query }
   })
 
-  console.log(response.data.results.bindings)
   return response.data.results.bindings;
 }
 

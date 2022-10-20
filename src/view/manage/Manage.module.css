@@ -3,10 +3,10 @@
   transition: background 0.2s !important;
 }
 
-.card:hover {
+/* .card:hover {
   cursor: pointer;
   background-color: #1976d210 !important;
-}
+} */
 
 .card .gridItem {
   display: flex;
