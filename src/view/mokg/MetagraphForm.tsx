@@ -4,25 +4,14 @@ import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
-import LinearProgress from "@mui/material/LinearProgress";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { addtMetadataGraph, updateMetadataGraph } from "../../services/sparql-metagraph";
+import { IMetadataGraphForm, addtMetadataGraph, updateMetadataGraph } from "../../services/sparql-metagraph";
 import { RDF_Node } from "../../models/RDF_Node";
 import { LoadingContext } from "../../App";
 import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
-
-interface IFormInput {
-  uri: string;
-  identifier: string;
-  title: string;
-  comment: string;
-  creator: string;
-  created: string;
-  modified: string;
-}
 
 export interface LocationParams {
   pathname: string;
@@ -47,7 +36,7 @@ export function MetagraphForm() {
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IFormInput>({
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IMetadataGraphForm>({
     resolver: zodResolver(MetadataGraphSchema),
     defaultValues: {
       identifier: '',
@@ -57,7 +46,7 @@ export function MetagraphForm() {
     }
   });
 
-  const handleSubmitMetadataGraph: SubmitHandler<IFormInput> = async (data) => {
+  const handleSubmitMetadataGraph: SubmitHandler<IMetadataGraphForm> = async (data) => {
     try {
       setIsLoading(true);
       console.log("*** Enviando dados de Grafo de Metadados ***")
@@ -92,6 +81,7 @@ export function MetagraphForm() {
           setValue("creator", state.creator.value);
           setValue("created", state.created.value);
           setValue("identifier", state.identifier.value);
+          setValue("hasSematicMetadata", state.hasSemanticMetadata)
         }
       } catch (err) {
         console.log(err);

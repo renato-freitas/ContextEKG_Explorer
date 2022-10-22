@@ -18,19 +18,6 @@ import { SemanticViewEntity } from "../../models/SemanticViewEntity";
 import { SemanticViewForm } from "../semantic-view/SemanticViewForm";
 import { findOneSemanticView } from "../../services/sparql-semantic-view";
 
-interface ElementOfRdfClass {
-  value: string,
-  type: string
-}
-
-interface IMetagraph {
-  uri: ElementOfRdfClass;
-  identifier: ElementOfRdfClass;
-  title: ElementOfRdfClass;
-  creator: ElementOfRdfClass;
-  created: ElementOfRdfClass;
-  modified: ElementOfRdfClass;
-}
 
 export function ManageMetagraph() {
   const location = useLocation();
@@ -38,13 +25,13 @@ export function ManageMetagraph() {
   const [metagraph, setMetagraph] = useState<MetadataGraphEntity>();
   const [semanticView, setSemanticView] = useState<SemanticViewEntity>();
 
+  /**CARREGAR O EKG */
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
           let state = location.state as MetadataGraphEntity;
-          console.log("*** Carregando o Grafo de Metadados selecionado ***\n")
-          console.log(location)
+          console.log("*** CARREGANDO O EKG SELECIONADO ***", location)
           setMetagraph(state)
         }
       } catch (err) {
@@ -54,16 +41,17 @@ export function ManageMetagraph() {
     onEdit();
   }, [location.state]);
 
+  /**CARREGAR A VISÃO SEMÂNTICA */
+  async function getSemantiView(uuid: string) {
+    const semantic_view = await findOneSemanticView(uuid)
+    console.log(`*** CARREGANDO VISÃO SEMANTICA DO EKG *** `, semantic_view)
+    setSemanticView(semantic_view)
+  }
   useEffect(() => {
-    async function getSemantiView(uuid: string) {
-      const semantic_view = await findOneSemanticView(uuid)
-      console.log(`*** VISÃO SEMANTICA ENCONTRADA *** `, semantic_view)
-      setSemanticView(semantic_view[0])
-    }
     // console.log(`*** METAGRAPH MUDOU ***`, metagraph)
     if (metagraph?.semanticView) {
       // console.log(`*** BUSCANDO A VISÃO SEMÂNTICA ***`)
-      let identifier = metagraph.semanticView.value.split('#')[1]
+      let identifier = metagraph?.semanticView.value.split('#')[1]
       // console.log(`**** ID DA VISÃO SEMÂNTICA ***`, identifier)
       getSemantiView(identifier)
     }
@@ -75,22 +63,6 @@ export function ManageMetagraph() {
       <Button variant="contained">+ Fonte de Dados</Button>
     ], items: ["Fonte 01", "Fonte 02"]
   }
-
-  // {
-  //   title: "Grafo de Conhecimento", subTitle: "Prefixo, Namespace", route: "manage-metagraph", buttons: [
-  //     <Button variant="contained">+ Ontologia</Button>
-  //   ], items: ["Fonte 01", "Fonte 02"]
-  // },
-  // ]
-
-  // let semanticViewLayer = {
-  //   title: "Visão Semântica", subTitle: "Ontologia de Domínio, Grafos Locais e Ligações", route: ROUTES.SEMANTIC_VIEW,
-  //   buttons: [
-  //     <Button variant="contained" onClick={() => false}>Ontologia</Button>,
-  //     <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST)}>Grafos Locais</Button>,
-  //     <Button variant="contained">Links Semânticos</Button>,
-  //   ]
-  // }
 
   let applicationLayer = {
     title: "Aplicações & Ferramentas", subTitle: "...", route: "manage-metagraph", buttons: [
@@ -105,13 +77,13 @@ export function ManageMetagraph() {
   }
 
 
+  /**CARREGAR OS GRAFOS LOCAIS */
   const [localgraphs, setLocalgraphs] = useState<LocalGraphEntity[]>([]);
   async function loadLocalGraphs() {
     try {
       // setLoading(true);
-      console.log("\n *** Lista de Grafos Locais ***\n")
       const response = await findAllLocalGraphs();
-      console.log(response)
+      console.log("\n *** LISTA DAS VISÕES EXPORTADAS *** ", response)
       setLocalgraphs(response);
     } catch (error) {
       console.log(error);
@@ -126,10 +98,6 @@ export function ManageMetagraph() {
 
   /** ABRE FORM DA VISÃO SEMANTICA */
   const [openSemanticViewDialog, setOpenSemanticViewDialog] = useState<boolean>(false);
-  // const handleClickOpenSemanticViewDialog = () => {
-  //   setOpenSemanticViewDialog(true);
-  // };
-
 
   return (
     <Container fixed>
@@ -145,20 +113,22 @@ export function ManageMetagraph() {
         <CardContent>
           <Grid container className={styles.gridItem}>
             <Grid item sm={6}>
-              <Typography variant="h6" component="div">
-                Visão Semântica {' '}
-                <span>
-                  <Chip label={semanticView ? "Atualizar" : "Instaciar"} onClick={setOpenSemanticViewDialog} />
-                </span>
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Typography variant="caption" component="div">
-                  Nome:
+              <Stack direction="row" spacing={2}>
+                <Typography variant="h6" component="div">
+                  Visão Semântica
                 </Typography>
-                <Typography variant="caption" component="div" color="purple">
-                  {semanticView?.label?.value}
-                </Typography>
+                <Chip label={semanticView ? "Atualizar" : "Instaciar"} onClick={() => setOpenSemanticViewDialog(true)} />
               </Stack>
+              {semanticView
+                ? <Stack direction="row" spacing={1}>
+                  <Typography variant="caption" component="div">
+                    Nome:
+                  </Typography>
+                  <Typography variant="caption" component="div" color="purple">
+                    {semanticView?.label?.value}
+                  </Typography>
+                </Stack>
+                : false}
             </Grid>
             <Grid item sm={6}>
               {semanticView ?
@@ -172,34 +142,36 @@ export function ManageMetagraph() {
                 : false
               }
             </Grid>
-            <Grid item sm={12}>
-              <Divider />
-              <Stack gap={1} sx={{ mt: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Ontologia de Domínio
-                </Typography>
-                <Stack direction="row" gap={1}>
-                  <Chip label='Ontologia de Dominio' color="info" />
+            {semanticView
+              ? <Grid item sm={12}>
+                <Divider />
+                <Stack gap={1} sx={{ mt: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Ontologia de Domínio
+                  </Typography>
+                  <Stack direction="row" gap={1}>
+                    {/* <Chip label='Ontologia de Dominio' color="info" /> */}
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">
+                    Grafos Locais
+                  </Typography>
+                  <Box sx={{ width: "100%" }}>
+                    {localgraphs.map((item) => <Chip
+                      sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }}
+                      label={item.title?.value}
+                      color="secondary"
+                      onClick={() => navigate(ROUTES.LOCAL_GRAPH_CONSTRUCT, { state: item })}
+                    />)}
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Links Semânticos
+                  </Typography>
+                  <Box sx={{ width: "100%" }}>
+                    {/* {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }} />)} */}
+                  </Box>
                 </Stack>
-                <Typography variant="body2" color="text.secondary">
-                  Grafos Locais
-                </Typography>
-                <Box sx={{ width: "100%" }}>
-                  {localgraphs.map((item) => <Chip
-                    sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }}
-                    label={item.title?.value}
-                    color="secondary"
-                    onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: item })}
-                  />)}
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Links Semânticos
-                </Typography>
-                <Box sx={{ width: "100%" }}>
-                  {/* {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }} />)} */}
-                </Box>
-              </Stack>
-            </Grid>
+              </Grid>
+              : false}
           </Grid>
         </CardContent>
       </Card>
@@ -209,6 +181,7 @@ export function ManageMetagraph() {
         setOpenSemanticViewDialog={setOpenSemanticViewDialog}
         ekg={metagraph}
         semanticView={semanticView}
+        getSemanticView={getSemantiView}
       />
 
       {/* {layers.map(layer => {

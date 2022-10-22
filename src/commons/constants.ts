@@ -71,6 +71,8 @@ export const ROUTES = {
   LOCAL_GRAPH_CONSTRUCT: '/localgraph-construct',
   LOCAL_GRAPH_FORM: '/localgraph-form',
   LOCAL_GRAPH_LIST: '/localgraphs',
+  
+  TRIPLES_MAP_FORM: '/triplesmap-form',
 },
 
   USER_TYPE = {

@@ -11,7 +11,7 @@ import { CaretCircleLeft, CaretCircleRight } from 'phosphor-react'
 
 import styles from '../manage/Manage.module.css'
 import { ROUTES } from "../../commons/constants";
-import { findAllLocalGraphs } from "../../services/sparql-localgraph";
+import { findAllLocalGraphs, ILocalGraphForm } from "../../services/sparql-localgraph";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
 
 interface ElementOfRdfClass {
@@ -32,15 +32,16 @@ export function LocalGraph() {
   const location = useLocation();
   const navigate = useNavigate();
   const [metagraph, setMetagraph] = useState<IMetagraph>();
+  const [localGraph, setLocalGraph] = useState<LocalGraphEntity>();
 
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as IMetagraph;
-          console.log("\n*** Carregando o Grafo de Metadados selecionado que será gerenciado ***\n")
-          console.log(location)
-          setMetagraph(state)
+          // let state = location.state as IMetagraph;
+          let state = location.state as LocalGraphEntity;
+          console.log("\n*** CARREGANDO GRAFO LOCAL SELECIONADO ***", location.state)
+          setLocalGraph(state)
         }
       } catch (err) {
         console.log(err);
@@ -54,8 +55,8 @@ export function LocalGraph() {
     title: "Grafo Local", subTitle: "Vocabulário, TriplesMap e LinkSpec", route: ROUTES.SEMANTIC_VIEW,
     buttons: [
       <Button variant="contained" onClick={() => false}>+ Vocabulário</Button>,
-      <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_FORM)}>+ Mapeamento</Button>,
-      <Button variant="contained">+ LinkSpec</Button>,
+      <Button variant="contained" onClick={() => navigate(ROUTES.TRIPLES_MAP_FORM, { state: localGraph })}>+ Mapeamento</Button>,
+      // <Button variant="contained">+ LinkSpec</Button>,
     ]
   }
 
@@ -64,9 +65,8 @@ export function LocalGraph() {
   async function loadLocalGraphs() {
     try {
       // setLoading(true);
-      console.log("\n *** Lista de Grafos Locais ***\n")
       const response = await findAllLocalGraphs();
-      console.log(response)
+      console.log("\n *** LISTA DE GRAFOS LOCAIS ***", response)
       setLocalgraphs(response);
     } catch (error) {
       console.log(error);
@@ -86,7 +86,7 @@ export function LocalGraph() {
         Gerenciar Grafo Local
       </h1>
       <h2 style={{ textAlign: "center", marginBottom: 10 }}>
-        <Chip label={`** ${metagraph?.title.value} **`} color="primary" sx={{ fontSize: 20 }} />
+        <Chip label={`** ${localGraph?.title.value} **`} color="primary" sx={{ fontSize: 20 }} />
       </h2>
 
       <Card className={styles.card}>
@@ -111,24 +111,25 @@ export function LocalGraph() {
                   Ontologia Local
                 </Typography>
                 <Stack direction="row" gap={1}>
-                  <Chip label='Ontologia de Dominio' color="info" />
+                  {/* <Chip label='Ontologia de Dominio' color="info" /> */}
                 </Stack>
                 <Typography variant="body2" color="text.secondary">
                   Mapeamentos
                 </Typography>
                 <Box sx={{ width: "100%" }}>
                   {localgraphs.map((item) => <Chip
+                    sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }}
                     label={item.title?.value}
-                    color="secondary"
+                    color="info"
                     onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: item })}
                   />)}
                 </Box>
-                <Typography variant="body2" color="text.secondary">
+                {/* <Typography variant="body2" color="text.secondary">
                   Especificações de Links Semânticos
                 </Typography>
                 <Box sx={{ width: "100%" }}>
                   {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" />)}
-                </Box>
+                </Box> */}
               </Stack>
             </Grid>
           </Grid>

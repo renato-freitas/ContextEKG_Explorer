@@ -33,12 +33,11 @@ export function MetagraphList() {
 
 
   async function loadMetagraphs() {
-    console.log("\n *** Lista dos Grafos de Metadados ***\n")
     setLoading(true);
     const response = await findAllMetadataGraphs();
     const new_set = [...new Set<MetadataGraphEntity>(response)];
     setLoading(false);
-    console.log(new_set)
+    console.log("\n *** LISTA DOS GRAFOS DE METADADOS *** ", new_set)
     setMetagraphs(new_set)
   }
   useEffect(() => {

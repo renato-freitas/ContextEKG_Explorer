@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { RDF_Node } from '../models/RDF_Node';
 // import { ENDPOINTS, PREFIXIES_SPARQL } from "../commons/constants";
 //405 - method not allowed
 //415 - mime type
 
-interface IFormMetadataGraph {
+export interface IMetadataGraphForm {
   uri: string;
   identifier: string;
   title: string;
@@ -12,9 +13,12 @@ interface IFormMetadataGraph {
   creator: string;
   created: string;
   modified: string;
+  semanticView?: string
 }
 
-export async function addtMetadataGraph(data: IFormMetadataGraph) {
+
+
+export async function addtMetadataGraph(data: IMetadataGraphForm) {
   const uuid = uuidv4();
   const currentDate: Date = new Date();
 
@@ -43,7 +47,7 @@ export async function addtMetadataGraph(data: IFormMetadataGraph) {
   })
 }
 
-export async function updateMetadataGraph(data: IFormMetadataGraph) {
+export async function updateMetadataGraph(data: IMetadataGraphForm) {
   const currentDate: Date = new Date();
   let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -52,7 +56,14 @@ export async function updateMetadataGraph(data: IFormMetadataGraph) {
     PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
     BASE <http://www.arida.ufc.org/resource/>
     DELETE { 
-      mokg:${data.identifier} ?o ?p .
+      mokg:${data.identifier} rdf:type mokg:MetadataGraph ; 
+        rdfs:label ?l ;
+        dc:identifier ?i ;
+        dc:title ?t ;
+        rdfs:comment ?c ;
+        dc:creator ?cr ;
+        dcterms:created ?cre ;
+        dcterms:modified ?m .
     }
     INSERT { 
       mokg:${data.identifier} rdf:type mokg:MetadataGraph ; 
@@ -65,7 +76,14 @@ export async function updateMetadataGraph(data: IFormMetadataGraph) {
         dcterms:modified "${currentDate.toISOString()}" .
     }
     WHERE { 
-      mokg:${data.identifier} ?o ?p .
+      mokg:${data.identifier} rdf:type mokg:MetadataGraph ; 
+        rdfs:label ?l ;
+        dc:identifier ?i ;
+        dc:title ?t ;
+        rdfs:comment ?c ;
+        dc:creator ?cr ;
+        dcterms:created ?cre ;
+        dcterms:modified ?m .
     }`
 
   return await axios({
@@ -76,19 +94,61 @@ export async function updateMetadataGraph(data: IFormMetadataGraph) {
   });
 }
 
-/**Esta função remove todas as triplas do sujeito informado */
+
+/**Esta função remove todas as triplas do sujeito informado 
+ * NÃO ESTÁ EXCLUIR NO GRAPHDB EXPLORAÇÃO
+*/
 export async function removeMetadataGraph(identifier: string) {
   try {
-    const response = await axios({
-      method: 'DELETE',
-      url: "http://localhost:7200/repositories/metagraph/statements",
-      params: { pred: '<http://purl.org/dc/elements/1.1/identifier>', obj: `"${identifier}"` },
-      headers: { 'Accept': 'application/json' }
-    })
+    let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
+    BASE <http://www.arida.ufc.org/resource/>
+    DELETE { 
+      mokg:${identifier} rdf:type mokg:MetadataGraph ; 
+        rdfs:label ?l ;
+        dc:identifier ?i ;
+        dc:title ?t ;
+        rdfs:comment ?c ;
+        dc:creator ?cr ;
+        dcterms:created ?cre ;
+        dcterms:modified ?m .
+    }
+    WHERE { 
+      mokg:${identifier} rdf:type mokg:MetadataGraph ; 
+        rdfs:label ?l ;
+        dc:identifier ?i ;
+        dc:title ?t ;
+        rdfs:comment ?c ;
+        dc:creator ?cr ;
+        dcterms:created ?cre ;
+        dcterms:modified ?m .
+    }`
+
+  return await axios({
+    method: 'POST',
+    url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
+    params: { update: query },
+    headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
+  });
   } catch (error) {
     console.error(error)
   }
 }
+// export async function removeMetadataGraph(identifier: string) {
+//   try {
+//     const response = await axios({
+//       method: 'DELETE',
+//       url: "http://localhost:7200/repositories/metagraph/statements",
+//       params: { pred: '<http://purl.org/dc/elements/1.1/identifier>', obj: `"${identifier}"` },
+//       headers: { 'Accept': 'application/json' }
+//     })
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }
 
 
 export async function findAllMetadataGraphs() {

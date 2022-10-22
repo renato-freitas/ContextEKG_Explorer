@@ -3,11 +3,11 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { addSemanticView, ISemanticViewForm } from "../../services/sparql-semantic-view";
+import { addSemanticView, ISemanticViewForm, updateSemanticView } from "../../services/sparql-semantic-view";
 
 import { LoadingContext } from "../../App";
 
-export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg, semanticView }) => {
+export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg, semanticView, getSemanticView }) => {
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
   const handleCloseDialog = () => {
@@ -35,33 +35,40 @@ export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg, semanti
   });
 
   useEffect(() => {
-    if (semanticView) {
-      setValue('label', semanticView.label.value)
-      setValue('page', semanticView.webpage.value)
+    if (open) {
+      console.log(`*** PREENCHENDO FORM COM DADOS DA VS: `, semanticView)
+      setValue('belongsTo', semanticView?.belongsTo.value)
+      setValue('created', semanticView?.created.value)
+      setValue('identifier', semanticView?.identifier.value)
+      setValue('label', semanticView?.label.value)
+      setValue('page', semanticView?.page.value)
     }
-  }, [semanticView]);
+  }, [open]);
 
   const handleSubmitSemanticView: SubmitHandler<ISemanticViewForm> = async (data) => {
-    console.log("*** Enviando dados da Visão Semântica ***")
-    console.log({ ...data, belongsTo: ekg.identifier.value });
+    console.log("*** ENVIANDO DADOS DA VS ***", { ...data, belongsTo: ekg.identifier.value })
     try {
       setIsLoading(true);
-      if (data.identifier !== "") {
-        console.log("*** Atualizando a Visão Semântica ***")
-        // await updateDataSource(data)
+      if (data.identifier) {
+        console.log("*** ATUALIZANDO A VS ***")
+        const updated = await updateSemanticView({ ...data, belongsTo: ekg.identifier.value })
+        console.log(`*** VS ATUALIZADA: `, updated)
+        await getSemanticView(data.identifier);
       } else {
-        console.log("*** Criando a Visão Semântica ***")
+        console.log("*** CRIANDO VS ***")
         // await insertOrganization(data);
-        await addSemanticView({ ...data, belongsTo: ekg.identifier.value })
+        const created = await addSemanticView({ ...data, belongsTo: ekg.identifier.value })
+        console.log(`*** VS CRIADA: `, created)
+        await getSemanticView(created.identifier.value);
       }
     } catch (error) {
       console.error(error)
     } finally {
-      setTimeout(() => {
-        reset();
-        setIsLoading(false);
-        handleCloseDialog
-      }, 300);
+      reset();
+      setIsLoading(false);
+      handleCloseDialog()
+      // setTimeout(() => {
+      // }, 300);
     }
   };
 

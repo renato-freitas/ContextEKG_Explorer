@@ -34,6 +34,7 @@ import { LocalGraph } from './view/local-graph/LocalGraph';
 import { LocalGraphForm } from './view/local-graph/LocalGraphForm';
 import { LocalGraphList } from './view/local-graph/LocalGraphList';
 
+import { TriplesMapForm } from './view/local-graph/triplesmap/TriplesMap_Form';
 
 import { ROUTES } from './commons/constants';
 
@@ -70,6 +71,8 @@ export default function Router() {
         <Route path={ROUTES.LOCAL_GRAPH_CONSTRUCT} element={<LocalGraph />} />
         <Route path={ROUTES.LOCAL_GRAPH_FORM} element={<LocalGraphForm />} />
         <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<LocalGraphList />} />
+        
+        <Route path={ROUTES.TRIPLES_MAP_FORM} element={<TriplesMapForm />} />
       </Route>
 
       {/* Para um painel de administração eu posso ter um layout diferente 
