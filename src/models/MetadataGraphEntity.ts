@@ -8,4 +8,5 @@ export interface MetadataGraphEntity {
   creator: RDF_Node;
   created: RDF_Node;
   modified: RDF_Node;
+  semanticView: RDF_Node;
 }

@@ -18,6 +18,7 @@ import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
 import { ILocalGraphForm, insertOrganization } from "../../services/sparql-organization";
 import { addLocalGraph } from "../../services/sparql-localgraph";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
+import { SemanticViewEntity } from "../../models/SemanticViewEntity";
 
 export interface LocationParams {
   pathname: string;
@@ -56,7 +57,7 @@ export function LocalGraphForm() {
     }
   });
 
-  const handleSubmitDataSource: SubmitHandler<ILocalGraphForm> = async (data) => {
+  const handleSubmitLocalGraph: SubmitHandler<ILocalGraphForm> = async (data) => {
     console.log("*** Enviando dados da Fonte de Dados ***")
     console.log(data);
     try {
@@ -88,8 +89,9 @@ export function LocalGraphForm() {
           let state;
           console.log(location.state);
           if (location.state?.from === "d") {
-            state = location.state as MetadataGraphEntity;
-            console.log(`*** EKG selecionado *** `, state)
+            // state = location.state as MetadataGraphEntity;
+            state = location.state as SemanticViewEntity;
+            console.log(`*** Visão Semãntica selecionado *** `, state)
             setValue("belongsTo", state.identifier.value)
           } else {
             state = location.state as LocalGraphEntity;
@@ -121,7 +123,7 @@ export function LocalGraphForm() {
             sx={{ p: 0 }}
           >
             <CardContent sx={{ padding: '30px' }}>
-              <form onSubmit={handleSubmit(handleSubmitDataSource)}>
+              <form onSubmit={handleSubmit(handleSubmitLocalGraph)}>
                 <Grid container spacing={2}>
                   <Grid item sm={6}>
                     <FormControl fullWidth>

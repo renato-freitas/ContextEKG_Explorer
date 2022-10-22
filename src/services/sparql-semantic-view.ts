@@ -28,7 +28,7 @@ export async function addSemanticView(data: ISemanticViewForm) {
         foaf:page "${data.page}";
         dcterms:created "${currentDate.toISOString()}" ;
         dcterms:modified "${currentDate.toISOString()}" ;
-        mokg:belgonsTo mokg:${data.belongsTo}.
+        mokg:belongsTo mokg:${data.belongsTo}.
       mokg:${data.belongsTo} mokg:hasSemanticMetadada mokg:${uuid}.
     }`
 
@@ -53,7 +53,11 @@ export async function findOneSemanticView(identifier: string) {
       PREFIX dc: <http://purl.org/dc/elements/1.1/>
       SELECT * WHERE { 
         ?uri a mokg:SemanticView ; 
-          dc:identifier "${identifier}" .
+          dc:identifier "${identifier}" ;
+          dc:identifier ?identifier ;
+          rdfs:label ?label ;
+          foaf:page ?webpage ;
+          mokg:belongsTo ?belongsTo .
       }
       limit 1
       `

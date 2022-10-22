@@ -7,7 +7,7 @@ import { addSemanticView, ISemanticViewForm } from "../../services/sparql-semant
 
 import { LoadingContext } from "../../App";
 
-export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg }) => {
+export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg, semanticView }) => {
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
   const handleCloseDialog = () => {
@@ -34,9 +34,16 @@ export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg }) => {
     }
   });
 
+  useEffect(() => {
+    if (semanticView) {
+      setValue('label', semanticView.label.value)
+      setValue('page', semanticView.webpage.value)
+    }
+  }, [semanticView]);
+
   const handleSubmitSemanticView: SubmitHandler<ISemanticViewForm> = async (data) => {
     console.log("*** Enviando dados da Visão Semântica ***")
-    console.log({...data, belongsTo: ekg.identifier.value});
+    console.log({ ...data, belongsTo: ekg.identifier.value });
     try {
       setIsLoading(true);
       if (data.identifier !== "") {
@@ -45,7 +52,7 @@ export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg }) => {
       } else {
         console.log("*** Criando a Visão Semântica ***")
         // await insertOrganization(data);
-        await addSemanticView({...data, belongsTo: ekg.identifier.value})
+        await addSemanticView({ ...data, belongsTo: ekg.identifier.value })
       }
     } catch (error) {
       console.error(error)
@@ -53,7 +60,7 @@ export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg }) => {
       setTimeout(() => {
         reset();
         setIsLoading(false);
-        // navigate(-1)
+        handleCloseDialog
       }, 300);
     }
   };
@@ -61,7 +68,7 @@ export const SemanticViewForm = ({ open, setOpenSemanticViewDialog, ekg }) => {
 
   return (
     <Dialog open={open} onClose={handleCloseDialog}>
-      <DialogTitle>{`${'Instaciar'} Visão Semântica`}</DialogTitle>
+      <DialogTitle>{`${semanticView ? 'Atualizar' : 'Instaciar'} Visão Semântica`}</DialogTitle>
       {/* <Divider /> */}
       <form onSubmit={handleSubmit(handleSubmitSemanticView)}>
         <DialogContent>

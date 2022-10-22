@@ -21,6 +21,7 @@ import { findAllOrganizations } from '../../services/sparql-organization';
 import { ROUTES } from '../../commons/constants';
 import styles from '../datasources/DataSource.module.css';
 import { findAllLocalGraphs } from '../../services/sparql-localgraph';
+import { SemanticViewEntity } from '../../models/SemanticViewEntity';
 
 export function LocalGraphList() {
   const navigate = useNavigate();
@@ -50,9 +51,10 @@ export function LocalGraphList() {
 
   const openForm = () => {
     console.log("*** Abrir formulário de Grafo Local ***")
-    let ekg = location.state as MetadataGraphEntity;
-    console.log(`*** ekg que tá saíndo da lista e indo para o form`, ekg)
-    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: { ...ekg, from: "d" } });
+    // let ekg = location.state as MetadataGraphEntity;
+    let semantic_view = location.state as SemanticViewEntity;
+    console.log(`*** semantic_view que tá saíndo da lista e indo para o form`, semantic_view)
+    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: { ...semantic_view, from: "d" } });
   }
 
 
@@ -88,8 +90,9 @@ export function LocalGraphList() {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as MetadataGraphEntity;
-          console.log(`*** Carregando o EKG selecionado ***`, state)
+          // let state = location.state as MetadataGraphEntity;
+          let state = location.state as SemanticViewEntity;
+          console.log(`*** Carregando a VS selecionada ***`, state)
           // console.log(state)
           // setMetagraph(state)
         }

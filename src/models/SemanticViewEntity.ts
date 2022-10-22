@@ -1,6 +1,6 @@
 import { RDF_Node } from "./RDF_Node";
 
-export interface LocalGraphEntity {
+export interface SemanticViewEntity {
   identifier: RDF_Node;
   label: RDF_Node;
   webpage: RDF_Node;

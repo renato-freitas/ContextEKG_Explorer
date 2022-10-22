@@ -106,6 +106,7 @@ export async function findAllMetadataGraphs() {
             dcterms:modified ?modified .
             OPTIONAL { ?uri dc:creator ?creator . }
             OPTIONAL { ?uri rdfs:comment ?comment . }
+            OPTIONAL { ?uri mokg:hasSemanticMetadada ?semanticView . }
           }`
 
     const response = await axios({
