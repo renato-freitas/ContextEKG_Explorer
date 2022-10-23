@@ -9,30 +9,31 @@ import { Box, Button, Chip, Divider, Grid, Stack, Typography } from "@mui/materi
 
 import { CaretCircleLeft, Eyeglasses } from 'phosphor-react'
 
-import styles from './Manage.module.css'
-import { ROUTES } from "../../commons/constants";
-import { findAllLocalGraphs } from "../../services/sparql-localgraph";
-import { LocalGraphEntity } from "../../models/LocalGraphEntity";
-import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
-import { SemanticViewEntity } from "../../models/SemanticViewEntity";
-import { SemanticViewForm } from "../semantic-view/SemanticViewForm";
-import { findOneSemanticView } from "../../services/sparql-semantic-view";
-import { TitleWithButtonBack } from "../../components/MTitleWithButtonBack";
+import styles from '../../manage/Manage.module.css';
+import { ROUTES } from "../../../commons/constants";
+import { findAllLocalGraphs } from "../../../services/sparql-localgraph";
+import { LocalGraphEntity } from "../../../models/LocalGraphEntity";
+import { MetadataGraphEntity } from "../../../models/MetadataGraphEntity";
+import { SemanticViewEntity } from "../../../models/SemanticViewEntity";
+import { SemanticViewForm } from "../../semantic-view/SemanticViewForm";
+import { findOneSemanticView } from "../../../services/sparql-semantic-view";
+import { TitleWithButtonBack } from "../../../components/MTitleWithButtonBack";
+import { print } from "../../../commons/utils";
 
 
-export function ManageMetagraph() {
+export function MashupManage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [metagraph, setMetagraph] = useState<MetadataGraphEntity>();
   const [semanticView, setSemanticView] = useState<SemanticViewEntity>();
 
-  /**CARREGAR O EKG */
+  /**CARREGAR O MASHUP */
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
           let state = location.state as MetadataGraphEntity;
-          console.log("*** CARREGANDO O EKG SELECIONADO ***", location)
+          print("CARREGANDO O MASHUP SELECIONADO", location.state)
           setMetagraph(state)
         }
       } catch (err) {
@@ -45,7 +46,7 @@ export function ManageMetagraph() {
   /**CARREGAR A VISÃO SEMÂNTICA */
   async function getSemantiView(uuid: string) {
     const semantic_view = await findOneSemanticView(uuid)
-    console.log(`*** CARREGANDO VISÃO SEMANTICA DO EKG *** `, semantic_view)
+    print(`CARREGANDO VISÃO SEMANTICA DO EKG `, semantic_view)
     setSemanticView(semantic_view)
   }
   useEffect(() => {
@@ -58,25 +59,6 @@ export function ManageMetagraph() {
     }
   }, [metagraph]);
 
-  let dataSourcelayer = {
-    title: "Fontes de Dados", subTitle: "Quantidade:", route: ROUTES.MANAGE_META_DATASOURCES,
-    buttons: [
-      <Button variant="contained">+ Fonte de Dados</Button>
-    ], items: ["Fonte 01", "Fonte 02"]
-  }
-
-  let applicationLayer = {
-    title: "Aplicações & Ferramentas", subTitle: "...", route: "manage-metagraph", buttons: [
-      <Button variant="contained">+ Ontologia</Button>
-    ], items: ["Fonte 01", "Fonte 02"]
-  }
-
-  let accessLayer = {
-    title: "Acesso e Integração", subTitle: "Enpoint e Wrapper", route: "manage-metagraph", buttons: [
-      <Button variant="contained">+ Ontologia</Button>
-    ], items: ["Fonte 01", "Fonte 02"]
-  }
-
 
   /**CARREGAR OS GRAFOS LOCAIS */
   const [localgraphs, setLocalgraphs] = useState<LocalGraphEntity[]>([]);
@@ -84,7 +66,7 @@ export function ManageMetagraph() {
     try {
       // setLoading(true);
       const response = await findAllLocalGraphs();
-      console.log("\n *** LISTA DAS VISÕES EXPORTADAS *** ", response)
+      print("listando VISÕES EXPORTADAS", response)
       setLocalgraphs(response);
     } catch (error) {
       console.log(error);
@@ -103,8 +85,8 @@ export function ManageMetagraph() {
   return (
     <Container fixed>
 
-      <TitleWithButtonBack title="Gerenciar EKG" icon/>
-      
+      <TitleWithButtonBack title="Gerenciar Mashup" icon />
+
       <h2 style={{ textAlign: "center", marginBottom: 10 }}>
         <Chip label={metagraph?.title.value} color="primary" sx={{ fontSize: 20 }} />
       </h2>
@@ -117,7 +99,9 @@ export function ManageMetagraph() {
                 <Typography variant="h6" component="div">
                   Visão Semântica
                 </Typography>
-                <Chip label={semanticView ? "Atualizar" : "Instaciar"} onClick={() => setOpenSemanticViewDialog(true)} />
+                <Chip 
+                  label={semanticView ? "Atualizar" : "Instaciar"} 
+                  onClick={() => setOpenSemanticViewDialog(true)} />
               </Stack>
               {semanticView
                 ? <Stack direction="row" spacing={1}>
@@ -177,39 +161,13 @@ export function ManageMetagraph() {
       </Card>
 
       <SemanticViewForm
+        from="mashup"
         open={openSemanticViewDialog}
         setOpenSemanticViewDialog={setOpenSemanticViewDialog}
-        ekg={metagraph}
+        metagraph={metagraph}
         semanticView={semanticView}
         getSemanticView={getSemantiView}
       />
-
-      {/* {layers.map(layer => {
-        return (
-          <Card className={styles.card}>
-            <CardContent>
-              <Grid container className={styles.gridItem}>
-                <Grid item>
-                  <Typography variant="h6" component="div">
-                    {layer.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {layer.subTitle}
-                  </Typography>
-                  <Stack direction="row" gap={1}>
-                    {layer.items.map((item) => <Chip label={item.title?.value} />)}
-                  </Stack>
-                </Grid>
-                <Grid item display='flex' justifyContent="flex-start" alignItems={"flex-start"}>
-                  <Stack direction="row" gap={1}>
-                    {layer.buttons.map((btn) => btn)}
-                  </Stack>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        )
-      })} */}
     </Container >
   );
 }

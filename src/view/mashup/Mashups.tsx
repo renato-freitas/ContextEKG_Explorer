@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { IconButton, Stack, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Stack, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
 import { Construction, DeleteForever, EditTwoTone } from '@mui/icons-material';
 import Storage from '@mui/icons-material/Storage';
 
@@ -13,49 +13,41 @@ import { MTable } from '../../components/MTable';
 import { TablePaginationActions } from '../../commons/pagination';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 
-import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
-import { DataSourceEntity } from '../../models/DataSourceEntity';
-import { LocalGraphEntity } from '../../models/LocalGraphEntity';
-
-import { findAllOrganizations } from '../../services/sparql-organization';
-import { ROUTES } from '../../commons/constants';
+import { METADATA_GRAHP_TYPE, ROUTES } from '../../commons/constants';
 import styles from '../datasources/DataSource.module.css';
-import { findAllLocalGraphs } from '../../services/sparql-localgraph';
 import { SemanticViewEntity } from '../../models/SemanticViewEntity';
 import { TitleWithButtonBack } from '../../components/MTitleWithButtonBack';
+import { MashupEntity } from '../../models/MashupEntity';
+import { findAllMetadataGraphs, removeMetadataGraph } from '../../services/sparql-metagraph';
+import { print } from '../../commons/utils';
 
-export function LocalGraphList() {
+export function Mashups() {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState<boolean>(false);
-  const [localGraphs, setLocalGraphs] = useState<LocalGraphEntity[]>([]);
-  const [selectedOrganization, setSelectedOrganization] = useState<LocalGraphEntity>({} as LocalGraphEntity);
+  const [mashups, setMashups] = useState<MashupEntity[]>([]);
+  const [selectedMashup, setSelectedMashup] = useState<MashupEntity>({} as MashupEntity);
 
-  async function loadLocalGraphs() {
+  async function loadMashups() {
     try {
       setLoading(true);
-      console.log("\n *** Lista de Grafos Locais ***\n")
-      const response = await findAllLocalGraphs();
-      console.log(response)
-      setLocalGraphs(response);
+      const response = await findAllMetadataGraphs(METADATA_GRAHP_TYPE.MASHUP);
+      print("LISTando MASHUPS", response)
+      setMashups(response);
     } catch (error) {
-      console.log(error);
+      print(error);
     } finally {
       setLoading(false);
     }
-
   }
 
   useEffect(() => {
-    loadLocalGraphs();
+    loadMashups();
   }, [])
 
   const openForm = () => {
-    console.log("*** Abrir formulário de Grafo Local ***")
-    // let ekg = location.state as MetadataGraphEntity;
-    let semantic_view = location.state as SemanticViewEntity;
-    console.log(`*** semantic_view que tá saíndo da lista e indo para o form`, semantic_view)
-    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: { ...semantic_view, from: "d" } });
+    print("ABRIR FORM MASHUP")
+    navigate(ROUTES.MASHUP_FORM);
   }
 
 
@@ -69,21 +61,22 @@ export function LocalGraphList() {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
-    // setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
-  const handleClickOpenDialogToConfirmDelete = (row: DataSourceEntity) => {
-    console.log(row)
-    setSelectedOrganization(row)
+  const handleClickOpenDialogToConfirmDelete = (row: MashupEntity) => {
+    print(`MASHUP SELECIONADO`, row)
+    setSelectedMashup(row)
     setOpenDialogToConfirmDelete(true);
   };
 
-  const handleRemove = async (identifier: string) => {
-    // await removeDataSource(identifier);
-    await loadLocalGraphs();
+  // const handleRemove = async (mashup: IMetadataGraphForm) => {
+  const handleRemove = async (identifier: string, type: string) => {
+    print("DELETANDO MASHUP")
+    await removeMetadataGraph(identifier, type);
+    await loadMashups();
   }
 
   /**EDIT */
@@ -107,7 +100,7 @@ export function LocalGraphList() {
   return (
     <div className={styles.listkg}>
 
-      <TitleWithButtonBack title="Grafos Locais" icon/>
+      <TitleWithButtonBack title="Mashups de Dados" />
 
       {/* <nav><Link to={ROUTES.ORGANIZATION_DOC}>Documento</Link></nav> */}
       {/* <Typography variant='caption'>Nessa tela são listas as organizações cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography> */}
@@ -115,14 +108,15 @@ export function LocalGraphList() {
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
           <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
-          <Button variant="contained" onClick={openForm}>+ Novo Grafo Local</Button>
+          <Button variant="contained" onClick={openForm}>+ Novo Mashup</Button>
         </Grid>
       </Grid>
 
       <MTable
-        header={[["Título", "left"], ["Prefixo", "right"], ["Comentário", "left"],
+        header={[["Título", "left"], ["Comentário", "left"],
+        ["Quem criou", "left"],
         ["Criado em", "right"], ["Modificado em", "right"]]}
-        size={localGraphs.length}
+        size={mashups.length}
         rowsPerPage={rowsPerPage}
         page={page}
         handleChangePage={handleChangePage}
@@ -132,19 +126,17 @@ export function LocalGraphList() {
       >
         {
           (rowsPerPage > 0
-            ? localGraphs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : localGraphs
+            ? mashups.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            : mashups
           ).map(row => (
             <TableRow key={row.identifier.value}>
               <TableCell>
                 <Typography>{row.title.value}</Typography>
               </TableCell>
               <TableCell>
-                <Typography>{row.prefix.value}</Typography>
-              </TableCell>
-              <TableCell>
                 <Typography>{row.comment.value}</Typography>
               </TableCell>
+              <TableCell>{row.creator?.value}</TableCell>
               <TableCell align='right'>
                 <Stack>
                   <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
@@ -160,18 +152,15 @@ export function LocalGraphList() {
               <TableCell align='center'>
                 <Tooltip title="Editar">
                   <IconButton onClick={() => {
-                    console.log("*** Selecionando um grafo local ***")
-                    navigate(ROUTES.LOCAL_GRAPH_FORM, { state: row })
+                    navigate(ROUTES.MASHUP_FORM, { state: row })
                   }}>
                     <EditTwoTone />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Construir">
                   <IconButton onClick={() => {
-                    navigate(ROUTES.LOCAL_GRAPH_CONSTRUCT, { state: row })
-                    console.log("*** Selecionando um grafo local ***")
-                    console.log(row)
-                    // setSelectedDataSource(row);
+                    navigate(ROUTES.MASHUP_MANAGE, { state: row })
+                    print("SELECIONANDO MASHUP", row);
                   }}>
                     <Construction />
                   </IconButton>
@@ -191,7 +180,8 @@ export function LocalGraphList() {
         openConfirmDeleteDialog={openDialogToConfirmDelete}
         setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
         deleteInstance={handleRemove}
-        instance={selectedOrganization}
+        instance={selectedMashup}
+        type={METADATA_GRAHP_TYPE.MASHUP}
       />
     </div >
   );

@@ -9,6 +9,12 @@ export const menuEvolve = [
     type: [USER_TYPE.ADMIN]
   },
   {
+    title: `Mashpus`,
+    icon: Graph,
+    href: ROUTES.MASHUP_LIST,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
     title: 'Tópicos',
     icon: Cube,
     href: ROUTES.TOPICS,

@@ -3,7 +3,16 @@ const TXT_PREFIX = "PREFIX"
 const MOKG = "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#";
 
 export const ENDPOINTS = {
-  MOKG: "http://localhost:7200/repositories/metagraph",
+  DEV: {
+    MOKG: "http://localhost:7200/repositories/metagraph",
+    INTERFACE_MASHUP: "http://localhost:7200/repositories/INTERFACE_MASHUP",
+    VSKG: "http://localhost:7200/repositories/VSKG_TULIO",
+  },
+  PRODUCTION: {
+    MOKG: "http://localhost:7200/repositories/metagraph",
+    INTERFACE_MASHUP: "http://localhost:7200/repositories/INTERFACE_MASHUP",
+    VSKG: "http://localhost:7200/repositories/VSKG_TULIO",
+  },
   DBPEDIA: "https://dbpedia.org/sparql",
   WIKIDATA: "https://query.wikidata.org/sparql"
 },
@@ -73,9 +82,18 @@ export const ROUTES = {
   LOCAL_GRAPH_LIST: '/localgraphs',
   
   TRIPLES_MAP_FORM: '/triplesmap-form',
+  
+  MASHUP_LIST: '/mashups',
+  MASHUP_FORM: '/mashup-form',
+  MASHUP_MANAGE: '/mashup-manage',
 },
 
   USER_TYPE = {
     ADMIN: "ADMIN",
     COLAB: "COLAB"
+  },
+
+  METADATA_GRAHP_TYPE = {
+    EKG: "EKG",
+    MASHUP: "Mashup"
   };

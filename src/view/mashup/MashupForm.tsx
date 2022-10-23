@@ -1,17 +1,26 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
+import React, { useState } from "react";
 import { Box, Button, FormControl, FormLabel, Stack, TextField } from "@mui/material";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
+import LinearProgress from "@mui/material/LinearProgress";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { IMetadataGraphForm, addtMetadataGraph, updateMetadataGraph } from "../../services/sparql-metagraph";
 import { RDF_Node } from "../../models/RDF_Node";
+
 import { LoadingContext } from "../../App";
-import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
+import { DataSourceEntity } from "../../models/DataSourceEntity";
+import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
+import { addtMetadataGraph, IMetadataGraphForm, updateMetadataGraph } from "../../services/sparql-metagraph";
+import { addLocalGraph } from "../../services/sparql-localgraph";
+import { LocalGraphEntity } from "../../models/LocalGraphEntity";
+import { SemanticViewEntity } from "../../models/SemanticViewEntity";
+import { print } from "../../commons/utils";
+import { METADATA_GRAHP_TYPE } from "../../commons/constants";
 
 export interface LocationParams {
   pathname: string;
@@ -29,9 +38,10 @@ const MetadataGraphSchema = zod.object({
   creator: zod.string().optional(),
   created: zod.string().optional(),
   modified: zod.string().optional(),
+  type: zod.string().optional(),
 });
 
-export function MetagraphForm() {
+export function MashupForm() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
@@ -42,58 +52,57 @@ export function MetagraphForm() {
       identifier: '',
       title: '',
       comment: '',
-      creator: ''
+      creator: '',
+      type: METADATA_GRAHP_TYPE.MASHUP
     }
   });
 
   const handleSubmitMetadataGraph: SubmitHandler<IMetadataGraphForm> = async (data) => {
+    print("ENVIANDO DADOS DO MASHUP", data);
     try {
       setIsLoading(true);
-      console.log("*** Enviando dados de Grafo de Metadados ***")
-      console.log(data);
       if (data.identifier !== "") {
-        console.log("*** Atulizando MetadataGraph ***")
+        print("ATUALIZANDO MASHUP")
         await updateMetadataGraph(data)
       } else {
-        console.log("*** Criando MetadataGraph ***")
+        print("CRIANDO MASHUP")
         await addtMetadataGraph(data)
       }
     } catch (error) {
-      console.log(error);
+      console.error(error)
     } finally {
-      setTimeout(() => {
-        reset();
-        setIsLoading(false);
-        navigate(-1)
-      }, 300);
+      reset();
+      setIsLoading(false);
+      navigate(-1)
     }
   };
+
 
   useEffect(() => {
     function onEdit() {
       try {
         if (location.state) {
           let state = location.state as MetadataGraphEntity;
-          console.log("*** Colocando o Grafo de Metadados Selecionado no Formulário ***")
-          console.log(location)
+          print("Colocando o Mashup Selecionado no Formulário", state)
           setValue("title", state.title.value);
           setValue("comment", state.comment.value);
           setValue("creator", state.creator.value);
           setValue("created", state.created.value);
           setValue("identifier", state.identifier.value);
-          setValue("hasSematicMetadata", state.hasSemanticMetadata)
+          // setValue("hasSematicMetadata", state.hasSemanticMetadata)
         }
       } catch (err) {
-        console.log(err);
+        print("Erro", err)
       }
     }
     onEdit();
   }, [location.state]);
 
+  // const title = watch('title');
 
   return (
     <Container fixed>
-      <h1>{`${"Criar"} Grafo de Metadados`}</h1>
+      <h1>{`${'Cadastrar'} Mashup`}</h1>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -155,7 +164,6 @@ export function MetagraphForm() {
                     </Box>
                   </Grid>
                 </Grid>
-
               </form>
             </CardContent>
             {/* {isLoading && <LinearProgress />} */}

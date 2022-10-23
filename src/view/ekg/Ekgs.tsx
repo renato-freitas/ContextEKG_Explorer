@@ -14,14 +14,15 @@ import DeleteForever from '@mui/icons-material/DeleteForever';
 
 import { useNavigate } from 'react-router-dom';
 
-import styles from './ListMokg.module.css';
-import { findAllMetadataGraphs, removeMetadataGraph } from '../../services/sparql-metagraph';
-import { ROUTES } from '../../commons/constants';
+import styles from './ListEkg.module.css';
+import { findAllMetadataGraphs, IMetadataGraphForm, removeMetadataGraph } from '../../services/sparql-metagraph';
+import { METADATA_GRAHP_TYPE, ROUTES } from '../../commons/constants';
 import { Typography } from "@mui/material";
 import { MTable } from "../../components/MTable";
 import { MDialogToConfirmDelete } from "../../components/MDialog";
 import { RDF_Node } from "../../models/RDF_Node";
 import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
+import { TitleWithButtonBack } from "../../components/MTitleWithButtonBack";
 
 
 
@@ -34,7 +35,7 @@ export function MetagraphList() {
 
   async function loadMetagraphs() {
     setLoading(true);
-    const response = await findAllMetadataGraphs();
+    const response = await findAllMetadataGraphs(METADATA_GRAHP_TYPE.EKG);
     const new_set = [...new Set<MetadataGraphEntity>(response)];
     setLoading(false);
     console.log("\n *** LISTA DOS GRAFOS DE METADADOS *** ", new_set)
@@ -69,8 +70,9 @@ export function MetagraphList() {
     setOpenDialogToConfirmDelete(true);
   };
   
-  const handleRemove = async (identifier: string) => {
-    await removeMetadataGraph(identifier);
+  // const handleRemove = async (identifier: string) => {
+  const handleRemove = async (ekg: IMetadataGraphForm) => {
+    await removeMetadataGraph(ekg);
     await loadMetagraphs();
   }
   /**Dialog to Delete */
@@ -78,7 +80,8 @@ export function MetagraphList() {
   return (
     <div className={styles.listkg}>
 
-      <h1>EKG - Enterprise Knowledge Graphs</h1>
+      <TitleWithButtonBack title="EKG's - Enterprise Knowledge Graphs"/>
+
       <Grid container spacing={2}>
         <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
           <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />

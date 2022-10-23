@@ -19,8 +19,9 @@ interface MDailogProps {
 interface IMDailogToConfirmDelete {
   openConfirmDeleteDialog: boolean,
   setOpenConfirmDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>,
-  deleteInstance: (instante: any) => void,
-  instance: any
+  deleteInstance: (identifier: string, type: string ) => void,
+  instance: any,
+  type: string
 }
 
 export function MDialog(props: MDailogProps) {
@@ -63,8 +64,7 @@ export function MDialog(props: MDailogProps) {
 export const MDialogToConfirmDelete = (props: IMDailogToConfirmDelete) => {
 
   const handleDeleteInstance = async () => {
-    const deleted = props.deleteInstance(props.instance.identifier?.value);
-    console.log("*** deletando")
+    const deleted = props.deleteInstance(props.instance.identifier?.value, props.type);
     handleCloseDialog();
   }
 

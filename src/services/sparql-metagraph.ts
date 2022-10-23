@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { RDF_Node } from '../models/RDF_Node';
+import { ENDPOINTS } from '../commons/constants';
 // import { ENDPOINTS, PREFIXIES_SPARQL } from "../commons/constants";
 //405 - method not allowed
 //415 - mime type
@@ -13,7 +13,8 @@ export interface IMetadataGraphForm {
   creator: string;
   created: string;
   modified: string;
-  semanticView?: string
+  semanticView?: string;
+  type: string;
 }
 
 
@@ -29,7 +30,7 @@ export async function addtMetadataGraph(data: IMetadataGraphForm) {
       PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
       BASE <http://www.arida.ufc.org/resource/>
       INSERT DATA { 
-          mokg:${uuid} rdf:type mokg:MetadataGraph ; 
+          mokg:${uuid} rdf:type mokg:MetadataGraph, mokg:${data.type} ; 
           rdfs:label '${data.title}' ;
           dc:identifier '${uuid}' ;
           dc:title '${data.title}' ;
@@ -41,7 +42,7 @@ export async function addtMetadataGraph(data: IMetadataGraphForm) {
 
   return await axios({
     method: 'POST',
-    url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
+    url: encodeURI(`${ENDPOINTS.DEV.MOKG}/statements`),
     params: { update: query },
     headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
   })
@@ -56,7 +57,7 @@ export async function updateMetadataGraph(data: IMetadataGraphForm) {
     PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
     BASE <http://www.arida.ufc.org/resource/>
     DELETE { 
-      mokg:${data.identifier} rdf:type mokg:MetadataGraph ; 
+      mokg:${data.identifier} rdf:type mokg:MetadataGraph, mokg:${data.type} ; 
         rdfs:label ?l ;
         dc:identifier ?i ;
         dc:title ?t ;
@@ -66,7 +67,7 @@ export async function updateMetadataGraph(data: IMetadataGraphForm) {
         dcterms:modified ?m .
     }
     INSERT { 
-      mokg:${data.identifier} rdf:type mokg:MetadataGraph ; 
+      mokg:${data.identifier} rdf:type mokg:MetadataGraph, mokg:${data.type} ; 
         rdfs:label "${data.title}" ;
         dc:identifier "${data.identifier}" ;
         dc:title "${data.title}" ;
@@ -76,7 +77,7 @@ export async function updateMetadataGraph(data: IMetadataGraphForm) {
         dcterms:modified "${currentDate.toISOString()}" .
     }
     WHERE { 
-      mokg:${data.identifier} rdf:type mokg:MetadataGraph ; 
+      mokg:${data.identifier} rdf:type mokg:MetadataGraph, mokg:${data.type} ; 
         rdfs:label ?l ;
         dc:identifier ?i ;
         dc:title ?t ;
@@ -88,7 +89,7 @@ export async function updateMetadataGraph(data: IMetadataGraphForm) {
 
   return await axios({
     method: 'POST',
-    url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
+    url: encodeURI(`${ENDPOINTS.DEV.MOKG}/statements`),
     params: { update: query },
     headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
   });
@@ -98,7 +99,7 @@ export async function updateMetadataGraph(data: IMetadataGraphForm) {
 /**Esta função remove todas as triplas do sujeito informado 
  * NÃO ESTÁ EXCLUIR NO GRAPHDB EXPLORAÇÃO
 */
-export async function removeMetadataGraph(identifier: string) {
+export async function removeMetadataGraph(identifier: string, type: string) {
   try {
     let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -107,7 +108,7 @@ export async function removeMetadataGraph(identifier: string) {
     PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
     BASE <http://www.arida.ufc.org/resource/>
     DELETE { 
-      mokg:${identifier} rdf:type mokg:MetadataGraph ; 
+      mokg:${identifier} rdf:type mokg:MetadataGraph, mokg:${type} ; 
         rdfs:label ?l ;
         dc:identifier ?i ;
         dc:title ?t ;
@@ -117,7 +118,7 @@ export async function removeMetadataGraph(identifier: string) {
         dcterms:modified ?m .
     }
     WHERE { 
-      mokg:${identifier} rdf:type mokg:MetadataGraph ; 
+      mokg:${identifier} rdf:type mokg:MetadataGraph, mokg:${type} ; 
         rdfs:label ?l ;
         dc:identifier ?i ;
         dc:title ?t ;
@@ -129,7 +130,7 @@ export async function removeMetadataGraph(identifier: string) {
 
   return await axios({
     method: 'POST',
-    url: encodeURI("http://localhost:7200/repositories/metagraph/statements"),
+    url: encodeURI(`${ENDPOINTS.DEV.MOKG}/statements`),
     params: { update: query },
     headers: { 'Content-type': 'application/rdf+xml', 'Accept': 'application/json' }
   });
@@ -151,14 +152,14 @@ export async function removeMetadataGraph(identifier: string) {
 // }
 
 
-export async function findAllMetadataGraphs() {
+export async function findAllMetadataGraphs(type: string) {
   try {
     let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
       PREFIX dcterms: <http://purl.org/dc/terms/>
       PREFIX dc: <http://purl.org/dc/elements/1.1/>
       SELECT * WHERE { 
-          ?uri a mokg:MetadataGraph ; 
+          ?uri a mokg:MetadataGraph, mokg:${type} ; 
             dc:identifier ?identifier ;
             rdfs:label ?label ;
             dc:title ?title ;
@@ -171,7 +172,7 @@ export async function findAllMetadataGraphs() {
 
     const response = await axios({
       method: 'GET',
-      url: encodeURI("http://localhost:7200/repositories/metagraph"),
+      url: encodeURI(`${ENDPOINTS.DEV.MOKG}`),
       params: { query }
     })
 
@@ -201,7 +202,7 @@ export async function findOneMetadataGraphByIdentifier(uuid: string) {
       `
     const response = await axios({
       method: 'GET',
-      url: encodeURI("http://localhost:7200/repositories/metagraph"),
+      url: encodeURI(`${ENDPOINTS.DEV.MOKG}`),
       params: { query }
     });
 

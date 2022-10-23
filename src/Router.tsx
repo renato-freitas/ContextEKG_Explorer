@@ -2,8 +2,8 @@ import { Routes, Route, Link } from "react-router-dom";
 import { MainLayout } from './layout/MainLayout';
 import { Home } from './view/home/Home';
 import { About } from './view/About';
-import { MetagraphList } from './view/mokg/MetagraphList';
-import { MetagraphForm } from './view/mokg/MetagraphForm';
+import { MetagraphList } from './view/ekg/Ekgs';
+import { MetagraphForm } from './view/ekg/EkgForm';
 import { OrganizationList } from './view/organizations/OrganizationList';
 import { OrganizationForm } from './view/organizations/OrganizationForm';
 import { OrganizationDoc } from './view/organizations/OrganizationDoc';
@@ -35,6 +35,9 @@ import { LocalGraphForm } from './view/local-graph/LocalGraphForm';
 import { LocalGraphList } from './view/local-graph/LocalGraphList';
 
 import { TriplesMapForm } from './view/local-graph/triplesmap/TriplesMap_Form';
+import { Mashups } from './view/mashup/Mashups';
+import { MashupForm } from './view/mashup/MashupForm';
+import { MashupManage } from './view/mashup/manage/MashupManage';
 
 import { ROUTES } from './commons/constants';
 
@@ -73,6 +76,10 @@ export default function Router() {
         <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<LocalGraphList />} />
         
         <Route path={ROUTES.TRIPLES_MAP_FORM} element={<TriplesMapForm />} />
+        
+        <Route path={ROUTES.MASHUP_LIST} element={<Mashups />} />
+        <Route path={ROUTES.MASHUP_FORM} element={<MashupForm />} />
+        <Route path={ROUTES.MASHUP_MANAGE} element={<MashupManage />} />
       </Route>
 
       {/* Para um painel de administração eu posso ter um layout diferente 
