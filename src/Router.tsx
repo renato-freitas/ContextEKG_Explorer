@@ -26,15 +26,15 @@ import { ColumnForm } from './view/datasources/columns/ColumnForm';
 
 import { Topics } from './view/topics/Topics';
 
-import { ManageMetagraph } from './view/manage/ManageMetagraph';
-import { MetaDataSources } from './view/manage/datasources/MetaDataSources';
+import { ManageMetagraph } from './view/ekg/manage/ManageMetagraph';
+import { MetaDataSources } from './view/ekg/manage/datasources/MetaDataSources';
 
 import { SemanticView } from './view/semantic-view/SemanticView';
-import { LocalGraph } from './view/local-graph/LocalGraph';
-import { LocalGraphForm } from './view/local-graph/LocalGraphForm';
-import { LocalGraphList } from './view/local-graph/LocalGraphList';
+import { LocalGraph } from './view/exported-view/LocalGraph';
+import { ExportedViewForm } from './view/exported-view/ExportedViewForm';
+import { ExportedViewList } from './view/exported-view/ExportedViewList';
 
-import { TriplesMapForm } from './view/local-graph/triplesmap/TriplesMap_Form';
+import { TriplesMapForm } from './view/exported-view/triplesmap/TriplesMap_Form';
 import { Mashups } from './view/mashup/Mashups';
 import { MashupForm } from './view/mashup/MashupForm';
 import { MashupManage } from './view/mashup/manage/MashupManage';
@@ -72,8 +72,8 @@ export default function Router() {
         <Route path={ROUTES.SEMANTIC_VIEW} element={<SemanticView />} />
 
         <Route path={ROUTES.LOCAL_GRAPH_CONSTRUCT} element={<LocalGraph />} />
-        <Route path={ROUTES.LOCAL_GRAPH_FORM} element={<LocalGraphForm />} />
-        <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<LocalGraphList />} />
+        <Route path={ROUTES.LOCAL_GRAPH_FORM} element={<ExportedViewForm />} />
+        <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<ExportedViewList />} />
         
         <Route path={ROUTES.TRIPLES_MAP_FORM} element={<TriplesMapForm />} />
         

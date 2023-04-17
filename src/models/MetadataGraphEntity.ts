@@ -9,4 +9,5 @@ export interface MetadataGraphEntity {
   created: RDF_Node;
   modified: RDF_Node;
   semanticView: RDF_Node;
+  kg_metadata?: RDF_Node;
 }

@@ -16,10 +16,10 @@ import { LoadingContext } from "../../App";
 import { DataSourceEntity } from "../../models/DataSourceEntity";
 import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
 import { addtMetadataGraph, IMetadataGraphForm, updateMetadataGraph } from "../../services/sparql-metagraph";
-import { addLocalGraph } from "../../services/sparql-localgraph";
+import { addExportedView } from "../../services/sparql-exported-view";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
 import { SemanticViewEntity } from "../../models/SemanticViewEntity";
-import { print } from "../../commons/utils";
+import { print_ } from "../../commons/utils";
 import { METADATA_GRAHP_TYPE } from "../../commons/constants";
 
 export interface LocationParams {
@@ -58,14 +58,14 @@ export function MashupForm() {
   });
 
   const handleSubmitMetadataGraph: SubmitHandler<IMetadataGraphForm> = async (data) => {
-    print("ENVIANDO DADOS DO MASHUP", data);
+    print_("ENVIANDO DADOS DO MASHUP", data);
     try {
       setIsLoading(true);
       if (data.identifier !== "") {
-        print("ATUALIZANDO MASHUP")
+        print_("ATUALIZANDO MASHUP" )
         await updateMetadataGraph(data)
       } else {
-        print("CRIANDO MASHUP")
+        print_("CRIANDO MASHUP" )
         await addtMetadataGraph(data)
       }
     } catch (error) {
@@ -83,7 +83,7 @@ export function MashupForm() {
       try {
         if (location.state) {
           let state = location.state as MetadataGraphEntity;
-          print("Colocando o Mashup Selecionado no Formulário", state)
+          print_("Colocando o Mashup Selecionado no Formulário", state )
           setValue("title", state.title.value);
           setValue("comment", state.comment.value);
           setValue("creator", state.creator.value);
@@ -92,7 +92,7 @@ export function MashupForm() {
           // setValue("hasSematicMetadata", state.hasSemanticMetadata)
         }
       } catch (err) {
-        print("Erro", err)
+        print_("Erro", err )
       }
     }
     onEdit();
@@ -102,7 +102,7 @@ export function MashupForm() {
 
   return (
     <Container fixed>
-      <h1>{`${'Cadastrar'} Mashup`}</h1>
+      <h2>{`${'Cadastrar'} Mashup`}</h2>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card

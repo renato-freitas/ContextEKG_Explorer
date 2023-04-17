@@ -9,7 +9,7 @@ import { Button, Chip, Grid, Stack, Typography } from "@mui/material";
 
 import { CaretCircleLeft, CaretCircleRight } from 'phosphor-react'
 
-import styles from '../manage/Manage.module.css'
+// import styles from '../manage/Manage.module.css'
 import { ROUTES } from "../../commons/constants";
 
 interface ElementOfRdfClass {

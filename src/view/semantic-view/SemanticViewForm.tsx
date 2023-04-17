@@ -6,9 +6,9 @@ import * as zod from 'zod';
 import { addSemanticView, ISemanticViewForm, updateSemanticView } from "../../services/sparql-semantic-view";
 
 import { LoadingContext } from "../../App";
-import { print } from "../../commons/utils";
+import { print_ } from "../../commons/utils";
 
-export const SemanticViewForm = ({ from, open, setOpenSemanticViewDialog, metagraph, semanticView, getSemanticView }) => {
+export const SemanticViewForm = ({ from, open, setOpenSemanticViewDialog, ekgMetadata, semanticView, getSemanticView }) => {
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
   const handleCloseDialog = () => {
@@ -47,18 +47,18 @@ export const SemanticViewForm = ({ from, open, setOpenSemanticViewDialog, metagr
   }, [open]);
 
   const handleSubmitSemanticView: SubmitHandler<ISemanticViewForm> = async (data) => {
-    print("ENVIANDO DADOS DA VS", { ...data, belongsTo: metagraph.identifier.value })
+    print_("ENVIANDO DADOS DA VS", { ...data, belongsTo: ekgMetadata.identifier.value })
     try {
       setIsLoading(true);
       if (data.identifier) {
-        print("ATUALIZANDO A VS")
-        const updated = await updateSemanticView({ ...data, belongsTo: metagraph.identifier.value })
-        print(`VS ATUALIZADA: `, updated)
+        print_("ATUALIZANDO A VS")
+        const updated = await updateSemanticView({ ...data, belongsTo: ekgMetadata.identifier.value })
+        print_(`VS ATUALIZADA: `, updated)
         await getSemanticView(data.identifier);
       } else {
-        print("CRIANDO VS")
-        const created = await addSemanticView({ ...data, belongsTo: metagraph.identifier.value })
-        print(`VS CRIADA: `, created)
+        print_("CRIANDO VS")
+        const created = await addSemanticView({ ...data, belongsTo: ekgMetadata.identifier.value })
+        print_(`VS CRIADA: `, created)
         await getSemanticView(created.identifier.value);
       }
     } catch (error) {
@@ -85,7 +85,7 @@ export const SemanticViewForm = ({ from, open, setOpenSemanticViewDialog, metagr
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <FormLabel htmlFor="label">Rótulo</FormLabel>
+                <FormLabel htmlFor="label">Rótulo (rdfs:label)</FormLabel>
                 <TextField
                   variant="outlined"
                   placeholder="Ex: Visão Semântica do Aracati/CE"

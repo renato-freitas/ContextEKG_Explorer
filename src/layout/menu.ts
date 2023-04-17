@@ -3,13 +3,13 @@ import { Horse, Person, Cube, Graph, Database, Storefront, PuzzlePiece } from "p
 
 export const menuEvolve = [
   {
-    title: `EKG's`,
+    title: `Grafo de Metadados`,
     icon: Graph,
     href: ROUTES.METAGRAPHS,
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: `Mashpus`,
+    title: `Mashups`,
     icon: Graph,
     href: ROUTES.MASHUP_LIST,
     type: [USER_TYPE.ADMIN]

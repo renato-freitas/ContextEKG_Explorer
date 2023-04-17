@@ -7,31 +7,45 @@ export const ENDPOINTS = {
     MOKG: "http://localhost:7200/repositories/metagraph",
     INTERFACE_MASHUP: "http://localhost:7200/repositories/INTERFACE_MASHUP",
     VSKG: "http://localhost:7200/repositories/VSKG_TULIO",
+    DBPEDIA: "https://dbpedia.org/sparql",
+    WIKIDATA: "https://query.wikidata.org/sparql"
   },
   PRODUCTION: {
     MOKG: "http://localhost:7200/repositories/metagraph",
     INTERFACE_MASHUP: "http://localhost:7200/repositories/INTERFACE_MASHUP",
     VSKG: "http://localhost:7200/repositories/VSKG_TULIO",
+    DBPEDIA: "https://dbpedia.org/sparql",
+    WIKIDATA: "https://query.wikidata.org/sparql"
   },
-  DBPEDIA: "https://dbpedia.org/sparql",
-  WIKIDATA: "https://query.wikidata.org/sparql"
-},
 
-  PREFIXIES_SPARQL = {
-    MOKG: TXT_PREFIX + " mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>\n",
-    DC: TXT_PREFIX + " dc: <http://purl.org/dc/elements/1.1/>\n",
-    DCT: TXT_PREFIX + " dcterms: <http://purl.org/dc/terms/>\n",
-    OWL: TXT_PREFIX + " owl: <http://www.w3.org/2002/07/owl#>\n",
-    RDFS: TXT_PREFIX + " rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n",
-    RDF: TXT_PREFIX + " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n",
-    FOAF: TXT_PREFIX + " foaf: <http://xmlns.com/foaf/0.1/>\n",
-    DBO: TXT_PREFIX + " dbo: <http://dbpedia.org/ontology/>\n",
-    VANN: TXT_PREFIX + " vann: <http://purl.org/vocab/vann/>",
-    WIKIDATA_ENTITY: TXT_PREFIX + " wd: <http://www.wikidata.org/entity/>\n",
-    WIKIDATA_PROPS: TXT_PREFIX + " wdt: <http://www.wikidata.org/prop/direct/>\n",
-    WIKIBASE: TXT_PREFIX + " wikibase: <http://wikiba.se/ontology#>\n",
-    BLAZEGRAPH_BD: TXT_PREFIX + " bd: <http://www.bigdata.com/rdf#>\n"
-  },
+},
+  MAIN_PREFIXIES = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX vann: <http://purl.org/vocab/vann/>
+    PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
+    PREFIX vskg: <http://www.arida.ufc.br/VSKG#>
+    BASE <http://www.arida.ufc.org/resource/>
+    `
+,
+PREFIXIES_SPARQL = {
+  MOKG: TXT_PREFIX + " mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>\n",
+  VSKG: TXT_PREFIX + " vsgk: <http://www.arida.ufc.br/VSKG#>\n",
+  DC: TXT_PREFIX + " dc: <http://purl.org/dc/elements/1.1/>\n",
+  DCT: TXT_PREFIX + " dcterms: <http://purl.org/dc/terms/>\n",
+  OWL: TXT_PREFIX + " owl: <http://www.w3.org/2002/07/owl#>\n",
+  RDFS: TXT_PREFIX + " rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n",
+  RDF: TXT_PREFIX + " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n",
+  FOAF: TXT_PREFIX + " foaf: <http://xmlns.com/foaf/0.1/>\n",
+  DBO: TXT_PREFIX + " dbo: <http://dbpedia.org/ontology/>\n",
+  VANN: TXT_PREFIX + " vann: <http://purl.org/vocab/vann/>",
+  WIKIDATA_ENTITY: TXT_PREFIX + " wd: <http://www.wikidata.org/entity/>\n",
+  WIKIDATA_PROPS: TXT_PREFIX + " wdt: <http://www.wikidata.org/prop/direct/>\n",
+  WIKIBASE: TXT_PREFIX + " wikibase: <http://wikiba.se/ontology#>\n",
+  BLAZEGRAPH_BD: TXT_PREFIX + " bd: <http://www.bigdata.com/rdf#>\n"
+},
 
   WIKIDATA = {
     INSTANCIA_DE: "wdt:P31",
@@ -75,14 +89,14 @@ export const ROUTES = {
   TOPICS: "/topics",
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
-  
+
   SEMANTIC_VIEW: '/semantic-view',
   LOCAL_GRAPH_CONSTRUCT: '/localgraph-construct',
   LOCAL_GRAPH_FORM: '/localgraph-form',
   LOCAL_GRAPH_LIST: '/localgraphs',
-  
+
   TRIPLES_MAP_FORM: '/triplesmap-form',
-  
+
   MASHUP_LIST: '/mashups',
   MASHUP_FORM: '/mashup-form',
   MASHUP_MANAGE: '/mashup-manage',

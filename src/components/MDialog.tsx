@@ -98,7 +98,8 @@ export const MDialogToConfirmDelete = (props: IMDailogToConfirmDelete) => {
             variant="button"
             fontWeight="00"
           >
-            "{props.instance.label?.value}" ?
+            {/* "{props.instance.label?.value}" ? */}
+            "{props.instance?.uri_l?.value}" ?
           </Typography>
         </DialogContentText>
       </DialogContent>

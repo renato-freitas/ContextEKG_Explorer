@@ -2,8 +2,6 @@ import React, { createContext, useContext } from "react";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { LoadingContext } from "../App";
 
-
-
 export function Loading() {
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   const [open, setOpen] = React.useState(false);

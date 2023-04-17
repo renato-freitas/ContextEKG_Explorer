@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { ENDPOINTS } from '../commons/constants';
+import { ENDPOINTS, MAIN_PREFIXIES } from '../commons/constants';
 // import { ENDPOINTS, PREFIXIES_SPARQL } from "../commons/constants";
 //405 - method not allowed
 //415 - mime type
@@ -23,12 +23,7 @@ export async function addtMetadataGraph(data: IMetadataGraphForm) {
   const uuid = uuidv4();
   const currentDate: Date = new Date();
 
-  let query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      PREFIX dcterms: <http://purl.org/dc/terms/>
-      PREFIX dc: <http://purl.org/dc/elements/1.1/>
-      PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
-      BASE <http://www.arida.ufc.org/resource/>
+  let query = `${MAIN_PREFIXIES}
       INSERT DATA { 
           mokg:${uuid} rdf:type mokg:MetadataGraph, mokg:${data.type} ; 
           rdfs:label '${data.title}' ;
@@ -168,6 +163,7 @@ export async function findAllMetadataGraphs(type: string) {
             OPTIONAL { ?uri dc:creator ?creator . }
             OPTIONAL { ?uri rdfs:comment ?comment . }
             OPTIONAL { ?uri mokg:hasSemanticMetadada ?semanticView . }
+            OPTIONAL { ?uri mokg:specializationOf ?kg_metadata . }
           }`
 
     const response = await axios({
@@ -182,6 +178,7 @@ export async function findAllMetadataGraphs(type: string) {
     console.error(error)
   }
 }
+
 
 
 /**Esta função retornar a uri do GM a partir do título*/

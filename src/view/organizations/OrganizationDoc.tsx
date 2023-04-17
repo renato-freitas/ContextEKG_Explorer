@@ -12,10 +12,10 @@ export function OrganizationDoc() {
 
       <div>
         <ul>
-          <li>X é uma <b>Organização.</b></li>
-          <li>Uma Organização mantém/gerencia/fornece uma ou mais <b>Fontes de Dados</b>.</li>
-          <li>Uma Fonte de Dados é qualquer artefato que pode ser lido por computador e que armazena dados.</li>
-          <li>Exemplos de Fontes de Dados são: <b>BDR</b>, <b>BD NO-SQL</b>, <b>TripleStore</b> e <b>Arquivos de Digitais</b></li>
+          <li>No nosso contexto, X é uma <b>Organização.</b></li>
+          <li>Uma Organização mantém/gerencia/distribui uma ou mais <b>Fontes de Dados</b>.</li>
+          <li>Uma Fonte de Dados é qualquer artefato que armazena dados e que pode ser lido por computador.</li>
+          <li>Exemplos de Fontes de Dados são: <b>BDR</b>, <b>BD Non-SQL</b>, <b>TripleStore</b> e <b>Arquivos Digitais</b></li>
           <li>Arquivos Digitais são: <b>PDF</b>, <b>EXCEL</b>, <b>CSV</b>, <b>JSON</b>, <b>XML</b>, <b>VIDEO</b>, <b>AÚDIO</b>, <b>IMAGEM</b></li>
           <br/>
           <li>Um BDR tem uma ou mais <b>Tabelas</b></li>
