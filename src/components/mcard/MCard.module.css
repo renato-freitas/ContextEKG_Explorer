@@ -1,0 +1,12 @@
+.card {
+  margin-bottom: 0.5rem;
+  transition: background 0.2s !important;
+}
+
+
+.card .gridItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0 20px;
+}

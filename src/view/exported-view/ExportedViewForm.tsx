@@ -15,12 +15,10 @@ import { RDF_Node } from "../../models/RDF_Node";
 import { LoadingContext } from "../../App";
 import { DataSourceEntity } from "../../models/DataSourceEntity";
 import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
-import { addtMetadataGraph, IMetadataGraphForm, updateMetadataGraph } from "../../services/sparql-metagraph";
+import { ILocalGraphForm, insertOrganization } from "../../services/sparql-organization";
 import { addExportedView } from "../../services/sparql-exported-view";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
 import { SemanticViewEntity } from "../../models/SemanticViewEntity";
-import { printt } from "../../commons/utils";
-import { METADATA_GRAHP_TYPE } from "../../commons/constants";
 
 export interface LocationParams {
   pathname: string;
@@ -30,50 +28,56 @@ export interface LocationParams {
   key: string;
 }
 
-const MetadataGraphSchema = zod.object({
+const LocalGraphSchema = zod.object({
   identifier: zod.string().optional(),
-  uri: zod.string().optional(),
+  // uri: zod.string().optional(),
   title: zod.string().min(1, 'Digite ao menos 1 caracter'),
   comment: zod.string().optional(),
-  creator: zod.string().optional(),
   created: zod.string().optional(),
+  prefix: zod.string().optional(),
   modified: zod.string().optional(),
-  type: zod.string().optional(),
+  belongsTo: zod.string().optional(),
 });
 
-export function MashupForm() {
+export function ExportedViewForm() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IMetadataGraphForm>({
-    resolver: zodResolver(MetadataGraphSchema),
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ILocalGraphForm>({
+    resolver: zodResolver(LocalGraphSchema),
     defaultValues: {
       identifier: '',
       title: '',
       comment: '',
-      creator: '',
-      type: METADATA_GRAHP_TYPE.MASHUP
+      created: '',
+      modified: '',
+      prefix: '',
+      belongsTo: ''
     }
   });
 
-  const handleSubmitMetadataGraph: SubmitHandler<IMetadataGraphForm> = async (data) => {
-    printt("ENVIANDO DADOS DO MASHUP", data);
+  const handleSubmitLocalGraph: SubmitHandler<ILocalGraphForm> = async (data) => {
+    console.log("*** Enviando dados da Fonte de Dados ***")
+    console.log(data);
     try {
       setIsLoading(true);
       if (data.identifier !== "") {
-        printt("ATUALIZANDO MASHUP" )
-        await updateMetadataGraph(data)
+        console.log("*** Atualizando Fonte de Dados ***")
+        // await updateDataSource(data)
       } else {
-        printt("CRIANDO MASHUP" )
-        await addtMetadataGraph(data)
+        console.log("*** Criando Fonte de Dados ***")
+        // await insertOrganization(data);
+        await addExportedView(data)
       }
     } catch (error) {
       console.error(error)
     } finally {
-      reset();
-      setIsLoading(false);
-      navigate(-1)
+      setTimeout(() => {
+        reset();
+        setIsLoading(false);
+        navigate(-1)
+      }, 300);
     }
   };
 
@@ -82,17 +86,26 @@ export function MashupForm() {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as MetadataGraphEntity;
-          printt("Colocando o Mashup Selecionado no Formulário", state )
-          setValue("title", state.title.value);
-          setValue("comment", state.comment.value);
-          setValue("creator", state.creator.value);
-          setValue("created", state.created.value);
-          setValue("identifier", state.identifier.value);
-          // setValue("hasSematicMetadata", state.hasSemanticMetadata)
+          let state;
+          console.log(location.state);
+          if (location.state?.from === "d") {
+            // state = location.state as MetadataGraphEntity;
+            state = location.state as SemanticViewEntity;
+            console.log(`*** Visão Semãntica selecionado *** `, state)
+            setValue("belongsTo", state.identifier.value)
+          } else {
+            state = location.state as LocalGraphEntity;
+            console.log("*** Colocando o Grafo Local selecionado no formulário ***")
+            console.log(state)
+            setValue("title", state.title.value);
+            setValue("comment", state.comment.value);
+            setValue("prefix", state.prefix.value);
+            setValue("created", state.created.value);
+            setValue("identifier", state.identifier.value);
+          }
         }
       } catch (err) {
-        printt("Erro", err )
+        console.log(err);
       }
     }
     onEdit();
@@ -102,7 +115,7 @@ export function MashupForm() {
 
   return (
     <Container fixed>
-      <h2>{`${'Cadastrar'} Mashup`}</h2>
+      <h1>{`${'Cadastrar'} Visão Exportada`}</h1>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -110,31 +123,18 @@ export function MashupForm() {
             sx={{ p: 0 }}
           >
             <CardContent sx={{ padding: '30px' }}>
-              <form onSubmit={handleSubmit(handleSubmitMetadataGraph)}>
+              <form onSubmit={handleSubmit(handleSubmitLocalGraph)}>
                 <Grid container spacing={2}>
                   <Grid item sm={6}>
                     <FormControl fullWidth>
                       <FormLabel htmlFor="title">Título</FormLabel>
                       <TextField
-                        required
                         variant="outlined"
-                        placeholder="Ex: Metadados-SEFAZ-MA"
+                        placeholder="Ex: Ministério da Educação do Brasil"
                         size="small"
                         {...register('title')}
                       />
                       <p>{errors.title?.message}</p>
-                    </FormControl>
-                  </Grid>
-                  <Grid item sm={6}>
-                    <FormControl fullWidth>
-                      <FormLabel htmlFor="creator">Criador</FormLabel>
-                      <TextField
-                        variant="outlined"
-                        placeholder="Ex: Apelido"
-                        size="small"
-                        {...register("creator")}
-                      />
-                      <p>{errors.creator?.message}</p>
                     </FormControl>
                   </Grid>
                   <Grid item sm={12}>
@@ -142,13 +142,26 @@ export function MashupForm() {
                       <FormLabel htmlFor="comment">Comentário</FormLabel>
                       <TextField
                         variant="outlined"
-                        placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
+                        placeholder="Ex: `Núcleo do Governo Federal responsável ..."
                         size="small"
                         {...register('comment')}
                       />
                       <p>{errors.comment?.message}</p>
                     </FormControl>
                   </Grid>
+                  <Grid item sm={12}>
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="prefix">Prefixo de Preferência</FormLabel>
+                      <TextField
+                        variant="outlined"
+                        placeholder="Ex: rdf:"
+                        size="small"
+                        {...register('prefix')}
+                      />
+                      <p>{errors.comment?.message}</p>
+                    </FormControl>
+                  </Grid>
+
                   {/* Botões */}
                   <Grid item sm={12}>
                     <Box display="flex" justifyContent="flex-start">
@@ -164,6 +177,7 @@ export function MashupForm() {
                     </Box>
                   </Grid>
                 </Grid>
+
               </form>
             </CardContent>
             {/* {isLoading && <LinearProgress />} */}

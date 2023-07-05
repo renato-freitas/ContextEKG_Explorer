@@ -18,7 +18,7 @@ import { SemanticViewEntity } from "../../../models/SemanticViewEntity";
 import { SemanticViewForm } from "../../semantic-view/SemanticViewForm";
 import { findOneSemanticView } from "../../../services/sparql-semantic-view";
 import { TitleWithButtonBack } from "../../../components/MTitleWithButtonBack";
-import { print_ } from "../../../commons/utils";
+import { printt } from "../../../commons/utils";
 import { EkgSelect } from "../../ekg/EkgSelect";
 import { EkgTulioEntity } from "../../../models/EkgTulioEntity";
 import { findOneMetadataGraphByIdentifier } from "../../../services/sparql-metagraph";
@@ -40,7 +40,7 @@ export function MashupManage() {
       try {
         if (location.state) {
           let state = location.state as MetaMashup;
-          print_("CARREGANDO O MASHUP SELECIONADO", location.state)
+          printt("CARREGANDO O MASHUP SELECIONADO", location.state)
           setMetaMashup(state)
         }
       } catch (err) {
@@ -54,14 +54,14 @@ export function MashupManage() {
   /**CARREGAR EKG ESPECIFICADO PELO MASHUP */
   async function getSpecificatedEKG(uuid: string) {
     const spec_ekg = await findOneMetadataGraphByIdentifier(uuid)
-    print_(`CARREGANDO EKG ESPECIFICADO PELO MASHUP`, spec_ekg)
+    printt(`CARREGANDO EKG ESPECIFICADO PELO MASHUP`, spec_ekg)
     setSpecificatedEKG(spec_ekg)
   }
 
   /**CARREGAR A VISÃO SEMÂNTICA */
   async function getSemantiView(uuid: string) {
     const semantic_view = await findOneSemanticView(uuid)
-    print_(`CARREGANDO VISÃO SEMANTICA DO EKG `, semantic_view)
+    printt(`CARREGANDO VISÃO SEMANTICA DO EKG `, semantic_view)
     setSemanticView(semantic_view)
   }
 
@@ -84,7 +84,7 @@ export function MashupManage() {
       // setLoading(true);
       // const response = await findAllLocalGraphs();
       const response = await findAllLocalGraphsBySemanticView(semanticView);
-      print_("listando VISÕES EXPORTADAS", response)
+      printt("listando VISÕES EXPORTADAS", response)
       setLocalgraphs(response);
     } catch (error) {
       console.log(error);
@@ -123,7 +123,7 @@ export function MashupManage() {
         <Grid item sm={12}>
           <Stack direction="row" spacing={2}>
             <Typography variant="h6" component="div">
-              KG de Metadados
+              KG de Metadados do EKG
             </Typography>
             {
               metaMashup?.uri_metaEKG
@@ -149,7 +149,7 @@ export function MashupManage() {
           {metaMashup?.uri_metaEKG
             ? <Stack direction="row" spacing={1}>
               <Typography variant="caption" component="div">
-                Nome:
+                URI/Nome:
               </Typography>
               <Typography variant="caption" component="div" color="purple">
                 {metaMashup?.uri_metaEKG?.value}
@@ -184,7 +184,7 @@ export function MashupManage() {
           {metaMashup?.uri_mashup_view
             ? <Stack direction="row" spacing={1}>
               <Typography variant="caption" component="div">
-                Nome:
+                URI/Nome:
               </Typography>
               <Typography variant="caption" component="div" color="purple">
                 {metaMashup?.uri_mashup_view?.value}

@@ -6,7 +6,7 @@ import * as zod from 'zod';
 import { addSemanticView, ISemanticViewForm, updateSemanticView } from "../../services/sparql-semantic-view";
 
 import { LoadingContext } from "../../App";
-import { print_ } from "../../commons/utils";
+import { printt } from "../../commons/utils";
 
 export const SemanticViewForm = ({ from, open, setOpenSemanticViewDialog, ekgMetadata, semanticView, getSemanticView }) => {
   const { isLoading, setIsLoading } = useContext(LoadingContext);
@@ -47,18 +47,18 @@ export const SemanticViewForm = ({ from, open, setOpenSemanticViewDialog, ekgMet
   }, [open]);
 
   const handleSubmitSemanticView: SubmitHandler<ISemanticViewForm> = async (data) => {
-    print_("ENVIANDO DADOS DA VS", { ...data, belongsTo: ekgMetadata.identifier.value })
+    printt("ENVIANDO DADOS DA VS", { ...data, belongsTo: ekgMetadata.identifier.value })
     try {
       setIsLoading(true);
       if (data.identifier) {
-        print_("ATUALIZANDO A VS")
+        printt("ATUALIZANDO A VS")
         const updated = await updateSemanticView({ ...data, belongsTo: ekgMetadata.identifier.value })
-        print_(`VS ATUALIZADA: `, updated)
+        printt(`VS ATUALIZADA: `, updated)
         await getSemanticView(data.identifier);
       } else {
-        print_("CRIANDO VS")
+        printt("CRIANDO VS")
         const created = await addSemanticView({ ...data, belongsTo: ekgMetadata.identifier.value })
-        print_(`VS CRIADA: `, created)
+        printt(`VS CRIADA: `, created)
         await getSemanticView(created.identifier.value);
       }
     } catch (error) {

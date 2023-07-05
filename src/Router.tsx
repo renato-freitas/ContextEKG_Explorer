@@ -19,6 +19,7 @@ import { DataSourceList } from './view/organizations/datasources/DataSourceList'
 import { DataSourceForm } from './view/organizations/datasources/DataSourceForm';
 
 
+import { DataSources } from './view/datasources/DataSources';
 import { NewTableList } from './view/datasources/tables/NewTableList';
 import { TableForm } from './view/datasources/tables/TableForm';
 import { ColumnList } from './view/datasources/columns/ColumnList';
@@ -59,7 +60,8 @@ export default function Router() {
 
         <Route path={ROUTES.PERSONS} element={<Persons />} />
         
-        <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} />
+        <Route path={ROUTES.DATASOURCE_LIST} element={<DataSources />} />
+        {/* <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} /> */}
         <Route path={ROUTES.DATASOURCE_FORM} element={<DataSourceForm />} />
 
         <Route path={ROUTES.TABLE_LIST} element={<NewTableList />} />

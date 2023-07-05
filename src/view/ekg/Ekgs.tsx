@@ -28,7 +28,7 @@ import { MDialogToConfirmDelete } from "../../components/MDialog";
 import { RDF_Node } from "../../models/RDF_Node";
 import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
 import { TitleWithButtonBack } from "../../components/MTitleWithButtonBack";
-import { print_ } from "../../commons/utils";
+import { printt } from "../../commons/utils";
 import { MetaEKGProperties } from "../../models/MetaEKGProperties";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 
@@ -64,9 +64,9 @@ export function MetagraphList() {
       try {
         setLoading(true);
         if (selectedMetaEKG?.uri) {
-          print_(`/propriedades/?uri=${encodeURIComponent(selectedMetaEKG?.uri?.value)}`)
+          printt(`/propriedades/?uri=${encodeURIComponent(selectedMetaEKG?.uri?.value)}`)
           const response = await api.get(`/propriedades/?uri=${encodeURIComponent(selectedMetaEKG?.uri?.value)}`);
-          print_(``, response)
+          printt(``, response)
           serProperties(response.data)
         }
         // setMetaEKG(response.data)

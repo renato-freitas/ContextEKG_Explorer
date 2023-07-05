@@ -12,7 +12,7 @@ import { IMetadataGraphForm, addtMetadataGraph, updateMetadataGraph } from "../.
 import { LoadingContext } from "../../App";
 import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
 import { METADATA_GRAHP_TYPE } from "../../commons/constants";
-import { print_ } from "../../commons/utils";
+import { printt } from "../../commons/utils";
 
 export interface LocationParams {
   pathname: string;
@@ -52,7 +52,7 @@ export function MetagraphForm() {
   const handleSubmitMetadataGraph: SubmitHandler<IMetadataGraphForm> = async (data) => {
     try {
       setIsLoading(true);
-      print_("Enviando dados do EKG de Metadados", data);
+      printt("Enviando dados do EKG de Metadados", data);
       if (data.identifier !== "") {
         console.log("*** Atulizando EKG de Metadados ***")
         await updateMetadataGraph(data)

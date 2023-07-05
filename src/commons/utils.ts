@@ -1,3 +1,3 @@
-export function print_(text: string, value?: any): void {
+export function printt(text: string, value?: any): void {
   console.log(`*** ${text.toUpperCase()} ***`, value ? value : "")
 }

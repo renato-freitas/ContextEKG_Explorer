@@ -3,13 +3,13 @@ import { Horse, Person, Cube, Graph, Database, Storefront, PuzzlePiece } from "p
 
 export const menuEvolve = [
   {
-    title: `Grafo de Metadados`,
+    title: `KG de Metadados`,
     icon: Graph,
     href: ROUTES.METAGRAPHS,
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: `Mashups`,
+    title: `KG Especializado`,
     icon: Graph,
     href: ROUTES.MASHUP_LIST,
     type: [USER_TYPE.ADMIN]
@@ -18,6 +18,12 @@ export const menuEvolve = [
     title: 'Tópicos',
     icon: Cube,
     href: ROUTES.TOPICS,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
+    title: 'Fonte de Dados',
+    icon: Database,
+    href: ROUTES.DATASOURCE_LIST,
     type: [USER_TYPE.ADMIN]
   },
   {

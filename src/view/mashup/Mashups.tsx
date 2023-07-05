@@ -25,7 +25,7 @@ import { SemanticViewEntity } from '../../models/SemanticViewEntity';
 import { TitleWithButtonBack } from '../../components/MTitleWithButtonBack';
 import { MashupEntity } from '../../models/MashupEntity';
 import { findAllMetadataGraphs, removeMetadataGraph } from '../../services/sparql-metagraph';
-import { print_ } from "../../commons/utils";
+import { printt } from "../../commons/utils";
 import { MetaEKGProperties } from "../../models/MetaEKGProperties";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { MetaMashup } from '../../models/MetaMashup';
@@ -43,12 +43,12 @@ export function Mashups() {
     try {
       setLoading(true);
       const response = await api.get("/meta-mashup");
-      print_(`mashups`, response.data)
+      printt(`mashups`, response.data)
       setMashups(response.data)
       setSelectedMashup(response.data[0])
       setSelectedIndex(0)
     } catch (error) {
-      print_('error', error);
+      printt('error', error);
     } finally {
       setLoading(false);
     }
@@ -64,9 +64,9 @@ export function Mashups() {
       try {
         setLoading(true);
         if (selectedMashup?.uri) {
-          print_(`/propriedades/mashup/?uri=${encodeURIComponent(selectedMashup?.uri?.value)}`)
+          printt(`/propriedades/mashup/?uri=${encodeURIComponent(selectedMashup?.uri?.value)}`)
           const response = await api.get(`/propriedades/mashup/?uri=${encodeURIComponent(selectedMashup?.uri?.value)}`);
-          print_(`propriedades/mashup/`, response.data)
+          printt(`propriedades/mashup/`, response.data)
           serProperties(response.data)
         }
         // setMetaEKG(response.data)
@@ -80,7 +80,7 @@ export function Mashups() {
   }, [selectedMashup])
 
   const openForm = () => {
-    print_("ABRIR FORM MASHUP")
+    printt("ABRIR FORM MASHUP")
     navigate(ROUTES.MASHUP_FORM);
   }
 
@@ -101,14 +101,14 @@ export function Mashups() {
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
   const handleClickOpenDialogToConfirmDelete = (row: MashupEntity) => {
-    print_(`MASHUP SELECIONADO`, row)
+    printt(`MASHUP SELECIONADO`, row)
     setSelectedMashup(row)
     setOpenDialogToConfirmDelete(true);
   };
 
   // const handleRemove = async (mashup: IMetadataGraphForm) => {
   const handleRemove = async (identifier: string, type: string) => {
-    print_("DELETANDO MASHUP")
+    printt("DELETANDO MASHUP")
     await removeMetadataGraph(identifier, type);
     await loadMashups();
   }
@@ -120,12 +120,12 @@ export function Mashups() {
         if (location.state) {
           // let state = location.state as MetadataGraphEntity;
           let state = location.state as SemanticViewEntity;
-          print_(`Carregando a VS selecionada`, state)
+          printt(`Carregando a VS selecionada`, state)
           // console.log(state)
           // setMetagraph(state)
         }
       } catch (err) {
-        print_('err', err);
+        printt('err', err);
       }
     }
     onEdit();
@@ -194,7 +194,7 @@ export function Mashups() {
               <Tooltip title="Construir Metadados de Artefatos">
                 <IconButton onClick={() => {
                   navigate(ROUTES.MASHUP_MANAGE, { state: row })
-                  print_("SELECIONANDO MASHUP", row);
+                  printt("SELECIONANDO MASHUP", row);
                 }}>
                   <ConstructionIcon />
                 </IconButton>
@@ -218,6 +218,9 @@ export function Mashups() {
         <Grid item sm={7}>
           {properties.length > 0 && <Box sx={{ width: "100%", height: "400" }}>
             {/* <Paper sx={{ maxHeight: 400, bgcolor: 'None', background: "None" }}> */}
+            <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
+              Propriedades
+            </Typography>
             <Paper sx={{ maxHeight: 400, background: "None" }} elevation={3}>
               <List sx={{
                 // background: "None",
@@ -231,19 +234,19 @@ export function Mashups() {
                 padding: 1
                 // '& ul': { padding: 1 },
               }}>
-                <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
-                  Propriedades
-                </Typography>
-                {properties.map((row, idx) => <>
-                  {/* <ListItem key={idx}> */}
-                  <Typography sx={{ fontSize: 14, fontWeight: 500 }} color="text.primary" gutterBottom>
-                    {row?.l ? row?.l?.value : row?.p?.value}
-                  </Typography>
 
-                  <Typography variant="body2" sx={{ mb: 2, ml: 2 }} color="text.secondary" gutterBottom>
-                    {row.o.value}
-                  </Typography>
-                  {/* </ListItem> */}
+                {properties.map((row, idx) => <>
+                  <ListItem key={idx}>
+                    <Stack>
+                      <Typography sx={{ fontSize: 14, fontWeight: 600 }} color="text.primary" gutterBottom>
+                        {row?.l ? row?.l?.value : row?.p?.value}
+                      </Typography>
+
+                      <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
+                        {row.o.value}
+                      </Typography>
+                    </Stack>
+                  </ListItem>
                 </>
                 )}
               </List>
