@@ -31,9 +31,10 @@ export const TitleWithButtonBack = ({ hasButtonBack, title, buttonLabel, openFor
       }
       <h2>{title}</h2>
       {
-        hasButtonBack
-          ? false
-          : <>
+        // hasButtonBack
+          // ? false
+          // :
+          <>
             <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
             <Button variant="contained" onClick={openForm}>{buttonLabel}</Button>
           </>

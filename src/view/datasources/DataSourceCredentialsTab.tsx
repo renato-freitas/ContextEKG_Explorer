@@ -20,47 +20,13 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Columns, Table } from "phosphor-react";
 
-const TabularForm = () => <Grid container spacing={2}>
-  <Grid item sm={6}>
-    <FormControl fullWidth>
-      <FormLabel htmlFor="title">Nome da Tabela/CSV</FormLabel>
-      <TextField
-        variant="outlined"
-        placeholder="Ex: REDESIM"
-        size="small"
-      // {...props.register('title')}
-      />
-      {/* <p>{props.errors.title?.message}</p> */}
-    </FormControl>
-  </Grid>
-  <Grid item sm={6}>
-    <FormControl fullWidth>
-      <FormLabel htmlFor="creator">Nome do Schema</FormLabel>
-      <TextField
-        variant="outlined"
-        placeholder="Ex: public"
-        // required
-        size="small"
-      // {...props.register("creator")}
-      />
-      {/* <p>{props.errors.creator?.message}</p> */}
-    </FormControl>
-  </Grid>
-  <Grid item sm={12}>
-    <FormControl fullWidth>
-      <FormLabel htmlFor="comment">Descrição</FormLabel>
-      <TextField
-        variant="outlined"
-        placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
-        size="small"
-      // {...props.register('comment')}
-      />
-    </FormControl>
-  </Grid>
-</Grid>
+interface DataSourceDescriptionProps {
+  schema: any;
+  register: any;
+  errors: any;
+}
 
-
-export function DataSourceCredentialsTab() {
+export function DataSourceCredentialsTab(props: DataSourceDescriptionProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [tables, setTables] = useState([
@@ -70,6 +36,57 @@ export function DataSourceCredentialsTab() {
 
   return (
     <div>
+      <Grid container spacing={2}>
+        <Grid item sm={6}>
+          <FormControl fullWidth>
+            <FormLabel htmlFor="title">URL de Conexão</FormLabel>
+            <TextField
+              variant="outlined"
+              placeholder="Ex: REDESIM"
+              size="small"
+              {...props.register('connection_url')}
+            />
+            <p>{props.errors.connection_url?.message}</p>
+          </FormControl>
+        </Grid>
+        <Grid item sm={6}>
+          <FormControl fullWidth>
+            <FormLabel htmlFor="creator">Nome de Usuário</FormLabel>
+            <TextField
+              variant="outlined"
+              placeholder="Ex: public"
+              // required
+              size="small"
+              {...props.register("username")}
+            />
+            <p>{props.errors.username?.message}</p>
+          </FormControl>
+        </Grid>
+        <Grid item sm={6}>
+          <FormControl fullWidth>
+            <FormLabel htmlFor="password">Senha</FormLabel>
+            <TextField
+              variant="outlined"
+              placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
+              size="small"
+              {...props.register('password')}
+            />
+            <p>{props.errors.password?.message}</p>
+          </FormControl>
+        </Grid>
+        <Grid item sm={6}>
+          <FormControl fullWidth>
+            <FormLabel htmlFor="jdbc_driver">Driver JDBC</FormLabel>
+            <TextField
+              variant="outlined"
+              placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
+              size="small"
+              {...props.register('jdbc_driver')}
+            />
+            <p>{props.errors.jdbc_driver?.message}</p>
+          </FormControl>
+        </Grid>
+      </Grid>
       {/* Botões */}
       <Grid item sm={12} >
         <Box display="flex" justifyContent="flex-start">

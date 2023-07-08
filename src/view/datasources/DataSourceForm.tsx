@@ -27,11 +27,18 @@ import { DataSourceTablesTab } from "./DataSourceTablesTab";
 import { DataSourceCredentialsTab } from "./DataSourceCredentialsTab";
 import { TableEntity } from "../../models/TableEntity";
 import { RDF_Node } from "../../models/RDF_Node";
+import { api } from "../../services/api";
+import PhoneMissedIcon from '@mui/icons-material/PhoneMissed';
+import { VSKG, NAMESPACES } from "../../commons/constants";
+import { double_encode_uri, printt } from "../../commons/utils";
 
 interface IDataSource {
   uri: RDF_Node;
   identifier: RDF_Node;
   title: RDF_Node;
+  label: RDF_Node;
+  description: RDF_Node;
+  type: RDF_Node;
   comment: RDF_Node;
   page: RDF_Node;
   creator: RDF_Node;
@@ -39,17 +46,24 @@ interface IDataSource {
   modified: RDF_Node;
 }
 
+enum DataSourceTypeEnum {
+  Banco_Dados_Relacional = `${VSKG}RelationalDataBase_DataSource`,
+  No_SQL = `${VSKG}NoSQL_DataSource`,
+  Triplestore = `${VSKG}Triplestore_DataSource`,
+  CSV = `${VSKG}CSV_DataSource`,
+  RDF = `${VSKG}RDF_DataSource`
+}
+
 interface IDataSourceForm {
-  uri: string;
-  identifier: string;
-  title: string;
-  comment: string;
-  page: string;
-  tables: TableEntity[];
-  tableNames: string[];
-  creator: string;
-  created: string;
-  modified: string;
+  label: string,
+  description: string,
+  subject_datasource: string,
+  type: DataSourceTypeEnum,
+  connection_url: string,
+  username: string,
+  password: string,
+  jdbc_driver: string,
+  csv_file: string
 }
 
 export interface LocationParams {
@@ -61,14 +75,17 @@ export interface LocationParams {
 }
 
 const DataSourceSchema = zod.object({
-  identifier: zod.string().optional(),
-  uri: zod.string().optional(),
-  title: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  comment: zod.string().min(1, 'Digite ao menos 1 caracter'),
-  page: zod.string().optional(),
-  creator: zod.string().min(2, 'Digite ao menos 1 caracter'),
-  created: zod.string().optional(),
-  modified: zod.string().optional(),
+  label: zod.string().min(1, { message: "Preencher!" }),
+  description: zod.string().optional(),
+  subject_datasource: zod.string().optional(),
+  type: zod.nativeEnum(DataSourceTypeEnum),
+  connection_url: zod.string().min(1, { message: "Preencher!" }),
+  username: zod.string().min(1, { message: "Preencher!" }),
+  password: zod.string().min(1, { message: "Preencher!" }),
+  jdbc_driver: zod.string().min(1, { message: "Preencher!" }),
+  csv_file: zod.string().optional(),
+  createdAt: zod.string().optional(),
+  updatedAt: zod.string().optional(),
 });
 
 /**Tenho que decidir como fazer a anotação das tabelas/csv das fontes de dados
@@ -85,49 +102,81 @@ export function DataSourceForm() {
   const [tables, setTables] = useState([]);
   const [tableNames, setTableNames] = useState<string[]>([]);
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IDataSourceForm>({
+  const { register, control, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IDataSourceForm>({
     resolver: zodResolver(DataSourceSchema),
-    defaultValues: {
-      identifier: '',
-      title: '',
-      comment: '',
-      page: '',
-      creator: ''
-    }
+    // defaultValues: {
+    // title: '',
+    // label: '',
+    // description: '',
+    // type: '',
+    // connection_url: '',
+    // page: '',
+    // creator: ''
+    // }
   });
 
   const handleSubmitDataSource: SubmitHandler<IDataSourceForm> = async (data) => {
-    console.log("*** Enviando dados de Grafo de Metadados ***")
+    console.log("*** Enviando dados de Fonte de Dados ***")
     console.log(data);
-    setLoading(true);
-    if (data.identifier !== "") {
-      console.log("*** UPDATE ***")
-      // await update(data)
-    } else {
-      console.log("*** INSERT ***")
-      const response = await insertDataSource(data)
-      console.log("*** RESPOSTA DO INSERT ***")
-      console.log(response)
+
+    try {
+      setLoading(true);
+      // if (location?.state) {
+      let uri = location?.state as IDataSource
+
+      printt('data 2 update', uri)
+      if (uri) {
+        let uri_enc = double_encode_uri(uri.uri.value)
+        await api.put(`/datasources/${uri_enc}`, data)
+      } else {
+        console.log("*** INSERT ***")
+        // const response = await insertDataSource(data)
+        const response = await api.post(`/datasources`, data)
+        console.log("*** RESPOSTA DO INSERT ***")
+        console.log(response)
+      }
+      reset();
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    // navigate(-1);
-    reset();
   };
 
   /**Editar uma Fonte de Dados */
   useEffect(() => {
-    function onEdit() {
+    async function onEdit() {
       try {
         if (location.state) {
           let state = location.state as IDataSource;
           console.log("*** Colocando a Fonte de Dados Selecionada no Formulário ***")
-          console.log(location)
-          setValue("title", state.title.value);
-          setValue("comment", state.comment.value);
-          setValue("page", state.page.value);
-          setValue("creator", state.creator.value);
-          setValue("created", state.created.value);
-          setValue("identifier", state.identifier.value);
+          console.log(location, state)
+          setValue("label", state.label.value);
+
+          printt('onEdite(), uri', state.uri.value)
+          try {
+            let encoded_uri = double_encode_uri(state.uri.value)
+            const response = await api.get(`/properties/${encoded_uri}`);
+            response.data.forEach((p: any) => {
+              // if (p.p.value.includes(`${NAMESPACES.VSKG}uri`)) { setValue("uri", p.o.value); }
+              if (p.p.value.includes(`${NAMESPACES.DC}description`)) { setValue("description", p.o.value); }
+              if (p.p.value.includes(`${NAMESPACES.VSKG}type`)) {
+                if (p.o.value == DataSourceTypeEnum.Banco_Dados_Relacional) {
+                  setValue("type", DataSourceTypeEnum.Banco_Dados_Relacional);
+                }
+                if (p.o.value == DataSourceTypeEnum.CSV) {
+                  setValue("type", DataSourceTypeEnum.CSV);
+                }
+              }
+              if (p.p.value.includes(`${NAMESPACES.VSKG}connection_url`)) { setValue("connection_url", p.o.value); }
+              if (p.p.value.includes(`${NAMESPACES.VSKG}username`)) { setValue("username", p.o.value); }
+              if (p.p.value.includes(`${NAMESPACES.VSKG}password`)) { setValue("password", p.o.value); }
+              if (p.p.value.includes(`${NAMESPACES.VSKG}jdbc_driver`)) { setValue("jdbc_driver", p.o.value); }
+            })
+          } catch (error) {
+            console.error("load properties", error)
+          }
+
         }
       } catch (err) {
         console.log(err);
@@ -188,36 +237,29 @@ export function DataSourceForm() {
             <CardContent sx={{ padding: '30px' }}>
               {/* <Box sx={{ borderBottom: 1, borderColor: 'divider' }}> */}
               <Box>
-                <Tabs value={valueTab} onChange={handleChange} aria-label="basic tabs example">
-                  <Tab label="Descrição" {...a11yProps(0)} />
-                  <Tab label="Tabelas" {...a11yProps(1)} />
-                  <Tab label="Colunas" {...a11yProps(2)} />
-                  <Tab label="Credenciais" {...a11yProps(3)} />
+                <Tabs value={valueTab}
+                  onChange={handleChange}
+                  aria-label="basic tabs example"
+                  indicatorColor="secondary">
+                  <Tab label={`Descrição`} icon={<PhoneMissedIcon />} iconPosition="end" {...a11yProps(0)} />
+                  <Tab label="Credenciais" {...a11yProps(1)} />
                 </Tabs>
                 <form onSubmit={handleSubmit(handleSubmitDataSource)}>
                   <TabPanel value={valueTab} index={0}>
                     <DataSourceDescriptionTab
                       schema={DataSourceSchema}
                       register={register}
+                      control={control}
                       errors={errors}
                     />
                   </TabPanel>
+
                   <TabPanel value={valueTab} index={1}>
-                    <DataSourceTablesTab
+                    <DataSourceCredentialsTab
                       schema={DataSourceSchema}
                       register={register}
                       errors={errors}
-                      tables={tables}
-                      setTables={setTables}
-                      tableNames={tableNames}
-                      setTableNames={setTableNames}
                     />
-                  </TabPanel>
-                  <TabPanel value={valueTab} index={2}>
-                    <DataSourceColumnsTab />
-                  </TabPanel>
-                  <TabPanel value={valueTab} index={3}>
-                    <DataSourceCredentialsTab />
                   </TabPanel>
                 </form>
               </Box>

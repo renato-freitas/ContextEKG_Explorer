@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import { IconButton, Stack} from '@mui/material';
+import { IconButton, Stack } from '@mui/material';
 
 
 import { ROUTES } from '../../commons/constants';
@@ -22,10 +22,11 @@ import ConstructionIcon from '@mui/icons-material/Construction';
 
 import { MTable } from '../../components/MTable';
 import { TablePaginationActions } from '../../commons/pagination';
-import { MDialogToConfirmDelete } from '../../components/MDialog';
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 
-import { printt } from "../../commons/utils";
+import { double_encode_uri, printt } from "../../commons/utils";
+import { MDialogToConfirmDelete } from '../../components/MDialog';
+import { MCard } from '../../components/mcard/MCard';
 
 export function DataSources() {
   const navigate = useNavigate();
@@ -80,32 +81,31 @@ export function DataSources() {
 
 
   /**Pagination */
-  const [page, setPage] = useState(0);
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
-    setRowsPerPage(parseInt(event.target.value, 10));
-    // setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  /**Dialog to Delete */
-  // const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
-  // const handleClickOpenDialogToConfirmDelete = (row: DataSourceEntity) => {
-  //   console.log(row)
-  //   setSelectedDataSource(row)
-  //   setOpenDialogToConfirmDelete(true);
+  // const [page, setPage] = useState(0);
+  // const handleChangePage = (event: unknown, newPage: number) => {
+  //   setPage(newPage);
   // };
 
-  // const handleRemove = async (identifier: string) => {
-  //   await removeDataSource(identifier);
-  //   await loadDataSources();
-  // }
+  // const [rowsPerPage, setRowsPerPage] = useState(5);
+  // const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   console.log(event.target.value)
+  //   setRowsPerPage(parseInt(event.target.value, 10));
+  //   setPage(0);
+  // };
+
   /**Dialog to Delete */
+  const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
+  const handleClickOpenDialogToConfirmDelete = (row: DataSourceModel) => {
+    console.log(row)
+    setSelectedDataSource(row)
+    setOpenDialogToConfirmDelete(true);
+  };
+
+  const handleRemove = async (normal_uri: string) => {
+    let encoded_uri = double_encode_uri(normal_uri)
+    await api.delete(`/datasources/${encoded_uri}`)
+    await loadDataSources();
+  }
 
   const [selectedIndex, setSelectedIndex] = React.useState<Number>(1);
   const handleListItemClick = (event: any, idx: Number, row: DataSourceModel) => {
@@ -123,65 +123,69 @@ export function DataSources() {
 
       <Grid container spacing={1}>
         {/* Lista das fontes de dados */}
-        <Grid item sm={5}>
+        <Grid item sm={6}>
+          <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
+            Recursos
+          </Typography>
           <List sx={{
-            // width: '100%',
-            // maxWidth: 360,
-            // bgcolor: 'background.paper',
-            // ml:0,
             bgcolor: 'None',
             position: 'relative',
             overflow: 'auto',
             maxHeight: 400,
             '& ul': { padding: 0 },
           }}>
-            {dataSources.map((row, idx) => <ListItemButton key={row.uri?.value} sx={{pl:1}}
+            {dataSources.map((row, idx) => <ListItemButton key={row.uri?.value} sx={{ p: 0 }}
               selected={selectedIndex === idx}
               onClick={(event) => handleListItemClick(event, idx, row)}
             >
-              <ListItemText
-                primary={
-                  <Typography sx={{ fontSize: "1rem", fontWeight: 600, m: 0 }} color="text.primary" gutterBottom>
-                    {row.label.value}
-                  </Typography>
-                }
-                secondary={<Typography
-                  sx={{ display: 'inline', fontSize: "0.66rem" }}
-                  component="span"
-                  variant="body2"
-                  color="text.primary"
-                >{row.uri.value}</Typography>} />
-
-              <Tooltip title="Construir Metadados de Artefatos">
-                <IconButton onClick={() => {
-                  navigate(ROUTES.MASHUP_MANAGE, { state: row })
-                  printt("SELECIONANDO MASHUP", row);
-                }}>
-                  <ConstructionIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Editar Metadados de Autoria">
-                <IconButton edge="end" aria-label="delete" onClick={() => alert("editar")}>
-                  <EditTwoToneIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Deletar Grafo de Metadados">
-                <IconButton edge="end" aria-label="delete" onClick={() => alert("remover")}>
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
+              <MCard>
+                <Box sx={{width:470}}>
+                  <Grid item sm={12}>
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="h6" component="div">
+                        {row?.label?.value}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <Typography variant="caption" component="div" color="purple">
+                        {row?.description?.value}
+                      </Typography>
+                    </Stack>
+                    {/* BOTÕES */}
+                    <Stack direction="row" gap={1}>
+                      <Tooltip title="Construir Metadados">
+                        <IconButton onClick={() => {
+                          navigate(ROUTES.MASHUP_MANAGE, { state: row })
+                        }}>
+                          <ConstructionIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Editar Metadados">
+                        <IconButton edge="end" onClick={() => { navigate(ROUTES.DATASOURCE_FORM, { state: row }) }}>
+                          <EditTwoToneIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Deletar Fonte de Dados">
+                        <IconButton edge="end" aria-label="delete" onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </Grid>
+                </Box>
+              </MCard>
             </ListItemButton>
             )}
           </List>
         </Grid>
 
-        {/* Listas da propriedades do mashup */}
-        <Grid item sm={7}>
+        {/* Listas de propriedades */}
+        <Grid item sm={6}>
           {properties.length > 0 && <Box sx={{ width: "100%", height: "400" }}>
             <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
               Propriedades
             </Typography>
-            <Paper sx={{ maxHeight: 400, background: "None" }} elevation={3}>
+            <Paper sx={{ maxHeight: 400, background: "None" }} elevation={0}>
               <List sx={{
                 width: '100%',
                 position: 'relative',
@@ -211,8 +215,15 @@ export function DataSources() {
         </Grid>
         {/* Fim */}
       </Grid>
+
+      <MDialogToConfirmDelete
+        openConfirmDeleteDialog={openDialogToConfirmDelete}
+        setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
+        deleteInstance={handleRemove}
+        instance={selectedDataSource}
+      />
     </div>
   )
 
-  
+
 }

@@ -13,12 +13,19 @@ import TextField from "@mui/material/TextField";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
+import { InputLabel, MenuItem, Select } from "@mui/material";
+import { DATASOURCE_TYPES, VSKG } from "../../commons/constants";
 
 interface DataSourceDescriptionProps {
   schema: any;
   register: any;
+  control: any;
   errors: any;
 }
+
+
+
+
 
 export function DataSourceDescriptionTab(props: DataSourceDescriptionProps) {
   const location = useLocation();
@@ -29,41 +36,44 @@ export function DataSourceDescriptionTab(props: DataSourceDescriptionProps) {
     <Grid container spacing={2}>
       <Grid item sm={6}>
         <FormControl fullWidth>
-          <FormLabel htmlFor="title">Titulo</FormLabel>
+          <FormLabel htmlFor="label">Rótulo</FormLabel>
           <TextField
             variant="outlined"
             placeholder="Ex: REDESIM"
             size="small"
-            {...props.register('title')}
+            {...props.register('label')}
           />
-          <p>{props.errors.title?.message}</p>
+          <p>{props.errors.label?.message}</p>
         </FormControl>
       </Grid>
       <Grid item sm={6}>
-        <FormControl fullWidth>
-          <FormLabel htmlFor="creator">Criador</FormLabel>
-          <TextField
-            variant="outlined"
-            placeholder="Ex: Apelido"
-            // required
-            size="small"
-            {...props.register("creator")}
+        <FormControl fullWidth size="small">
+          <FormLabel htmlFor="type">Tipo de Fonte</FormLabel>
+          <Controller
+            name="type"
+            defaultValue={""}
+            control={props.control}
+            render={({ field }) => <Select
+              {...field}
+            >
+              {Object.entries(DATASOURCE_TYPES).map(([k, v]) => <MenuItem value={v}>{k}</MenuItem>)}
+            </Select>
+            }
           />
-          <p>{props.errors.creator?.message}</p>
         </FormControl>
       </Grid>
       <Grid item sm={12}>
         <FormControl fullWidth>
-          <FormLabel htmlFor="comment">Descrição</FormLabel>
+          <FormLabel htmlFor="description">Descrição</FormLabel>
           <TextField
             variant="outlined"
             placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
             size="small"
-            {...props.register('comment')}
+            {...props.register('description')}
           />
         </FormControl>
       </Grid>
-      <Grid item sm={12}>
+      {/* <Grid item sm={12}>
         <FormControl fullWidth>
           <FormLabel htmlFor="page">Página Web sobre a Fonte de Dados</FormLabel>
           <TextField
@@ -73,8 +83,8 @@ export function DataSourceDescriptionTab(props: DataSourceDescriptionProps) {
             {...props.register('page')}
           />
         </FormControl>
-      </Grid>
-      
+      </Grid> */}
+
     </Grid>
   );
 }

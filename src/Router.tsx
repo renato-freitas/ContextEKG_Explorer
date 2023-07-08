@@ -9,14 +9,8 @@ import { OrganizationForm } from './view/organizations/OrganizationForm';
 import { OrganizationDoc } from './view/organizations/OrganizationDoc';
 
 
-
 import { Persons } from './view/persons/Persons';
-// import { DataSourceList } from './view/datasources/DataSourceList';
-// import { DataSourceForm } from './view/datasources/DataSourceForm';
-import { NewDataSourceForm } from './view/datasources/NewDataSourceForm';
-
-import { DataSourceList } from './view/organizations/datasources/DataSourceList';
-import { DataSourceForm } from './view/organizations/datasources/DataSourceForm';
+import { DataSourceForm } from './view/datasources/DataSourceForm';
 
 
 import { DataSources } from './view/datasources/DataSources';
@@ -34,6 +28,9 @@ import { SemanticView } from './view/semantic-view/SemanticView';
 import { LocalGraph } from './view/exported-view/LocalGraph';
 import { ExportedViewForm } from './view/exported-view/ExportedViewForm';
 import { ExportedViewList } from './view/exported-view/ExportedViewList';
+import { ExportedViews } from './view/exported-view/ExportedViews';
+import { ExportedViewManage } from './view/exported-view/ExportedViewManage';
+import { Mappings } from './view/mappings/Mappings';
 
 import { TriplesMapForm } from './view/exported-view/triplesmap/TriplesMap_Form';
 import { Mashups } from './view/mashup/Mashups';
@@ -75,7 +72,10 @@ export default function Router() {
 
         <Route path={ROUTES.LOCAL_GRAPH_CONSTRUCT} element={<LocalGraph />} />
         <Route path={ROUTES.LOCAL_GRAPH_FORM} element={<ExportedViewForm />} />
-        <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<ExportedViewList />} />
+        <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<ExportedViews />} />
+        <Route path={ROUTES.EXPORTED_VIEW_MANAGE} element={<ExportedViewManage />} />
+        
+        <Route path={ROUTES.MAPPINGS_LIST} element={<Mappings />} />
         
         <Route path={ROUTES.TRIPLES_MAP_FORM} element={<TriplesMapForm />} />
         

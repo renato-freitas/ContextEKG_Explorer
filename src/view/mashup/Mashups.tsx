@@ -29,6 +29,7 @@ import { printt } from "../../commons/utils";
 import { MetaEKGProperties } from "../../models/MetaEKGProperties";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { MetaMashup } from '../../models/MetaMashup';
+import { MCard } from '../../components/mcard/MCard';
 
 export function Mashups() {
   const navigate = useNavigate();
@@ -146,24 +147,14 @@ export function Mashups() {
         buttonLabel="+ Mashup"
         openForm={openForm} />
 
-      {/* <nav><Link to={ROUTES.ORGANIZATION_DOC}>Documento</Link></nav> */}
-      {/* <Typography variant='caption'>Nessa tela são listas as organizações cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography> */}
 
-      {/* <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
-          <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
-          <Button variant="contained" onClick={openForm}>+ Novo Mashup</Button>
-        </Grid>
-      </Grid> */}
-
-
-      <Grid container spacing={2}>
+      <Grid container spacing={1}>
         {/* Lista dos mashups */}
         <Grid item sm={5}>
+          <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
+            Recursos
+          </Typography>
           <List sx={{
-            // width: '100%',
-            // maxWidth: 360,
-            // bgcolor: 'background.paper',
             bgcolor: 'None',
             position: 'relative',
             overflow: 'auto',
@@ -174,12 +165,24 @@ export function Mashups() {
               selected={selectedIndex === idx}
               onClick={(event) => handleListItemClick(event, idx, row)}
             >
-              <ListItemAvatar sx={{ minWidth: 45 }}>
-                <Avatar sx={{ fontSize: "1rem", width: 30, height: 30 }}>
-                  {idx + 1}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
+              <MCard>
+                <Box sx={{ width: 470 }}>
+                  <Grid item sm={12}>
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="h6" component="div">
+                        {row?.label?.value}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <Typography variant="caption" component="div" color="purple">
+                        {row?.description?.value}
+                      </Typography>
+                    </Stack>
+                    {/* BOTÕES */}
+                  </Grid>
+                </Box>
+              </MCard>
+              {/* <ListItemText
                 primary={
                   <Typography sx={{ fontSize: "1rem", fontWeight: 600, m: 0 }} color="text.primary" gutterBottom>
                     {row.uri_l.value}
@@ -190,7 +193,7 @@ export function Mashups() {
                   component="span"
                   variant="body2"
                   color="text.primary"
-                >{row.uri.value}</Typography>} />
+                >{row.uri.value}</Typography>} /> */}
               <Tooltip title="Construir Metadados de Artefatos">
                 <IconButton onClick={() => {
                   navigate(ROUTES.MASHUP_MANAGE, { state: row })
@@ -221,7 +224,7 @@ export function Mashups() {
             <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
               Propriedades
             </Typography>
-            <Paper sx={{ maxHeight: 400, background: "None" }} elevation={3}>
+            <Paper sx={{ maxHeight: 400, background: "None" }} elevation={0}>
               <List sx={{
                 // background: "None",
                 width: '100%',

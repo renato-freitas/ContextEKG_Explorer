@@ -1,5 +1,7 @@
 import axios from "axios";
+import { printt } from "../commons/utils";
 // var pjson = require("../../package.json");
+// https://testdriven.io/blog/developing-a-single-page-app-with-fastapi-and-vuejs/
 
 export const api = axios.create({
   // withCredentials: true,
@@ -9,12 +11,16 @@ export const api = axios.create({
   // Authorization: "Bearer " + localStorage.getItem('token')
   // }
 });
-api.defaults.headers.common["Authorization"] =
-  "Bearer " + localStorage.getItem("token");
+api.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
 api.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
 api.interceptors.response.use(
   function (response) {
-    return response;
+    if (response.data.status_code === 409) {
+      throw new Error(response.data.detail);
+    }
+    else {
+      return response;
+    }
   },
   function (error) {
     if (!error.response) {

@@ -1,6 +1,16 @@
 /**SEMANTIC WEB */
 const TXT_PREFIX = "PREFIX"
 const MOKG = "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#";
+export const VSKG = "http://www.arida.ufc.br/VSKG/";
+
+export const NAMESPACES = {
+  DC: "http://purl.org/dc/elements/1.1/",
+  VSKG: "http://www.arida.ufc.br/VSKG/",
+  SEFAZMA: "http://www.sefaz.ma.gov.br/ontology/",
+  BASE: "http://www.sefaz.ma.gov.br/resource/",
+  VSKGR: "http://www.arida.ufc.br/VSKG/resource/",
+  META_EKG: "http://www.arida.ufc.br/meta-ekg/resource/"
+}
 
 export const ENDPOINTS = {
   DEV: {
@@ -54,11 +64,11 @@ PREFIXIES_SPARQL = {
   },
 
   DATASOURCE_TYPES = {
-    "Banco de Dados Relacional": `${MOKG}RelationalDataBase_DataSource`,
-    "No-SQL": `${MOKG}NoSQL_DataSource`,
-    "Triplestore": `${MOKG}Triplestore_DataSource`,
-    "CSV": `${MOKG}CSV_DataSource`,
-    "RDF": `${MOKG}RDF_DataSource`
+    "Banco de Dados Relacional": `${VSKG}RelationalDataBase_DataSource`,
+    "No-SQL": `${VSKG}NoSQL_DataSource`,
+    "Triplestore": `${VSKG}Triplestore_DataSource`,
+    "CSV": `${VSKG}CSV_DataSource`,
+    "RDF": `${VSKG}RDF_DataSource`
   };
 
 /**APPLICATION */
@@ -93,7 +103,10 @@ export const ROUTES = {
   SEMANTIC_VIEW: '/semantic-view',
   LOCAL_GRAPH_CONSTRUCT: '/localgraph-construct',
   LOCAL_GRAPH_FORM: '/localgraph-form',
-  LOCAL_GRAPH_LIST: '/localgraphs',
+  LOCAL_GRAPH_LIST: '/exportedviews',
+  EXPORTED_VIEW_MANAGE: '/exportedview-manage',
+
+  MAPPINGS_LIST: '/mappings',
 
   TRIPLES_MAP_FORM: '/triplesmap-form',
 
