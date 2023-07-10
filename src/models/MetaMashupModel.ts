@@ -1,11 +1,13 @@
 import { RDF_Node } from "./RDF_Node";
 
-export interface MetaMashup {
+export interface MetaMashupModel {
   uri: RDF_Node;
   uri_l: RDF_Node;
   identifier: RDF_Node;
   label?: RDF_Node;
-  comment?: RDF_Node;
+  description?: RDF_Node;
+  mashupClass: RDF_Node;
+  
   creator?: RDF_Node;
   created?: RDF_Node;
   modified?: RDF_Node;

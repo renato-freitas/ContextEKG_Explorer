@@ -1,24 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useForm, Controller, SubmitHandler, UseFormProps } from "react-hook-form";
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as zod from 'zod';
-import Container from "@mui/material/Container";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Columns, Table } from "phosphor-react";
 
 interface DataSourceDescriptionProps {
   schema: any;
@@ -29,10 +17,10 @@ interface DataSourceDescriptionProps {
 export function DataSourceCredentialsTab(props: DataSourceDescriptionProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [tables, setTables] = useState([
-    { name: 'Empresas', type: 'CSV' },
-    { name: 'Empregados', type: 'BDR' },
-  ]);
+  // const [tables, setTables] = useState([
+  //   { name: 'Empresas', type: 'CSV' },
+  //   { name: 'Empregados', type: 'BDR' },
+  // ]);
 
   return (
     <div>
@@ -55,7 +43,6 @@ export function DataSourceCredentialsTab(props: DataSourceDescriptionProps) {
             <TextField
               variant="outlined"
               placeholder="Ex: public"
-              // required
               size="small"
               {...props.register("username")}
             />
@@ -88,7 +75,7 @@ export function DataSourceCredentialsTab(props: DataSourceDescriptionProps) {
         </Grid>
       </Grid>
       {/* Botões */}
-      <Grid item sm={12} >
+      <Grid item sm={12} sx={{ pt: 2 }} >
         <Box display="flex" justifyContent="flex-start">
           <Stack spacing={1} direction={{ xs: "column", sm: "row" }}>
             <Button type="submit" color="primary" variant="contained">

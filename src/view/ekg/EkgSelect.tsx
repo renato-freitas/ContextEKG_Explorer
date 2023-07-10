@@ -13,7 +13,7 @@ import { EkgTulioEntity } from "../../models/EkgTulioEntity";
 import { add_gk_metadados_on_mashup } from "../../services/sparql-mashup";
 import { MetaEKGProperties } from "../../models/MetaEKGProperties";
 
-export const EkgSelect = ({ from, open, setOpenEkgDialog, mashup_metadata_graph, setEkg }) => {
+export const MetaEkgSelect = ({ from, open, setOpenEkgDialog, mashup_metadata_graph, setEkg }) => {
   /**Preciso de model porque vem do kg de metadados do Tulio */
   const [metadataGraphs, setMetadataGraphs] = useState<EkgTulioEntity[]>([]);
   const [selectedMetaEKG, setSelectedMetaEKG] = useState<EkgTulioEntity | null>();
@@ -54,18 +54,11 @@ export const EkgSelect = ({ from, open, setOpenEkgDialog, mashup_metadata_graph,
 
 
   const handleSubmitEkgTulio: SubmitHandler<IEkgForm> = async (data) => {
-    // print_("ENVIANDO DADOS DA VS", data)
     try {
-      // print_("ENVIANDO DADOS DA VS", data.kg_metadata as EkgTulioEntity)
-      // print_('dados', data)
-      // print_("META mashup", mashup_metadata_graph)
       const obj = { uri_meta_mashup: mashup_metadata_graph.uri.value, uri_meta_ekg: data.meta_ekg?.uri?.value}
       printt('obj', obj)
       const response = await api.post("/meta-mashup/associa-meta-ekg", data=obj);
       printt('retorno', response)
-
-      // add_gk_metadados_on_mashup(data.kg_metadata as EkgTulioEntity, mashup_metadata_graph.uri.value)
-      // setEkg(data.kg_metadata)
       handleCloseDialog();
     } catch (error) {
       console.error(error)

@@ -60,7 +60,7 @@ export function SemanticView() {
     {
       title: "Grafos Locais",
       subTitle: "Visões Exportadas, Grafos Locais e Ligações",
-      route: ROUTES.LOCAL_GRAPH_LIST,
+      route: ROUTES.EXPORTED_VIEW_LIST,
       buttons: [
         <Button>+ Ontologia</Button>
       ],

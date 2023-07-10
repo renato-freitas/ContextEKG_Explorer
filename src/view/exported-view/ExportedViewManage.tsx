@@ -13,23 +13,22 @@ import { CaretCircleLeft, Eyeglasses } from 'phosphor-react'
 import { ROUTES } from "../../commons/constants";
 import { findAllExportedViews, findAllLocalGraphsBySemanticView } from "../../services/sparql-exported-view";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
-import { MetaMashup } from "../../models/MetaMashup";
+import { MetaMashupModel } from "../../models/MetaMashupModel";
 import { SemanticViewEntity } from "../../models/SemanticViewEntity";
 import { SemanticViewForm } from "../semantic-view/SemanticViewForm";
 import { findOneSemanticView } from "../../services/sparql-semantic-view";
 import { TitleWithButtonBack } from "../../components/MTitleWithButtonBack";
 import { printt } from "../../commons/utils";
-import { EkgSelect } from "../ekg/EkgSelect";
+import { MetaEkgSelect } from "../ekg/EkgSelect";
 import { EkgTulioEntity } from "../../models/EkgTulioEntity";
-import { findOneMetadataGraphByIdentifier } from "../../services/sparql-metagraph";
 import { MCard } from "../../components/mcard/MCard";
 
 
 export function ExportedViewManage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [metaMashup, setMetaMashup] = useState<MetaMashup | null>();
-  const [specificatedEKG, setSpecificatedEKG] = useState<MetaMashup | null>();
+  const [metaMashup, setMetaMashup] = useState<MetaMashupModel | null>();
+  const [specificatedEKG, setSpecificatedEKG] = useState<MetaMashupModel | null>();
   const [ekg, setEkg] = useState<EkgTulioEntity>();
   const [semanticView, setSemanticView] = useState<SemanticViewEntity | null>();
 
@@ -39,7 +38,7 @@ export function ExportedViewManage() {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as MetaMashup;
+          let state = location.state as MetaMashupModel;
           printt("CARREGANDO O MASHUP SELECIONADO", location.state)
           setMetaMashup(state)
         }
@@ -52,11 +51,11 @@ export function ExportedViewManage() {
 
 
   /**CARREGAR EKG ESPECIFICADO PELO MASHUP */
-  async function getSpecificatedEKG(uuid: string) {
-    const spec_ekg = await findOneMetadataGraphByIdentifier(uuid)
-    printt(`CARREGANDO EKG ESPECIFICADO PELO MASHUP`, spec_ekg)
-    setSpecificatedEKG(spec_ekg)
-  }
+  // async function getSpecificatedEKG(uuid: string) {
+  //   const spec_ekg = await findOneMetadataGraphByIdentifier(uuid)
+  //   printt(`CARREGANDO EKG ESPECIFICADO PELO MASHUP`, spec_ekg)
+  //   setSpecificatedEKG(spec_ekg)
+  // }
 
   /**CARREGAR A VISÃO SEMÂNTICA */
   async function getSemantiView(uuid: string) {
@@ -71,7 +70,7 @@ export function ExportedViewManage() {
       // console.log(`*** BUSCANDO A VISÃO SEMÂNTICA ***`)
       let identifier = metaMashup?.semanticView.value.split('#')[1]
       // console.log(`**** ID DA VISÃO SEMÂNTICA ***`, identifier)
-      getSpecificatedEKG(identifier);
+      // getSpecificatedEKG(identifier);
       getSemantiView(identifier)
     }
   }, [metaMashup]);
@@ -204,7 +203,7 @@ export function ExportedViewManage() {
             metaMashup?.uri_mashup_view
               ? <Stack direction="row" gap={1}>
                 <Button variant="contained" onClick={() => false}>Ontologia</Button>
-                <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: semanticView })}>Visões Exportadas</Button>
+                <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: semanticView })}>Visões Exportadas</Button>
                 <Button variant="contained">Links Semânticos</Button>
               </Stack>
               : false
@@ -287,7 +286,7 @@ export function ExportedViewManage() {
             metaMashup?.uri_mashup_view
               ? <Stack direction="row" gap={1}>
                 <Button variant="contained" onClick={() => false}>Ontologia</Button>
-                <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: semanticView })}>Visões Exportadas</Button>
+                <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: semanticView })}>Visões Exportadas</Button>
                 <Button variant="contained">Links Semânticos</Button>
               </Stack>
               : false
@@ -320,7 +319,7 @@ export function ExportedViewManage() {
           </Grid>
           : false} */}
       </MCard>
-      <EkgSelect
+      <MetaEkgSelect
         from="mashup"
         open={openEkgDialog}
         setOpenEkgDialog={setOpenEkgDialog}

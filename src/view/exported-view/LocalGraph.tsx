@@ -121,7 +121,7 @@ export function LocalGraph() {
                     sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }}
                     label={item.title?.value}
                     color="info"
-                    onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: item })}
+                    onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: item })}
                   />)}
                 </Box>
                 {/* <Typography variant="body2" color="text.secondary">

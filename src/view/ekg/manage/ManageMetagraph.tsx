@@ -119,7 +119,7 @@ export function ManageMetagraph() {
                 <Stack direction="row" gap={1}>
                   {/* {semanticViewLayer.buttons.map((btn) => btn)} */}
                   <Button variant="contained" onClick={() => false}>Ontologia</Button>
-                  <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: semanticView })}>Grafos Locais</Button>
+                  <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: semanticView })}>Grafos Locais</Button>
                   {/* <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: metagraph })}>Grafos Locais</Button> */}
                   <Button variant="contained">Links Semânticos</Button>
                 </Stack>

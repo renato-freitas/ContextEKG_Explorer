@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './ListEkg.module.css';
 
 import { api } from "../../services/api";
-import { findAllMetadataGraphs, IMetadataGraphForm, removeMetadataGraph } from '../../services/sparql-metagraph';
+import { IMetadataGraphForm, removeMetadataGraph } from '../../services/sparql-metagraph';
 import { METADATA_GRAHP_TYPE, ROUTES } from '../../commons/constants';
 import { Avatar, Box, CardActions, CardContent, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { MTable } from "../../components/MTable";
@@ -45,7 +45,7 @@ export function MetagraphList() {
   async function loadMetaEKG() {
     try {
       setLoading(true);
-      const response = await api.get("/meta-ekg");
+      const response = await api.get("/meta-ekgs/");
       setMetaEKGs(response.data)
       setSelectedMetaEKG(response.data[0])
     } catch (error) {

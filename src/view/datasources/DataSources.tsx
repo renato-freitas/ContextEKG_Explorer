@@ -139,7 +139,7 @@ export function DataSources() {
               onClick={(event) => handleListItemClick(event, idx, row)}
             >
               <MCard>
-                <Box sx={{width:470}}>
+                <Box sx={{ width: 470 }}>
                   <Grid item sm={12}>
                     <Stack direction="row" spacing={2}>
                       <Typography variant="h6" component="div">
@@ -155,7 +155,7 @@ export function DataSources() {
                     <Stack direction="row" gap={1}>
                       <Tooltip title="Construir Metadados">
                         <IconButton onClick={() => {
-                          navigate(ROUTES.MASHUP_MANAGE, { state: row })
+                          navigate(ROUTES.META_MASHUP_MANAGE, { state: row })
                         }}>
                           <ConstructionIcon />
                         </IconButton>

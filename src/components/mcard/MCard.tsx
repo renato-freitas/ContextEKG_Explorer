@@ -4,12 +4,13 @@ import styles from "MCard.modules.css";
 import { CardContainer, CardGridItem } from "./MCard.styles";
 
 interface MCardProps {
+  elevation?: number
   children: React.ReactNode;
 }
 
 export function MCard(props: MCardProps) {
   return (
-    <CardContainer>
+    <CardContainer elevation={props.elevation}>
       <CardContent>
         <CardGridItem container>
           {props.children}

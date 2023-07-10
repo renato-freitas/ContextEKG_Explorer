@@ -33,9 +33,9 @@ import { ExportedViewManage } from './view/exported-view/ExportedViewManage';
 import { Mappings } from './view/mappings/Mappings';
 
 import { TriplesMapForm } from './view/exported-view/triplesmap/TriplesMap_Form';
-import { Mashups } from './view/mashup/Mashups';
-import { MashupForm } from './view/mashup/MashupForm';
-import { MashupManage } from './view/mashup/manage/MashupManage';
+import { MetaMashups } from './view/mashup/MetaMashups';
+import { MashupForm } from './view/mashup/MetaMashupForm';
+import { MetaMashupManage } from './view/mashup/manage/MetaMashupManage';
 
 import { ROUTES } from './commons/constants';
 
@@ -72,16 +72,16 @@ export default function Router() {
 
         <Route path={ROUTES.LOCAL_GRAPH_CONSTRUCT} element={<LocalGraph />} />
         <Route path={ROUTES.LOCAL_GRAPH_FORM} element={<ExportedViewForm />} />
-        <Route path={ROUTES.LOCAL_GRAPH_LIST} element={<ExportedViews />} />
+        <Route path={ROUTES.EXPORTED_VIEW_LIST} element={<ExportedViews />} />
         <Route path={ROUTES.EXPORTED_VIEW_MANAGE} element={<ExportedViewManage />} />
         
         <Route path={ROUTES.MAPPINGS_LIST} element={<Mappings />} />
         
         <Route path={ROUTES.TRIPLES_MAP_FORM} element={<TriplesMapForm />} />
         
-        <Route path={ROUTES.MASHUP_LIST} element={<Mashups />} />
-        <Route path={ROUTES.MASHUP_FORM} element={<MashupForm />} />
-        <Route path={ROUTES.MASHUP_MANAGE} element={<MashupManage />} />
+        <Route path={ROUTES.META_MASHUP_LIST} element={<MetaMashups />} />
+        <Route path={ROUTES.META_MASHUP_FORM} element={<MashupForm />} />
+        <Route path={ROUTES.META_MASHUP_MANAGE} element={<MetaMashupManage />} />
       </Route>
 
       {/* Para um painel de administração eu posso ter um layout diferente 

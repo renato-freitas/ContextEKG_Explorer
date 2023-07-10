@@ -9,7 +9,7 @@ import { CaretCircleLeft } from "phosphor-react"
 interface TitleProps {
   hasButtonBack?: boolean;
   title: string;
-  buttonLabel: string;
+  buttonLabel?: string | null | undefined;
   openForm?: () => void
 }
 
@@ -31,10 +31,9 @@ export const TitleWithButtonBack = ({ hasButtonBack, title, buttonLabel, openFor
       }
       <h2>{title}</h2>
       {
-        // hasButtonBack
-          // ? false
-          // :
-          <>
+        !buttonLabel
+          ? false
+          : <>
             <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
             <Button variant="contained" onClick={openForm}>{buttonLabel}</Button>
           </>

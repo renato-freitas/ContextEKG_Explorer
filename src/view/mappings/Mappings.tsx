@@ -191,7 +191,7 @@ export function Mappings() {
                     </Stack>
                     <Stack direction="row" gap={1}>
                       <Button variant="contained" onClick={(event) => handleListItemClick(event, idx, row)}>Propriedades</Button>
-                      <Button variant="contained" onClick={() => navigate(ROUTES.LOCAL_GRAPH_LIST, { state: row })}>Editar</Button>
+                      <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: row })}>Editar</Button>
                       <Button variant="contained">Excluir</Button>
                       <Button variant="contained" color='secondary'>Mapeamentos</Button>
                     </Stack>

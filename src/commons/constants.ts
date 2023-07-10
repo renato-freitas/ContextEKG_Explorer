@@ -103,16 +103,16 @@ export const ROUTES = {
   SEMANTIC_VIEW: '/semantic-view',
   LOCAL_GRAPH_CONSTRUCT: '/localgraph-construct',
   LOCAL_GRAPH_FORM: '/localgraph-form',
-  LOCAL_GRAPH_LIST: '/exportedviews',
+  EXPORTED_VIEW_LIST: '/exportedviews',
   EXPORTED_VIEW_MANAGE: '/exportedview-manage',
 
   MAPPINGS_LIST: '/mappings',
 
   TRIPLES_MAP_FORM: '/triplesmap-form',
 
-  MASHUP_LIST: '/mashups',
-  MASHUP_FORM: '/mashup-form',
-  MASHUP_MANAGE: '/mashup-manage',
+  META_MASHUP_LIST: '/meta-mashups',
+  META_MASHUP_FORM: '/meta-mashup-form',
+  META_MASHUP_MANAGE: '/meta-mashup-manage',
 },
 
   USER_TYPE = {
@@ -124,3 +124,8 @@ export const ROUTES = {
     EKG: "EKG",
     MASHUP: "Mashup"
   };
+
+  /**Ontologia de Domínio */
+export const OVSGK = {
+  P_META_MASHUP_HAS_EXPORTED_VIEW: "http://www.arida.ufc.br/VSKG/hasExportedView"
+}

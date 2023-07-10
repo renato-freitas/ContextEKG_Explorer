@@ -9,7 +9,8 @@ export interface IMetadataGraphForm {
   uri: string;
   identifier: string;
   title: string;
-  comment: string;
+  label: string;
+  description: string;
   creator: string;
   created: string;
   modified: string;
@@ -29,7 +30,6 @@ export async function addtMetadataGraph(data: IMetadataGraphForm) {
           rdfs:label '${data.title}' ;
           dc:identifier '${uuid}' ;
           dc:title '${data.title}' ;
-          rdfs:comment "${data.comment}" ;
           dc:creator '${data.creator}' ;
           dcterms:created '${currentDate.toISOString()}' ;
           dcterms:modified '${currentDate.toISOString()}' .
@@ -66,7 +66,6 @@ export async function updateMetadataGraph(data: IMetadataGraphForm) {
         rdfs:label "${data.title}" ;
         dc:identifier "${data.identifier}" ;
         dc:title "${data.title}" ;
-        rdfs:comment "${data.comment}" ;
         dc:creator "${data.creator}" ;
         dcterms:created "${data.created}" ;
         dcterms:modified "${currentDate.toISOString()}" .
@@ -147,64 +146,64 @@ export async function removeMetadataGraph(identifier: string, type: string) {
 // }
 
 
-export async function findAllMetadataGraphs(type: string) {
-  try {
-    let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
-      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      PREFIX dcterms: <http://purl.org/dc/terms/>
-      PREFIX dc: <http://purl.org/dc/elements/1.1/>
-      SELECT * WHERE { 
-          ?uri a mokg:MetadataGraph, mokg:${type} ; 
-            dc:identifier ?identifier ;
-            rdfs:label ?label ;
-            dc:title ?title ;
-            dcterms:created ?created ;
-            dcterms:modified ?modified .
-            OPTIONAL { ?uri dc:creator ?creator . }
-            OPTIONAL { ?uri rdfs:comment ?comment . }
-            OPTIONAL { ?uri mokg:hasSemanticMetadada ?semanticView . }
-            OPTIONAL { ?uri mokg:specializationOf ?kg_metadata . }
-          }`
+// export async function findAllMetadataGraphs(type: string) {
+//   try {
+//     let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
+//       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+//       PREFIX dcterms: <http://purl.org/dc/terms/>
+//       PREFIX dc: <http://purl.org/dc/elements/1.1/>
+//       SELECT * WHERE { 
+//           ?uri a mokg:MetadataGraph, mokg:${type} ; 
+//             dc:identifier ?identifier ;
+//             rdfs:label ?label ;
+//             dc:title ?title ;
+//             dcterms:created ?created ;
+//             dcterms:modified ?modified .
+//             OPTIONAL { ?uri dc:creator ?creator . }
+//             OPTIONAL { ?uri rdfs:comment ?comment . }
+//             OPTIONAL { ?uri mokg:hasSemanticMetadada ?semanticView . }
+//             OPTIONAL { ?uri mokg:specializationOf ?kg_metadata . }
+//           }`
 
-    const response = await axios({
-      method: 'GET',
-      url: encodeURI(`${ENDPOINTS.DEV.MOKG}`),
-      params: { query }
-    })
+//     const response = await axios({
+//       method: 'GET',
+//       url: encodeURI(`${ENDPOINTS.DEV.MOKG}`),
+//       params: { query }
+//     })
 
-    // console.log(response.data.results.bindings)
-    return response.data.results.bindings;
-  } catch (error) {
-    console.error(error)
-  }
-}
+//     // console.log(response.data.results.bindings)
+//     return response.data.results.bindings;
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }
 
 
 
 /**Esta função retornar a uri do GM a partir do título*/
-export async function findOneMetadataGraphByIdentifier(uuid: string) {
-  console.log(`*** Verificando se já existe a URI que quer criar`)
-  try {
-    let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
-      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-      PREFIX dcterms: <http://purl.org/dc/terms/>
-      PREFIX dc: <http://purl.org/dc/elements/1.1/>
-      BASE <http://www.arida.ufc.org/resource/>
-      SELECT * WHERE { 
-        ?uri a mokg:MetadataGraph .
-        mokg:${uuid} ?p ?o .
-      }
-      limit 1
-      `
-    const response = await axios({
-      method: 'GET',
-      url: encodeURI(`${ENDPOINTS.DEV.MOKG}`),
-      params: { query }
-    });
+// export async function findOneMetadataGraphByIdentifier(uuid: string) {
+//   console.log(`*** Verificando se já existe a URI que quer criar`)
+//   try {
+//     let query = `PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>
+//       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+//       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+//       PREFIX dcterms: <http://purl.org/dc/terms/>
+//       PREFIX dc: <http://purl.org/dc/elements/1.1/>
+//       BASE <http://www.arida.ufc.org/resource/>
+//       SELECT * WHERE { 
+//         ?uri a mokg:MetadataGraph .
+//         mokg:${uuid} ?p ?o .
+//       }
+//       limit 1
+//       `
+//     const response = await axios({
+//       method: 'GET',
+//       url: encodeURI(`${ENDPOINTS.DEV.MOKG}`),
+//       params: { query }
+//     });
 
-    return response.data.results.bindings;
-  } catch (error) {
-    console.error(error)
-  }
-}
+//     return response.data.results.bindings;
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }

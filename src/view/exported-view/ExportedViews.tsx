@@ -180,7 +180,7 @@ export function ExportedViews() {
                   </Stack>
                   <Stack direction="row" spacing={1}>
                     <Typography variant="caption" component="div" color="purple">
-                      {row?.uri?.value}
+                      {row?.description?.value}
                     </Typography>
                   </Stack>
                   {/* BOTÕES */}

@@ -24,28 +24,29 @@ import { api } from "../../services/api";
 import { SemanticViewEntity } from '../../models/SemanticViewEntity';
 import { TitleWithButtonBack } from '../../components/MTitleWithButtonBack';
 import { MashupEntity } from '../../models/MashupEntity';
-import { findAllMetadataGraphs, removeMetadataGraph } from '../../services/sparql-metagraph';
+// import { findAllMetadataGraphs, removeMetadataGraph } from '../../services/sparql-metagraph';
 import { printt } from "../../commons/utils";
 import { MetaEKGProperties } from "../../models/MetaEKGProperties";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
-import { MetaMashup } from '../../models/MetaMashup';
+import { MetaMashupModel } from '../../models/MetaMashupModel';
 import { MCard } from '../../components/mcard/MCard';
 
-export function Mashups() {
+export function MetaMashups() {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState<boolean>(false);
-  const [mashups, setMashups] = useState<MetaMashup[]>([]);
-  const [selectedMashup, setSelectedMashup] = useState<MetaMashup>({} as MetaMashup);
+  const [metaMashups, setMetaMashups] = useState<MetaMashupModel[]>([]);
+  const [selectedMashup, setSelectedMashup] = useState<MetaMashupModel>({} as MetaMashupModel);
 
   const [selectedMetaEKG, setSelectedMetaEKG] = useState<MetaEKGProperties>({} as MetaEKGProperties);
   const [metaEKG, setMetaEKG] = useState<MetaEKGProperties[]>([] as MetaEKGProperties[])
-  async function loadMashups() {
+
+  async function loadMetaMashups() {
     try {
       setLoading(true);
-      const response = await api.get("/meta-mashup");
-      printt(`mashups`, response.data)
-      setMashups(response.data)
+      const response = await api.get("/meta-mashups");
+      printt(`MetaMashups`, response.data)
+      setMetaMashups(response.data)
       setSelectedMashup(response.data[0])
       setSelectedIndex(0)
     } catch (error) {
@@ -56,12 +57,14 @@ export function Mashups() {
   }
 
   useEffect(() => {
-    loadMashups();
+    loadMetaMashups();
   }, [])
+
+
 
   const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   useEffect(() => {
-    async function loadMetaEKGProperties() {
+    async function loadMetaMashupProperties() {
       try {
         setLoading(true);
         if (selectedMashup?.uri) {
@@ -77,12 +80,12 @@ export function Mashups() {
         setLoading(false);
       }
     }
-    loadMetaEKGProperties()
+    loadMetaMashupProperties()
   }, [selectedMashup])
 
   const openForm = () => {
     printt("ABRIR FORM MASHUP")
-    navigate(ROUTES.MASHUP_FORM);
+    navigate(ROUTES.META_MASHUP_FORM);
   }
 
 
@@ -100,57 +103,57 @@ export function Mashups() {
   };
 
   /**Dialog to Delete */
-  const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
-  const handleClickOpenDialogToConfirmDelete = (row: MashupEntity) => {
-    printt(`MASHUP SELECIONADO`, row)
-    setSelectedMashup(row)
-    setOpenDialogToConfirmDelete(true);
-  };
+  // const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
+  // const handleClickOpenDialogToConfirmDelete = (row: MashupEntity) => {
+  //   printt(`MASHUP SELECIONADO`, row)
+  //   setSelectedMashup(row)
+  //   setOpenDialogToConfirmDelete(true);
+  // };
 
   // const handleRemove = async (mashup: IMetadataGraphForm) => {
-  const handleRemove = async (identifier: string, type: string) => {
-    printt("DELETANDO MASHUP")
-    await removeMetadataGraph(identifier, type);
-    await loadMashups();
-  }
+  // const handleRemove = async (identifier: string, type: string) => {
+  //   printt("DELETANDO MASHUP")
+  //   await removeMetadataGraph(identifier, type);
+  //   await loadMashups();
+  // }
 
   /**EDIT */
-  useEffect(() => {
-    function onEdit() {
-      try {
-        if (location.state) {
-          // let state = location.state as MetadataGraphEntity;
-          let state = location.state as SemanticViewEntity;
-          printt(`Carregando a VS selecionada`, state)
-          // console.log(state)
-          // setMetagraph(state)
-        }
-      } catch (err) {
-        printt('err', err);
-      }
-    }
-    onEdit();
-  }, [location.state]);
+  // useEffect(() => {
+  //         // let state = location.state as MetadataGraphEntity;
+  //         let state = location.state as SemanticViewEntity;
+  //         printt(`Carregando a VS selecionada`, state)
+  //         // console.log(state)
+  //         // setMetagraph(state)
+  //       }
+  //     } catch (err) {
+  //       printt('err', err);
+  //     }
+  //   }
+  //   onEdit();
+  // }, [location.state]);
 
 
   const [selectedIndex, setSelectedIndex] = React.useState<Number>(1);
-  const handleListItemClick = (event, idx: Number, row: MetaMashup) => {
+  const handleListItemClick = (event: any, idx: Number, row: MetaMashupModel) => {
     setSelectedIndex(idx);
     setSelectedMashup(row)
   };
+
+  const changeElevation = (idx: Number) => selectedIndex == idx ? 0 : 3;
+
 
   return (
     <div className={styles.listkg}>
 
       <TitleWithButtonBack
-        title="Mashups de Dados"
-        buttonLabel="+ Mashup"
+        title="MetaMashups"
+        buttonLabel="+ MetaMashup"
         openForm={openForm} />
 
 
       <Grid container spacing={1}>
-        {/* Lista dos mashups */}
-        <Grid item sm={5}>
+        {/* Lista dos metamashups */}
+        <Grid item sm={6}>
           <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
             Recursos
           </Typography>
@@ -161,14 +164,14 @@ export function Mashups() {
             maxHeight: 400,
             '& ul': { padding: 0 },
           }}>
-            {mashups.map((row, idx) => <ListItemButton key={row.identifier.value}
+            {metaMashups.map((row, idx) => <ListItemButton key={row.uri.value} sx={{ p: 0, mb: 0.5 }}
               selected={selectedIndex === idx}
               onClick={(event) => handleListItemClick(event, idx, row)}
             >
-              <MCard>
+              <MCard elevation={changeElevation(idx)}>
                 <Box sx={{ width: 470 }}>
-                  <Grid item sm={12}>
-                    <Stack direction="row" spacing={2}>
+                  <Grid item sm={12} gap={3}>
+                    <Stack direction="row" spacing={1}>
                       <Typography variant="h6" component="div">
                         {row?.label?.value}
                       </Typography>
@@ -179,46 +182,35 @@ export function Mashups() {
                       </Typography>
                     </Stack>
                     {/* BOTÕES */}
+                    <Stack direction="row" gap={1}>
+                      <Tooltip title="Construir Metadados de Artefatos">
+                        <IconButton onClick={() => {
+                          navigate(ROUTES.META_MASHUP_MANAGE, { state: row })
+                        }}>
+                          <ConstructionIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Editar Metadados de Autoria">
+                        <IconButton sx={{ fontSize: 3 }} edge="end" aria-label="delete" onClick={() => { navigate(ROUTES.META_MASHUP_FORM, { state: row }) }}>
+                          <EditTwoToneIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Deletar Grafo de Metadados">
+                        <IconButton edge="end" aria-label="delete" onClick={() => alert("remover")}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
                   </Grid>
                 </Box>
               </MCard>
-              {/* <ListItemText
-                primary={
-                  <Typography sx={{ fontSize: "1rem", fontWeight: 600, m: 0 }} color="text.primary" gutterBottom>
-                    {row.uri_l.value}
-                  </Typography>
-                }
-                secondary={<Typography
-                  sx={{ display: 'inline', fontSize: "0.66rem" }}
-                  component="span"
-                  variant="body2"
-                  color="text.primary"
-                >{row.uri.value}</Typography>} /> */}
-              <Tooltip title="Construir Metadados de Artefatos">
-                <IconButton onClick={() => {
-                  navigate(ROUTES.MASHUP_MANAGE, { state: row })
-                  printt("SELECIONANDO MASHUP", row);
-                }}>
-                  <ConstructionIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Editar Metadados de Autoria">
-                <IconButton sx={{ fontSize: 3 }} edge="end" aria-label="delete" onClick={() => alert("editar")}>
-                  <EditTwoToneIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Deletar Grafo de Metadados">
-                <IconButton edge="end" aria-label="delete" onClick={() => alert("remover")}>
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
             </ListItemButton>
             )}
           </List>
         </Grid>
 
         {/* Listas da propriedades do mashup */}
-        <Grid item sm={7}>
+        <Grid item sm={6}>
           {properties.length > 0 && <Box sx={{ width: "100%", height: "400" }}>
             {/* <Paper sx={{ maxHeight: 400, bgcolor: 'None', background: "None" }}> */}
             <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
@@ -259,13 +251,13 @@ export function Mashups() {
         </Grid>
       </Grid>
 
-      <MDialogToConfirmDelete
+      {/* <MDialogToConfirmDelete
         openConfirmDeleteDialog={openDialogToConfirmDelete}
         setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
         deleteInstance={handleRemove}
         instance={selectedMashup}
         type={METADATA_GRAHP_TYPE.MASHUP}
-      />
+      /> */}
     </div >
   );
 }

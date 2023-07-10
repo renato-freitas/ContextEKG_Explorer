@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Box, Button, FormControl, FormLabel, Stack, TextField } from "@mui/material";
+import { Box, Button, FormControl, FormLabel, Stack, TextField, Typography } from "@mui/material";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -93,7 +93,8 @@ export function MetagraphForm() {
 
   return (
     <Container fixed>
-      <h1>{`${"Criar"} EKG de Metadados`}</h1>
+      <h1>{`${"Criar"} MetaEKG`}</h1>
+      <Typography variant='caption'>Grafo de Metadados do EKG</Typography>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
