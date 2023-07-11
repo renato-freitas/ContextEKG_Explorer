@@ -14,25 +14,31 @@ import { add_gk_metadados_on_mashup } from "../../../services/sparql-mashup";
 import { MetaEKGProperties } from "../../../models/MetaEKGProperties";
 import { LocalGraphEntity } from "../../../models/LocalGraphEntity";
 
-export const SelectExportedView = ({ from, open, setOpenEkgDialog, mashup_metadata_graph, selectedMetaEKG, setCheckedExportedViews }) => {
-  // const [metadataGraphs, setMetadataGraphs] = useState<EkgTulioEntity[]>([]);
-  // const [selectedMetaEKG, setSelectedMetaEKG] = useState<EkgTulioEntity | null>();
+interface SelectExportedViewProps {
+  from: any, 
+  open: any, 
+  setOpenEkgDialog: any, 
+  submit: any, 
+  selectedMetaEKG: any, 
+  setCheckedExportedViews: any
+}
+
+export const SelectExportedView = (props: SelectExportedViewProps) => {
+  let { from, open, setOpenEkgDialog, submit, selectedMetaEKG, setCheckedExportedViews } = props
   const theme = useTheme();
   const [exportedViewCheckeds, setExportedViewCheckeds] = useState<string[]>([]);
 
   
-  // const [metaEKGs, setMetaEKGs] = useState<MetaEKGProperties[]>([] as MetaEKGProperties[])
   const [exportedViews, setExportedViews] = useState<LocalGraphEntity[]>([]);
   useEffect(() => {
-    async function getSuggestExportedViews(metaekgUri:string) {
-      // printt('uri do meta-ekg', selectedMetaEKG.uri.value)
+    async function getSuggestedExportedViews(metaekgUri:string) {
       let uri_encoded = double_encode_uri(metaekgUri)
       const response = await api.get(`/meta-ekgs/${uri_encoded}/mashupClass/${"Estabelecimento"}`);
       printt('CARREGANDO EVs', response.data)
       setExportedViews(response.data)
     }
     if(selectedMetaEKG?.uri){
-      getSuggestExportedViews(selectedMetaEKG?.uri.value);
+      getSuggestedExportedViews(selectedMetaEKG?.uri.value);
     }
   }, [selectedMetaEKG?.uri]);
 
@@ -44,13 +50,10 @@ export const SelectExportedView = ({ from, open, setOpenEkgDialog, mashup_metada
 
 
   interface IEkgForm {
-    // kg_metadata: object;
-    // meta_ekg: object;
     meta_ekg: MetaEKGProperties
   }
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IEkgForm>({
-    // resolver: zodResolver(SemanticViewSchema),
     defaultValues: {
       meta_ekg: {}
     }
@@ -59,11 +62,8 @@ export const SelectExportedView = ({ from, open, setOpenEkgDialog, mashup_metada
 
   const handleSubmitExporteViewsSelected: SubmitHandler<IEkgForm> = async (data) => {
     try {
-      // const obj = { uri_meta_mashup: mashup_metadata_graph.uri.value, uri_meta_ekg: data.meta_ekg?.uri?.value}
-      // printt('obj', obj)
-      // const response = await api.post("/meta-mashup/associa-meta-ekg", data=obj);
-      // printt('retorno', response)
       setCheckedExportedViews(exportedViewCheckeds)
+      submit()
       handleCloseDialog();
     } catch (error) {
       console.error(error)
@@ -85,7 +85,6 @@ export const SelectExportedView = ({ from, open, setOpenEkgDialog, mashup_metada
       target: { value },
     } = event;
     setExportedViewCheckeds(
-      // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value,
     );
   };
@@ -111,12 +110,10 @@ export const SelectExportedView = ({ from, open, setOpenEkgDialog, mashup_metada
                   multiple
                   label="Visões Exportadas Sugeridas"
                 >
-                  {/* {metadataGraphs.map((ele) => <MenuItem key={ele.uri.value} value={ele}>{ele.label.value}</MenuItem>)} */}
                   {exportedViews.map((ele) => <MenuItem key={ele?.uri?.value} value={ele.label.value} style={getStyles(ele.uri.value, exportedViewCheckeds, theme)}>
                     {ele?.label?.value}
                   </MenuItem>)}
                 </Select>
-                {/* <p>{errors.title?.message}</p> */}
               </FormControl>
             </Grid>
           </Grid>

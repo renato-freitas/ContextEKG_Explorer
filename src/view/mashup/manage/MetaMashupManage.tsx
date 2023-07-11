@@ -1,33 +1,20 @@
-import { SetStateAction, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Container from "@mui/material/Container";
-import Paper from '@mui/material/Paper';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import { Avatar, Box, Button, Chip, Divider, Grid, Stack, Typography } from "@mui/material";
+import { Button, Chip, Divider, Grid, Stack, Typography } from "@mui/material";
 
-import { CaretCircleLeft, Eyeglasses } from 'phosphor-react'
 import CircleIcon from '@mui/icons-material/Circle';
 
-// import styles from ';
 import { OVSGK, ROUTES } from "../../../commons/constants";
-import { findAllExportedViews, findAllLocalGraphsBySemanticView } from "../../../services/sparql-exported-view";
-import { LocalGraphEntity } from "../../../models/LocalGraphEntity";
 import { MetaMashupModel } from "../../../models/MetaMashupModel";
 import { SemanticViewEntity } from "../../../models/SemanticViewEntity";
-import { SemanticViewForm } from "../../semantic-view/SemanticViewForm";
-import { findOneSemanticView } from "../../../services/sparql-semantic-view";
 import { TitleWithButtonBack } from "../../../components/MTitleWithButtonBack";
-import { printt } from "../../../commons/utils";
-import { MetaEkgSelect } from "../../ekg/EkgSelect";
+import { double_encode_uri, printt } from "../../../commons/utils";
 import { EkgTulioEntity } from "../../../models/EkgTulioEntity";
-// import { findOneMetadataGraphByIdentifier } from "../../../services/sparql-metagraph";
 import { MCard } from "../../../components/mcard/MCard";
 import { SelectExportedView } from "./SelectExportedView";
 import { MetaEKGProperties } from "../../../models/MetaEKGProperties";
 import { api } from "../../../services/api";
-import { RDF_Node } from "../../../models/RDF_Node";
 import { PropertyObjectEntity } from "../../../models/PropertyObjectEntity";
 
 
@@ -35,13 +22,11 @@ export function MetaMashupManage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [metaMashup, setMetaMashup] = useState<MetaMashupModel | null>();
-  const [specificatedEKG, setSpecificatedEKG] = useState<MetaMashupModel | null>();
-  const [ekg, setEkg] = useState<EkgTulioEntity>();
   const [semanticView, setSemanticView] = useState<SemanticViewEntity | null>();
-  const [CheckedExportedViews, setCheckedExportedViews] = useState<string[]>([]);
+  const [checkedExportedViews, setCheckedExportedViews] = useState<string[]>([]);
 
 
-  /**CARREGAR O META-MASHUP */
+  /**RECEBER O META-MASHUP SELECIONADO (LABEL)*/
   useEffect(() => {
     function onEdit() {
       try {
@@ -58,38 +43,42 @@ export function MetaMashupManage() {
   }, [location.state]);
 
 
-  /**CARREGAR O META-EKG*/
+  /**CARREGAR O META-EKG PARA OBTER AS VISÕES EXPORTADAS SUGERIDAS*/
   const [selectedMetaEKG, setSelectedMetaEKG] = useState<MetaEKGProperties>({} as MetaEKGProperties);
   const [metaEKGs, setMetaEKGs] = useState<MetaEKGProperties[]>([] as MetaEKGProperties[])
-  async function loadMetaEKG() {
-    try {
-      const response = await api.get("/meta-ekgs/");
-      printt('[metaekg', response.data)
-      setMetaEKGs(response.data)
-      setSelectedMetaEKG(response.data[0])
-    } catch (error) {
-      alert(error)
-    } finally {
-      // setLoading(false);
-    }
-  }
   useEffect(() => {
+    async function loadMetaEKG() {
+      try {
+        const response = await api.get("/meta-ekgs/");
+        printt('[metaekg', response.data)
+        setMetaEKGs(response.data)
+        setSelectedMetaEKG(response.data[0])
+      } catch (error) {
+        alert(error)
+      } 
+    }
     loadMetaEKG();
   }, [])
 
-  /**CARREGAR  */
+
+  /**CADASTRAR AS VISÕES EXPORTADAS SELECIONADAS NO META-MASHUP  */
+  async function addExportedViewForMetaMashup() {
+    let uri = double_encode_uri(metaMashup?.uri.value as string)
+    let response = api.put(`/meta-mashups/${uri}/add-exported-views`, {
+      exportedViewCheckeds: checkedExportedViews
+    })
+    printt('', response)
+  }
   useEffect(() => {
-    printt('EV foram selecionadas', CheckedExportedViews)
-    async function addExportedView2MetaMashup() {
-
+    printt('EV foram selecionadas', checkedExportedViews)
+    
+    if (checkedExportedViews) {
+      addExportedViewForMetaMashup()
     }
-    if (CheckedExportedViews) {
-      addExportedView2MetaMashup()
-    }
-  }, [CheckedExportedViews]);
+  }, []);
 
 
-  /**CARREGAR AS VISÕES EXPORTADAS */
+  /**CARREGAR AS VISÕES EXPORTADAS SUGERIDAS (METADADOS ATIVOS) QUANDO ENTRA NA PÁGINA*/
   const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   useEffect(() => {
     async function loadMetaMashupProperties() {
@@ -113,9 +102,6 @@ export function MetaMashupManage() {
   }, [location?.state])
 
 
-  /** ABRE FORM DE SELECIONAR EKG */
-  // const [openEkgDialog, setOpenEkgDialog] = useState<boolean>(false);
-
 
   /** ABRE FORM PARA SELECIONAR AS VISÕES EXPORTADAS */
   const [openExportedViewDialog, setOpenExportedViewDialog] = useState<boolean>(false);
@@ -132,36 +118,7 @@ export function MetaMashupManage() {
         <Chip label={metaMashup?.label?.value} color="primary" sx={{ fontSize: 20 }} />
       </h2>
 
-      {/* KG DE METADADOS */}
-      {/* <MCard>
-        <Grid item sm={12}>
-          <Stack direction="row" spacing={2}>
-            <Typography variant="h6" component="div">
-              MetaEKG Utilizado
-            </Typography>
-            {
-              metaMashup?.uri_metaEKG
-                ? false
-                : <Chip
-                  label={"Selecionar"}
-                  onClick={() => setOpenEkgDialog(true)} />
-            }
-            <Typography variant="caption" component="div" color="purple">
-              {metaMashup?.uri_metaEKG?.value}
-            </Typography>
-          </Stack>
-          {metaMashup?.uri_metaEKG
-            ? <Stack direction="row" spacing={1}>
-              <Typography variant="caption" component="div">
-                URI/Nome:
-              </Typography>
-              <Typography variant="caption" component="div" color="purple">
-                {metaMashup?.uri_metaEKG?.value}
-              </Typography>
-            </Stack>
-            : false}
-        </Grid>
-      </MCard> */}
+     
 
       {/* VISÃO EXPORTADA DO META-MASHUP */}
       <MCard>
@@ -170,13 +127,11 @@ export function MetaMashupManage() {
             <Typography variant="h6" component="div">
               Visão Exportada
             </Typography>
-            {/* <Chip
-              label={metaMashup?.uri_mashup_view ? "Editar" : "Selecionar"}
-              onClick={() => setOpenExportedViewDialog(true)} /> */}
+            
             <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button>
           </Stack>
-          {CheckedExportedViews.length > 0
-            ? CheckedExportedViews.map((ele, idx) =>
+          {checkedExportedViews.length > 0
+            ? checkedExportedViews.map((ele, idx) =>
               <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
                 <Typography variant="caption" component="div">
                   <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
@@ -187,6 +142,7 @@ export function MetaMashupManage() {
               </Stack>
             )
             : false}
+
           {metaMashup?.uri_mashup_view
             ? <Stack direction="row" spacing={1}>
               <Typography variant="caption" component="div">
@@ -215,6 +171,7 @@ export function MetaMashupManage() {
               : false
           }
         </Grid>
+
         {semanticView
           ? <Grid item sm={12}>
             <Divider />
@@ -269,13 +226,14 @@ export function MetaMashupManage() {
 
       {
         selectedMetaEKG && <SelectExportedView
-          from="mashup"
+          from="MetaMashupManage"
           open={openExportedViewDialog}
           setOpenEkgDialog={setOpenExportedViewDialog}
-          mashup_metadata_graph={metaMashup}
+          // metaMashup={metaMashup}
           // setEkg={setEkg}
           selectedMetaEKG={selectedMetaEKG}
           setCheckedExportedViews={setCheckedExportedViews}
+          submit={addExportedViewForMetaMashup}
         />
       }
 
