@@ -25,7 +25,7 @@ import { SemanticViewEntity } from '../../models/SemanticViewEntity';
 import { TitleWithButtonBack } from '../../components/MTitleWithButtonBack';
 import { MashupEntity } from '../../models/MashupEntity';
 // import { findAllMetadataGraphs, removeMetadataGraph } from '../../services/sparql-metagraph';
-import { printt } from "../../commons/utils";
+import { double_encode_uri, printt } from "../../commons/utils";
 import { MetaEKGProperties } from "../../models/MetaEKGProperties";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { MetaMashupModel } from '../../models/MetaMashupModel';
@@ -68,9 +68,10 @@ export function MetaMashups() {
       try {
         setLoading(true);
         if (selectedMashup?.uri) {
-          printt(`/propriedades/mashup/?uri=${encodeURIComponent(selectedMashup?.uri?.value)}`)
-          const response = await api.get(`/propriedades/mashup/?uri=${encodeURIComponent(selectedMashup?.uri?.value)}`);
-          printt(`propriedades/mashup/`, response.data)
+          let _uri = double_encode_uri(selectedMashup?.uri?.value)
+          printt(`/properties/${_uri}`)
+          const response = await api.get(`/properties/${_uri}`);
+          printt(`properties/`, response.data)
           serProperties(response.data)
         }
         // setMetaEKG(response.data)
@@ -139,7 +140,8 @@ export function MetaMashups() {
     setSelectedMashup(row)
   };
 
-  const changeElevation = (idx: Number) => selectedIndex == idx ? 0 : 3;
+  const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#edf4fc" : "None";
+  // const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#f5f5fd" : "None";
 
 
   return (
@@ -164,16 +166,22 @@ export function MetaMashups() {
             maxHeight: 400,
             '& ul': { padding: 0 },
           }}>
-            {metaMashups.map((row, idx) => <ListItemButton key={row.uri.value} sx={{ p: 0, mb: 0.5 }}
+            {metaMashups.map((row, idx) => <ListItemButton key={row?.uri?.value} sx={{ p: 0, mb: 1 }}
               selected={selectedIndex === idx}
               onClick={(event) => handleListItemClick(event, idx, row)}
             >
-              <MCard elevation={changeElevation(idx)}>
+              <MCard 
+                bgcolor={changeBgColorCard(idx)}>
                 <Box sx={{ width: 470 }}>
                   <Grid item sm={12} gap={3}>
                     <Stack direction="row" spacing={1}>
                       <Typography variant="h6" component="div">
                         {row?.label?.value}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <Typography variant="caption" component="div" color="gray">
+                        {row?.uri?.value}
                       </Typography>
                     </Stack>
                     <Stack direction="row" spacing={1}>
@@ -261,67 +269,3 @@ export function MetaMashups() {
     </div >
   );
 }
-
-{/* <MTable
-        header={[["Título", "left"], ["Comentário", "left"],
-        ["Quem criou", "left"],
-        ["Criado em", "right"], ["Modificado em", "right"]]}
-        size={mashups.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        handleChangePage={handleChangePage}
-        handleChangeRowsPerPage={handleChangeRowsPerPage}
-        hasActions
-        loading={false}
-      >
-        {
-          (rowsPerPage > 0
-            ? mashups.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : mashups
-          ).map(row => (
-            <TableRow key={row.identifier.value}>
-              <TableCell>
-                <Typography>{row.title.value}</Typography>
-              </TableCell>
-              <TableCell>
-                <Typography>{row.comment.value}</Typography>
-              </TableCell>
-              <TableCell>{row.creator?.value}</TableCell>
-              <TableCell align='right'>
-                <Stack>
-                  <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
-                  <Typography variant="caption" display="block" gutterBottom>{new Date(row.created.value).toLocaleTimeString()}</Typography>
-                </Stack>
-              </TableCell>
-              <TableCell align='right'>
-                <Stack>
-                  <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
-                  <Typography variant="caption" display="block" gutterBottom>{new Date(row.modified.value).toLocaleTimeString()}</Typography>
-                </Stack>
-              </TableCell>
-              <TableCell align='center'>
-                <Tooltip title="Editar">
-                  <IconButton onClick={() => {
-                    navigate(ROUTES.MASHUP_FORM, { state: row })
-                  }}>
-                    <EditTwoTone />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Construir">
-                  <IconButton onClick={() => {
-                    navigate(ROUTES.MASHUP_MANAGE, { state: row })
-                    print_("SELECIONANDO MASHUP", row);
-                  }}>
-                    <Construction />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title="Excluir">
-                  <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
-                    <DeleteForever />
-                  </IconButton>
-                </Tooltip>
-              </TableCell>
-            </TableRow>
-          ))}
-      </MTable> */}

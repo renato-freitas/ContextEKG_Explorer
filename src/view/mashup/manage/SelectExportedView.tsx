@@ -20,7 +20,7 @@ interface SelectExportedViewProps {
   setOpenEkgDialog: any, 
   submit: any, 
   selectedMetaEKG: any, 
-  setCheckedExportedViews: any
+  setCheckedExportedViews?: any
 }
 
 export const SelectExportedView = (props: SelectExportedViewProps) => {

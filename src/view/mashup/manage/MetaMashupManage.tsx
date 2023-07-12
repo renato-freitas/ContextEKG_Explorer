@@ -5,7 +5,7 @@ import { Button, Chip, Divider, Grid, Stack, Typography } from "@mui/material";
 
 import CircleIcon from '@mui/icons-material/Circle';
 
-import { OVSGK, ROUTES } from "../../../commons/constants";
+import { VSGK_TBOX, ROUTES } from "../../../commons/constants";
 import { MetaMashupModel } from "../../../models/MetaMashupModel";
 import { SemanticViewEntity } from "../../../models/SemanticViewEntity";
 import { TitleWithButtonBack } from "../../../components/MTitleWithButtonBack";
@@ -24,42 +24,81 @@ export function MetaMashupManage() {
   const [metaMashup, setMetaMashup] = useState<MetaMashupModel | null>();
   const [semanticView, setSemanticView] = useState<SemanticViewEntity | null>();
   const [checkedExportedViews, setCheckedExportedViews] = useState<string[]>([]);
+  const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
+  const [sqps, setSqps] = useState<any[]>([] as any[])
 
 
-  /**RECEBER O META-MASHUP SELECIONADO (LABEL)*/
+  /**RECEBER O META-MASHUP SELECIONADO NA LISTA*/
   useEffect(() => {
-    function onEdit() {
+    async function onEdit() {
       try {
-        if (location.state) {
+        if (location?.state) {
           let state = location.state as MetaMashupModel;
-          printt("CARREGANDO O MASHUP SELECIONADO", location.state)
+          // printt("CARREGANDO O MASHUP SELECIONADO", location.state)
           setMetaMashup(state)
+
+          /**Obter as VE do MM */
+          let _uri = double_encode_uri(state?.uri?.value)
+          const response = await api.get(`/properties/${_uri}`);
+          let _properties = response.data.filter((ele: any) => ele.p.value == VSGK_TBOX.P_META_MASHUP_HAS_EXPORTED_VIEW)
+          // printt(`properties/`, _properties)
+          serProperties(_properties)
+          setCheckedExportedViews(_properties.map((ele: any) => ele.label.value))
+
+          /**OBTER OS PARAMETROS DE CONSULTA SPARQL PARA RML */
+          const _response = await api.get(`/meta-mashups/${_uri}/sparql-query-params`);
+          printt(`SQP`, _response.data)
+          setSqps(_response.data)
+
         }
       } catch (err) {
         console.log(err);
       }
     }
     onEdit();
-  }, [location.state]);
+  }, [location?.state]);
 
 
-  /**CARREGAR O META-EKG PARA OBTER AS VISÕES EXPORTADAS SUGERIDAS*/
+  /**ENCONTRAR O META-EKG PARA OBTER AS VISÕES EXPORTADAS SUGERIDAS*/
   const [selectedMetaEKG, setSelectedMetaEKG] = useState<MetaEKGProperties>({} as MetaEKGProperties);
   const [metaEKGs, setMetaEKGs] = useState<MetaEKGProperties[]>([] as MetaEKGProperties[])
   useEffect(() => {
     async function loadMetaEKG() {
       try {
         const response = await api.get("/meta-ekgs/");
-        printt('[metaekg', response.data)
+        // printt('[metaekg', response.data)
         setMetaEKGs(response.data)
         setSelectedMetaEKG(response.data[0])
       } catch (error) {
         alert(error)
-      } 
+      }
     }
     loadMetaEKG();
   }, [])
 
+
+  /**QUANDO ENTRAR NA PÁGINA, CARREGAR, SE HOUVER, AS VISÕES EXPORTADAS QUE FORAM SELECIONADAS 
+   * ENTRE AS SUGERIDAS (METADADOS ATIVOS)*/
+
+  // useEffect(() => {
+  //   async function loadMetaMashupProperties() {
+  //     try {
+  //       if (location?.state) {
+  //         let state = location.state as MetaMashupModel;
+  //         let _uri = double_encode_uri(state?.uri?.value)
+  //         const response = await api.get(`/properties/${_uri}`);
+  //         let _properties = response.data.filter((ele: any) => ele.p.value == VSGK_TBOX.P_META_MASHUP_HAS_EXPORTED_VIEW)
+  //         printt(`properties/`, _properties)
+  //         serProperties(_properties)
+  //         setCheckedExportedViews(_properties.map((ele: any) => ele.o.value))
+  //       }
+  //     } catch (error) {
+  //       alert(error)
+  //     } finally {
+  //     }
+  //   }
+  //   loadMetaMashupProperties()
+  // }, [location?.state])
 
   /**CADASTRAR AS VISÕES EXPORTADAS SELECIONADAS NO META-MASHUP  */
   async function addExportedViewForMetaMashup() {
@@ -71,35 +110,14 @@ export function MetaMashupManage() {
   }
   useEffect(() => {
     printt('EV foram selecionadas', checkedExportedViews)
-    
+
     if (checkedExportedViews) {
       addExportedViewForMetaMashup()
     }
   }, []);
 
 
-  /**CARREGAR AS VISÕES EXPORTADAS SUGERIDAS (METADADOS ATIVOS) QUANDO ENTRA NA PÁGINA*/
-  const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
-  useEffect(() => {
-    async function loadMetaMashupProperties() {
-      try {
-        if (location?.state) {
-          let state = location.state as MetaMashupModel;
-          printt(`/propriedades/mashup/?uri=${encodeURIComponent(state?.uri?.value)}`)
-          const response = await api.get(`/propriedades/mashup/?uri=${encodeURIComponent(state?.uri?.value)}`);
-          let _x = response.data.filter((ele:any) => ele.p.value == OVSGK.P_META_MASHUP_HAS_EXPORTED_VIEW)
-          printt(`propriedades/meta-mashup/`, _x)
-          serProperties(_x)
-          setCheckedExportedViews(_x.map((ele:any) => ele.o.value))
-        }
-        // setMetaEKG(response.data)
-      } catch (error) {
-        alert(error)
-      } finally {
-      }
-    }
-    loadMetaMashupProperties()
-  }, [location?.state])
+
 
 
 
@@ -118,75 +136,145 @@ export function MetaMashupManage() {
         <Chip label={metaMashup?.label?.value} color="primary" sx={{ fontSize: 20 }} />
       </h2>
 
-     
+
+      <Grid container spacing={1}>
+        {/* VISÃO EXPORTADA DO META-MASHUP */}
+        <Grid item sm={12}>
+          <MCard>
+            <Grid container gap={1}>
+              <Grid item sm={12}>
+                <Stack direction="row" spacing={2}>
+                  <Typography variant="h6" component="div">
+                    Visão Exportada
+                  </Typography>
+
+                  <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button>
+                </Stack>
+              </Grid>
+              <Grid>
+                {checkedExportedViews.length > 0
+                  ? checkedExportedViews.map((ele, idx) =>
+                    <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
+                      <Typography variant="caption" component="div">
+                        <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
+                      </Typography>
+                      <Typography variant="caption" component="div" color="purple">
+                        {ele}
+                      </Typography>
+                    </Stack>
+                  )
+                  : false}
+              </Grid>
+            </Grid>
+          </MCard>
+        </Grid>
+
+        {/* PARAMETROS PARA CONSULTA SPARQL 2 RML*/}
+        <Grid item sm={12}>
+          <MCard>
+            <Grid container gap={1}>
+              <Grid item sm={12}>
+                <Stack direction="row" spacing={2}>
+                  <Typography variant="h6" component="div">
+                    Parametros para consulta SPARQL
+                  </Typography>
+
+                  <Button variant="contained" size="small" onClick={() => navigate(ROUTES.META_MASHUP_SPARQP_QUERY_PARAMS_FORM, { state: metaMashup })} sx={{ fontSize: 10 }}>+ Adicionar</Button>
+                </Stack>
+              </Grid>
+              <Grid>
+                {sqps.length > 0
+                  ? sqps.map((ele, idx) =>
+                    <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
+                      <Typography variant="caption" component="div">
+                        <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
+                      </Typography>
+                      <Typography variant="caption" component="div" color="purple">
+                        {ele?.label?.value}
+                      </Typography>
+                    </Stack>
+                  )
+                  : false}
+              </Grid>
+            </Grid>
+          </MCard>
+        </Grid>
+      </Grid>
+
 
       {/* VISÃO EXPORTADA DO META-MASHUP */}
-      <MCard>
-        <Grid item sm={6}>
-          <Stack direction="row" spacing={2}>
-            <Typography variant="h6" component="div">
-              Visão Exportada
-            </Typography>
-            
-            <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button>
-          </Stack>
-          {checkedExportedViews.length > 0
-            ? checkedExportedViews.map((ele, idx) =>
-              <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
+      {/* <MCard> */}
+      {/* <Grid container gap={1}> */}
+      {/* <Grid item sm={12}>
+            <Stack direction="row" spacing={2}>
+              <Typography variant="h6" component="div">
+                Visão Exportada
+              </Typography>
+
+              <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button>
+            </Stack>
+          </Grid> */}
+      {/* <Grid>
+            {checkedExportedViews.length > 0
+              ? checkedExportedViews.map((ele, idx) =>
+                <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
+                  <Typography variant="caption" component="div">
+                    <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
+                  </Typography>
+                  <Typography variant="caption" component="div" color="purple">
+                    {ele}
+                  </Typography>
+                </Stack>
+              )
+              : false}
+
+            {metaMashup?.uri_mashup_view
+              ? <Stack direction="row" spacing={1}>
                 <Typography variant="caption" component="div">
-                  <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
+                  URI/Nome:
                 </Typography>
                 <Typography variant="caption" component="div" color="purple">
-                  {ele}
+                  {metaMashup?.uri_mashup_view?.value}
                 </Typography>
               </Stack>
-            )
-            : false}
+              : false}
+          </Grid> */}
+      {/* </Grid> */}
 
-          {metaMashup?.uri_mashup_view
-            ? <Stack direction="row" spacing={1}>
-              <Typography variant="caption" component="div">
-                URI/Nome:
-              </Typography>
-              <Typography variant="caption" component="div" color="purple">
-                {metaMashup?.uri_mashup_view?.value}
-              </Typography>
-            </Stack>
-            : false}
-        </Grid>
-        {/* <Grid item sm={6}>
+
+      {/* <Grid item sm={6}>
           <Stack direction="row" gap={1}>
             <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: semanticView })}>Visões Exportadas</Button>
             <Button variant="contained">Links Semânticos</Button>
           </Stack>
         </Grid> */}
-        <Grid item sm={6}>
-          {
-            metaMashup?.uri_mashup_view
-              ? <Stack direction="row" gap={1}>
-                <Button variant="contained" onClick={() => false}>Ontologia</Button>
-                <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: semanticView })}>Visões Exportadas</Button>
-                <Button variant="contained">Links Semânticos</Button>
-              </Stack>
-              : false
-          }
-        </Grid>
+      <Grid item sm={6}>
+        {
+          metaMashup?.uri_mashup_view
+            ? <Stack direction="row" gap={1}>
+              <Button variant="contained" onClick={() => false}>Ontologia</Button>
+              <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: semanticView })}>Visões Exportadas</Button>
+              <Button variant="contained">Links Semânticos</Button>
+            </Stack>
+            : false
+        }
+      </Grid>
 
-        {semanticView
-          ? <Grid item sm={12}>
-            <Divider />
-            <Stack gap={1} sx={{ mt: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Ontologia de Aplicação
-              </Typography>
+      {semanticView
+        ? <Grid item sm={12}>
+          <Divider />
+          <Stack gap={1} sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Ontologia de Aplicação
+            </Typography>
 
-              {/* <Stack direction="row" gap={1}> */}
-              {/* <Chip label='Ontologia de Dominio' color="info" /> */}
-              {/* </Stack> */}
-              <Typography variant="body2" color="text.secondary">
-                Visões Exportadas
-              </Typography>
-              {/* <Box sx={{ width: "100%" }}>
+            {/* <Stack direction="row" gap={1}> */}
+            {/* <Chip label='Ontologia de Dominio' color="info" /> */}
+            {/* </Stack> */}
+            <Typography variant="body2" color="text.secondary">
+              Visões Exportadas
+            </Typography>
+            {/* <Box sx={{ width: "100%" }}>
                 {localgraphs.map((item) => <Chip
                   sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }}
                   label={item.title?.value}
@@ -194,18 +282,19 @@ export function MetaMashupManage() {
                   onClick={() => navigate(ROUTES.LOCAL_GRAPH_CONSTRUCT, { state: item })}
                 />)}
               </Box> */}
-              <Typography variant="body2" color="text.secondary">
-                Links Semânticos
-              </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Links Semânticos
+            </Typography>
 
-              {/* <Box sx={{ width: "100%" }}> */}
-              {/* {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }} />)} */}
-              {/* </Box> */}
+            {/* <Box sx={{ width: "100%" }}> */}
+            {/* {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }} />)} */}
+            {/* </Box> */}
 
-            </Stack>
-          </Grid>
-          : false}
-      </MCard>
+          </Stack>
+        </Grid>
+        : false}
+      {/* </MCard> */}
+
 
       {/* <MetaEkgSelect
         from="mashup"

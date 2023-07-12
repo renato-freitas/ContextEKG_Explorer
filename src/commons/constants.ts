@@ -113,6 +113,7 @@ export const ROUTES = {
   META_MASHUP_LIST: '/meta-mashups',
   META_MASHUP_FORM: '/meta-mashup-form',
   META_MASHUP_MANAGE: '/meta-mashup-manage',
+  META_MASHUP_SPARQP_QUERY_PARAMS_FORM: '/meta-mashup/sparql-query-params',
 },
 
   USER_TYPE = {
@@ -125,7 +126,7 @@ export const ROUTES = {
     MASHUP: "Mashup"
   };
 
-  /**Ontologia de Domínio */
-export const OVSGK = {
-  P_META_MASHUP_HAS_EXPORTED_VIEW: "http://www.arida.ufc.br/VSKG/hasExportedView"
+/**Ontologia de Domínio */
+export const VSGK_TBOX = {
+  P_META_MASHUP_HAS_EXPORTED_VIEW: "http://www.arida.ufc.br/VSKG#hasExportedView"
 }

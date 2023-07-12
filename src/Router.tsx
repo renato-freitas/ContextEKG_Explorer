@@ -36,6 +36,7 @@ import { TriplesMapForm } from './view/exported-view/triplesmap/TriplesMap_Form'
 import { MetaMashups } from './view/mashup/MetaMashups';
 import { MashupForm } from './view/mashup/MetaMashupForm';
 import { MetaMashupManage } from './view/mashup/manage/MetaMashupManage';
+import { SparqlQueryParamsForm } from './view/mashup/manage/SparqlQueryParamsForm';
 
 import { ROUTES } from './commons/constants';
 
@@ -82,6 +83,7 @@ export default function Router() {
         <Route path={ROUTES.META_MASHUP_LIST} element={<MetaMashups />} />
         <Route path={ROUTES.META_MASHUP_FORM} element={<MashupForm />} />
         <Route path={ROUTES.META_MASHUP_MANAGE} element={<MetaMashupManage />} />
+        <Route path={ROUTES.META_MASHUP_SPARQP_QUERY_PARAMS_FORM} element={<SparqlQueryParamsForm />} />
       </Route>
 
       {/* Para um painel de administração eu posso ter um layout diferente 
