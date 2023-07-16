@@ -104,19 +104,21 @@ export function MetaMashups() {
   };
 
   /**Dialog to Delete */
-  // const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
-  // const handleClickOpenDialogToConfirmDelete = (row: MashupEntity) => {
-  //   printt(`MASHUP SELECIONADO`, row)
-  //   setSelectedMashup(row)
-  //   setOpenDialogToConfirmDelete(true);
-  // };
+  const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
+  const handleClickOpenDialogToConfirmDelete = (row: MetaMashupModel) => {
+    console.log(row)
+    setSelectedMashup(row)
+    setOpenDialogToConfirmDelete(true);
+  };
 
-  // const handleRemove = async (mashup: IMetadataGraphForm) => {
-  // const handleRemove = async (identifier: string, type: string) => {
-  //   printt("DELETANDO MASHUP")
-  //   await removeMetadataGraph(identifier, type);
-  //   await loadMashups();
-  // }
+  const handleRemove = async (identifier: string) => {
+    // await removeDataSource(identifier);
+    // print('', identifier)
+    let uri_enc = double_encode_uri(identifier)
+    await api.delete(`/meta-mashups/${uri_enc}`)
+    await loadMetaMashups();
+  }
+  /**Dialog to Delete */
 
   /**EDIT */
   // useEffect(() => {
@@ -149,7 +151,7 @@ export function MetaMashups() {
 
       <TitleWithButtonBack
         title="MetaMashups"
-        buttonLabel="+ MetaMashup"
+        buttonLabel="+ Meta Mashup"
         openForm={openForm} />
 
 
@@ -170,7 +172,7 @@ export function MetaMashups() {
               selected={selectedIndex === idx}
               onClick={(event) => handleListItemClick(event, idx, row)}
             >
-              <MCard 
+              <MCard
                 bgcolor={changeBgColorCard(idx)}>
                 <Box sx={{ width: 470 }}>
                   <Grid item sm={12} gap={3}>
@@ -204,7 +206,7 @@ export function MetaMashups() {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Deletar Grafo de Metadados">
-                        <IconButton edge="end" aria-label="delete" onClick={() => alert("remover")}>
+                        <IconButton edge="end" aria-label="delete" onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -229,7 +231,7 @@ export function MetaMashups() {
                 // background: "None",
                 width: '100%',
                 // maxWidth: 400,
-                // bgcolor: 'background.paper',
+                bgcolor: 'background.paper',
                 // bgcolor: 'None',
                 position: 'relative',
                 overflow: 'auto',
@@ -259,13 +261,12 @@ export function MetaMashups() {
         </Grid>
       </Grid>
 
-      {/* <MDialogToConfirmDelete
+      <MDialogToConfirmDelete
         openConfirmDeleteDialog={openDialogToConfirmDelete}
         setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
         deleteInstance={handleRemove}
         instance={selectedMashup}
-        type={METADATA_GRAHP_TYPE.MASHUP}
-      /> */}
+      />
     </div >
   );
 }

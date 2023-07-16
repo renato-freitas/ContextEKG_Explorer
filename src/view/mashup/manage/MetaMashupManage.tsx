@@ -37,13 +37,13 @@ export function MetaMashupManage() {
           // printt("CARREGANDO O MASHUP SELECIONADO", location.state)
           setMetaMashup(state)
 
-          /**Obter as VE do MM */
+          /**OBTER AS VISÕES EXPORTADAS SELECIONADAS DO MTMSHP */
           let _uri = double_encode_uri(state?.uri?.value)
           const response = await api.get(`/properties/${_uri}`);
           let _properties = response.data.filter((ele: any) => ele.p.value == VSGK_TBOX.P_META_MASHUP_HAS_EXPORTED_VIEW)
           // printt(`properties/`, _properties)
           serProperties(_properties)
-          setCheckedExportedViews(_properties.map((ele: any) => ele.label.value))
+          setCheckedExportedViews(_properties.map((ele: any) => ele?.label?.value))
 
           /**OBTER OS PARAMETROS DE CONSULTA SPARQL PARA RML */
           const _response = await api.get(`/meta-mashups/${_uri}/sparql-query-params`);
@@ -130,14 +130,46 @@ export function MetaMashupManage() {
 
       <TitleWithButtonBack
         title="Gerenciar MetaMashup"
-        hasButtonBack />
+        hasButtonBack
+        chip={<h2 style={{ textAlign: "center", marginBottom: 5 }}>
+          <Chip label={metaMashup?.label?.value} color="primary" sx={{ fontSize: 20 }} />
+        </h2>}
+      />
 
-      <h2 style={{ textAlign: "center", marginBottom: 10 }}>
-        <Chip label={metaMashup?.label?.value} color="primary" sx={{ fontSize: 20 }} />
-      </h2>
 
 
       <Grid container spacing={1}>
+        {/* CLASSE DE FUSÃO DO MM */}
+        <Grid item sm={12}>
+          <MCard>
+            <Grid container gap={1}>
+              <Grid item sm={12}>
+                <Stack direction="row" spacing={2}>
+                  <Typography variant="h6" component="div">
+                    Classe de Fusão
+                  </Typography>
+
+                  <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button>
+                </Stack>
+              </Grid>
+              <Grid>
+                {checkedExportedViews.length > 0
+                  ? checkedExportedViews.map((ele, idx) =>
+                    <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
+                      <Typography variant="caption" component="div">
+                        <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
+                      </Typography>
+                      <Typography variant="caption" component="div" color="purple">
+                        {ele}
+                      </Typography>
+                    </Stack>
+                  )
+                  : false}
+              </Grid>
+            </Grid>
+          </MCard>
+        </Grid>
+
         {/* VISÃO EXPORTADA DO META-MASHUP */}
         <Grid item sm={12}>
           <MCard>
@@ -176,7 +208,7 @@ export function MetaMashupManage() {
               <Grid item sm={12}>
                 <Stack direction="row" spacing={2}>
                   <Typography variant="h6" component="div">
-                    Parametros para consulta SPARQL
+                    Parâmetros R2RML
                   </Typography>
 
                   <Button variant="contained" size="small" onClick={() => navigate(ROUTES.META_MASHUP_SPARQP_QUERY_PARAMS_FORM, { state: metaMashup })} sx={{ fontSize: 10 }}>+ Adicionar</Button>
@@ -199,55 +231,42 @@ export function MetaMashupManage() {
             </Grid>
           </MCard>
         </Grid>
+
+        {/* METADADOS PARA O KG DE FUSÃO*/}
+        <Grid item sm={12}>
+          <MCard>
+            <Grid container gap={1}>
+              <Grid item sm={12}>
+                <Stack direction="row" spacing={2}>
+                  <Typography variant="h6" component="div">
+                    Metadados para o KG de Fusão
+                  </Typography>
+
+                  {/* <Button variant="contained" size="small" onClick={() => navigate(ROUTES.META_MASHUP_SPARQP_QUERY_PARAMS_FORM, { state: metaMashup })} sx={{ fontSize: 10 }}>+ Adicionar</Button> */}
+                </Stack>
+              </Grid>
+              <Grid>
+                {sqps.length > 0
+                  ? sqps.map((ele, idx) =>
+                    <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
+                      <Typography variant="caption" component="div">
+                        <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
+                      </Typography>
+                      <Typography variant="caption" component="div" color="purple">
+                        {ele?.label?.value}
+                      </Typography>
+                    </Stack>
+                  )
+                  : false}
+              </Grid>
+            </Grid>
+          </MCard>
+        </Grid>
       </Grid>
 
 
-      {/* VISÃO EXPORTADA DO META-MASHUP */}
-      {/* <MCard> */}
-      {/* <Grid container gap={1}> */}
-      {/* <Grid item sm={12}>
-            <Stack direction="row" spacing={2}>
-              <Typography variant="h6" component="div">
-                Visão Exportada
-              </Typography>
-
-              <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button>
-            </Stack>
-          </Grid> */}
-      {/* <Grid>
-            {checkedExportedViews.length > 0
-              ? checkedExportedViews.map((ele, idx) =>
-                <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
-                  <Typography variant="caption" component="div">
-                    <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
-                  </Typography>
-                  <Typography variant="caption" component="div" color="purple">
-                    {ele}
-                  </Typography>
-                </Stack>
-              )
-              : false}
-
-            {metaMashup?.uri_mashup_view
-              ? <Stack direction="row" spacing={1}>
-                <Typography variant="caption" component="div">
-                  URI/Nome:
-                </Typography>
-                <Typography variant="caption" component="div" color="purple">
-                  {metaMashup?.uri_mashup_view?.value}
-                </Typography>
-              </Stack>
-              : false}
-          </Grid> */}
-      {/* </Grid> */}
 
 
-      {/* <Grid item sm={6}>
-          <Stack direction="row" gap={1}>
-            <Button variant="contained" onClick={() => navigate(ROUTES.EXPORTED_VIEW_LIST, { state: semanticView })}>Visões Exportadas</Button>
-            <Button variant="contained">Links Semânticos</Button>
-          </Stack>
-        </Grid> */}
       <Grid item sm={6}>
         {
           metaMashup?.uri_mashup_view

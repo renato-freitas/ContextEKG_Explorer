@@ -7,13 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import { CaretCircleLeft } from "phosphor-react"
 
 interface TitleProps {
-  hasButtonBack?: boolean;
   title: string;
+  hasButtonBack?: boolean;
   buttonLabel?: string | null | undefined;
+  chip?: React.ReactElement
   openForm?: () => void
 }
 
-export const TitleWithButtonBack = ({ hasButtonBack, title, buttonLabel, openForm }: TitleProps) => {
+export const TitleWithButtonBack = ({ hasButtonBack, title, buttonLabel, chip, openForm }: TitleProps) => {
   const navigate = useNavigate();
   return (
     <Stack direction="row" alignItems="center" spacing={1} margin={1}>
@@ -37,6 +38,9 @@ export const TitleWithButtonBack = ({ hasButtonBack, title, buttonLabel, openFor
             <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
             <Button variant="contained" onClick={openForm}>{buttonLabel}</Button>
           </>
+      }
+      {
+        chip && chip
       }
     </Stack>
   )

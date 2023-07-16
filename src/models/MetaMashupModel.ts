@@ -7,6 +7,7 @@ export interface MetaMashupModel {
   label?: RDF_Node;
   description?: RDF_Node;
   mashupClass: RDF_Node;
+  fusionClass: RDF_Node;
   
   creator?: RDF_Node;
   created?: RDF_Node;

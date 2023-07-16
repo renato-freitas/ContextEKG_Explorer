@@ -38,19 +38,22 @@ interface IMetaMashup {
   title: RDF_Node;
   label: RDF_Node;
   description: RDF_Node;
-  mashupClass: RDF_Node;
+  // mashupClass: RDF_Node;
+  // fusionClass: RDF_Node;
 }
 interface IMetaMashupForm {
   label: string,
   description: string,
-  mashupClass: string;
+  // mashupClass: string;
+  // fusionClass: string;
 }
 const MetaMashupSchema = zod.object({
   identifier: zod.string().optional(),
   uri: zod.string().optional(),
   label: zod.string().min(1, 'Digite ao menos 1 caracter'),
   description: zod.string().optional(),
-  mashupClass: zod.string(),
+  // mashupClass: zod.string(),
+  // fusionClass: zod.string(),
 
   creator: zod.string().optional(),
   created: zod.string().optional(),
@@ -68,7 +71,8 @@ export function MashupForm() {
     defaultValues: {
       label: '',
       description: '',
-      mashupClass: '',
+      // mashupClass: '',
+      // fusionClass: '',
     }
   });
 
@@ -103,7 +107,8 @@ export function MashupForm() {
           printt("Colocando o Mashup Selecionado no Formulário", state)
           setValue("label", state.label.value);
           setValue("description", state.description.value);
-          setValue("mashupClass", state.mashupClass.value);
+          // setValue("mashupClass", state?.mashupClass?.value);
+          // setValue("fusionClass", state?.fusionClass?.value);
           // setValue("creator", state.creator.value);
           // setValue("created", state.created.value);
           // setValue("identifier", state.identifier.value);
@@ -119,7 +124,7 @@ export function MashupForm() {
 
   return (
     <Container fixed>
-      <h2>{`${location.state?'Editar':'Cadastrar'} MetaMashup`}</h2>
+      <h2>{`${location.state?'Editar':'Criar'} MetaMashup`}</h2>
       <Typography variant='caption'>Instancia do Grafo de Metadados do Mashup</Typography>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
@@ -143,18 +148,18 @@ export function MashupForm() {
                       <p>{errors.label?.message}</p>
                     </FormControl>
                   </Grid>
-                  <Grid item sm={6}>
+                  {/* <Grid item sm={6}>
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="mashupClass">Classe do Mashup</FormLabel>
+                      <FormLabel htmlFor="fusionClass">Classe de Fusão do Mashup</FormLabel>
                       <TextField
                         variant="outlined"
                         placeholder="Ex: Empresa"
                         size="small"
-                        {...register("mashupClass")}
+                        {...register("fusionClass")}
                       />
-                      <p>{errors.mashupClass?.message}</p>
+                      <p>{errors.fusionClass?.message}</p>
                     </FormControl>
-                  </Grid>
+                  </Grid> */}
                   <Grid item sm={12}>
                     <FormControl fullWidth>
                       <FormLabel htmlFor="description">Descrição</FormLabel>
