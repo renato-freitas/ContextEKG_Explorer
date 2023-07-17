@@ -15,7 +15,7 @@ import { RDF_Node } from "../../models/RDF_Node";
 import { IDataSourceForm, insertDataSource, updateDataSource } from "../../services/sparql-datasource";
 import { LoadingContext } from "../../App";
 import { DataSourceEntity } from "../../models/DataSourceEntity";
-import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
+import { MetaEKGModel } from "../../models/MetaEKGModel";
 
 // interface IMetagraphEntity {
 //   uri: RDF_Node;
@@ -29,7 +29,7 @@ import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
 
 export interface LocationParams {
   pathname: string;
-  state: MetadataGraphEntity;
+  state: MetaEKGModel;
   search: string;
   hash: string;
   key: string;

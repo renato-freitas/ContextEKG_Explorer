@@ -134,7 +134,7 @@ export function DataSources() {
             maxHeight: 400,
             '& ul': { padding: 0 },
           }}>
-            {dataSources.map((row, idx) => <ListItemButton key={row.uri?.value} sx={{ p: 0 }}
+            {dataSources.map((row, idx) => <ListItemButton key={row.uri?.value} sx={{ p: 0, mb: 1 }}
               selected={selectedIndex === idx}
               onClick={(event) => handleListItemClick(event, idx, row)}
             >
@@ -181,11 +181,12 @@ export function DataSources() {
 
         {/* Listas de propriedades */}
         <Grid item sm={6}>
+          <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
+            Propriedades
+          </Typography>
           {properties.length > 0 && <Box sx={{ width: "100%", height: "400" }}>
-            <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
-              Propriedades
-            </Typography>
-            <Paper sx={{ maxHeight: 400, background: "None" }} elevation={0}>
+            {/* <Paper sx={{ maxHeight: 400, background: "None" }} elevation={0}> */}
+            <Paper sx={{ maxHeight: 400 }} elevation={0}>
               <List sx={{
                 width: '100%',
                 position: 'relative',

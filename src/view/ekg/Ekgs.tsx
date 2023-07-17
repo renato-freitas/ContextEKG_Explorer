@@ -11,9 +11,11 @@ import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 
 import EditTwoTone from '@mui/icons-material/EditTwoTone';
-import Construction from '@mui/icons-material/Construction';
-import DeleteForever from '@mui/icons-material/DeleteForever';
+// import Construction from '@mui/icons-material/Construction';
+// import DeleteForever from '@mui/icons-material/DeleteForever';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ConstructionIcon from '@mui/icons-material/Construction';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -26,22 +28,23 @@ import { Avatar, Box, CardActions, CardContent, List, ListItem, ListItemAvatar, 
 import { MTable } from "../../components/MTable";
 import { MDialogToConfirmDelete } from "../../components/MDialog";
 import { RDF_Node } from "../../models/RDF_Node";
-import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
+import { MetaEKGModel } from "../../models/MetaEKGModel";
 import { TitleWithButtonBack } from "../../components/MTitleWithButtonBack";
-import { printt } from "../../commons/utils";
+import { changeBgColorCard, printt } from "../../commons/utils";
 import { MetaEKGProperties } from "../../models/MetaEKGProperties";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
+import { MCard } from "../../components/mcard/MCard";
 
 
 
 export function MetagraphList() {
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
-  const [metagraphs, setMetagraphs] = useState<MetadataGraphEntity[]>([] as MetadataGraphEntity[]);
-  const [selectedMetadataGraph, setSelectedMetadataGraph] = useState<MetadataGraphEntity>({} as MetadataGraphEntity);
+  const [metagraphs, setMetagraphs] = useState<MetaEKGModel[]>([] as MetaEKGModel[]);
+  const [selectedMetadataGraph, setSelectedMetadataGraph] = useState<MetaEKGModel>({} as MetaEKGModel);
 
-  const [selectedMetaEKG, setSelectedMetaEKG] = useState<MetaEKGProperties>({} as MetaEKGProperties);
-  const [metaEKGs, setMetaEKGs] = useState<MetaEKGProperties[]>([] as MetaEKGProperties[])
+  const [selectedMetaEKG, setSelectedMetaEKG] = useState<MetaEKGModel>({} as MetaEKGModel);
+  const [metaEKGs, setMetaEKGs] = useState<MetaEKGModel[]>([] as MetaEKGModel[])
   async function loadMetaEKG() {
     try {
       setLoading(true);
@@ -98,7 +101,7 @@ export function MetagraphList() {
 
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
-  const handleClickOpenDialogToConfirmDelete = (row: MetadataGraphEntity) => {
+  const handleClickOpenDialogToConfirmDelete = (row: MetaEKGModel) => {
     console.log(row)
     setSelectedMetadataGraph(row)
     setOpenDialogToConfirmDelete(true);
@@ -111,29 +114,90 @@ export function MetagraphList() {
   }
   /**Dialog to Delete */
 
-  const [selectedIndex, setSelectedIndex] = React.useState(1);
-
-  const handleListItemClick = (event, index) => {
-    setSelectedIndex(index);
+  const [selectedIndex, setSelectedIndex] = React.useState<Number>(1);
+  const handleListItemClick = (event: any, idx: Number, row: MetaEKGModel) => {
+    setSelectedIndex(idx);
+    setSelectedMetaEKG(row)
   };
 
   return (
     <div className={styles.listkg}>
 
       <TitleWithButtonBack
-        title="Grafos de Metadados"
+        title="Meta EKGs"
         buttonLabel="+ MetaEKG"
         openForm={openForm} />
 
-      {/* <Grid container spacing={2}>
-        <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
-          <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
-          <Button variant="contained" onClick={openForm}>+ Novo Grafo de Metadados</Button>
+      <Grid container spacing={1}>
+        {/* LISTA DOS META-EKGs */}
+        <Grid item sm={6}>
+          <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
+            Recursos
+          </Typography>
+          <List sx={{
+            bgcolor: 'None',
+            position: 'relative',
+            overflow: 'auto',
+            maxHeight: 400,
+            '& ul': { padding: 0 },
+          }}>
+            {metaEKGs.map((row, idx) => <ListItemButton key={row?.uri?.value} sx={{ p: 0, mb: 1 }}
+              selected={selectedIndex === idx}
+              onClick={(event) => handleListItemClick(event, idx, row)}
+            >
+              <MCard
+                bgcolor={changeBgColorCard(idx, selectedIndex)}>
+                <Box sx={{ width: 470 }}>
+                  <Grid item sm={12} gap={3}>
+                    <Stack direction="row" spacing={1}>
+                      <Typography variant="h6" component="div">
+                        {row?.label?.value}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <Typography variant="caption" component="div" color="gray" sx={{ fontSize: "0.55rem" }}>
+                        {row?.uri?.value}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <Typography variant="caption" component="div" color="purple">
+                        {row?.description?.value}
+                      </Typography>
+                    </Stack>
+                    {/* BOTÕES */}
+                    <Stack direction="row" gap={1}>
+                      <Tooltip title="Construir Metadados de Artefatos">
+                        <IconButton onClick={() => {
+                          navigate(ROUTES.META_MASHUP_MANAGE, { state: row })
+                        }}>
+                          <ConstructionIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Editar Metadados de Autoria">
+                        <IconButton sx={{ fontSize: 3 }} edge="end" aria-label="delete" onClick={() => { navigate(ROUTES.META_MASHUP_FORM, { state: row }) }}>
+                          <EditTwoToneIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Deletar Grafo de Metadados">
+                        <IconButton edge="end" aria-label="delete" onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </Grid>
+                </Box>
+              </MCard>
+            </ListItemButton>
+            )}
+          </List>
         </Grid>
+
+        {/* PROPRIEDADES DO META-EKG */}
+        <Grid item sm={6}></Grid>
       </Grid>
-      <br /> */}
+
       <Grid container spacing={2}>
-        <Grid item sm={5}>
+        {/* <Grid item sm={5}>
           <List sx={{
             // width: '100%',
             // maxWidth: 360,
@@ -156,7 +220,7 @@ export function MetagraphList() {
               <ListItemText
                 primary={
                   <Typography sx={{ fontSize: "1rem", fontWeight: 500, m: 0 }} color="text.primary" gutterBottom>
-                    {row.uri_l.value}
+                    {row.label.value}
                   </Typography>
                 }
                 secondary={<Typography
@@ -180,7 +244,7 @@ export function MetagraphList() {
             )}
           </List>
 
-        </Grid>
+        </Grid> */}
 
         <Grid item sm={7}>
           {properties.length > 0 && <Box sx={{ width: "100%", height: "400" }}>

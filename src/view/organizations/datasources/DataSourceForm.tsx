@@ -14,7 +14,7 @@ import { RDF_Node } from "../../../models/RDF_Node";
 
 import { LoadingContext } from "../../../App";
 import { DataSourceEntity } from "../../../models/DataSourceEntity";
-import { MetadataGraphEntity } from "../../../models/MetadataGraphEntity";
+import { MetaEKGModel } from "../../../models/MetaEKGModel";
 import { OrganizationEntity } from "../../../models/OrganizationEntity";
 
 import { CaretCircleLeft } from "phosphor-react";
@@ -24,7 +24,7 @@ const MOKG = "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#";
 
 export interface LocationParams {
   pathname: string;
-  state: MetadataGraphEntity;
+  state: MetaEKGModel;
   search: string;
   hash: string;
   key: string;

@@ -37,18 +37,20 @@ export function MetaMashupManage() {
           // printt("CARREGANDO O MASHUP SELECIONADO", location.state)
           setMetaMashup(state)
 
+
           /**OBTER AS VISÕES EXPORTADAS SELECIONADAS DO MTMSHP */
           let _uri = double_encode_uri(state?.uri?.value)
           const response = await api.get(`/properties/${_uri}`);
           let _properties = response.data.filter((ele: any) => ele.p.value == VSGK_TBOX.P_META_MASHUP_HAS_EXPORTED_VIEW)
-          // printt(`properties/`, _properties)
+          console.log(`properties/`, _properties)
           serProperties(_properties)
           setCheckedExportedViews(_properties.map((ele: any) => ele?.label?.value))
 
+
           /**OBTER OS PARAMETROS DE CONSULTA SPARQL PARA RML */
-          const _response = await api.get(`/meta-mashups/${_uri}/sparql-query-params`);
-          printt(`SQP`, _response.data)
-          setSqps(_response.data)
+          // const _response = await api.get(`/meta-mashups/${_uri}/sparql-query-params`);
+          // printt(`SQP`, _response.data)
+          // setSqps(_response.data)
 
         }
       } catch (err) {
@@ -60,7 +62,7 @@ export function MetaMashupManage() {
 
 
   /**ENCONTRAR O META-EKG PARA OBTER AS VISÕES EXPORTADAS SUGERIDAS*/
-  const [selectedMetaEKG, setSelectedMetaEKG] = useState<MetaEKGProperties>({} as MetaEKGProperties);
+  const [userMetaEKG, setUserMetaEKG] = useState<MetaEKGProperties>({} as MetaEKGProperties);
   const [metaEKGs, setMetaEKGs] = useState<MetaEKGProperties[]>([] as MetaEKGProperties[])
   useEffect(() => {
     async function loadMetaEKG() {
@@ -68,7 +70,7 @@ export function MetaMashupManage() {
         const response = await api.get("/meta-ekgs/");
         // printt('[metaekg', response.data)
         setMetaEKGs(response.data)
-        setSelectedMetaEKG(response.data[0])
+        setUserMetaEKG(response.data[0])
       } catch (error) {
         alert(error)
       }
@@ -100,28 +102,37 @@ export function MetaMashupManage() {
   //   loadMetaMashupProperties()
   // }, [location?.state])
 
+
+
   /**CADASTRAR AS VISÕES EXPORTADAS SELECIONADAS NO META-MASHUP  */
   async function addExportedViewForMetaMashup() {
     let uri = double_encode_uri(metaMashup?.uri.value as string)
-    let response = api.put(`/meta-mashups/${uri}/add-exported-views`, {
-      exportedViewCheckeds: checkedExportedViews
+    console.log('|||', checkedExportedViews)
+    let _checkedExportedViewsURIs = checkedExportedViews.map((ele) => ele.split("|")[0])
+    if(checkedExportedViews[0].includes("|")){
+      let _checkedExportedViewsLabels = checkedExportedViews.map((ele) => ele.split("|")[1])
+      setCheckedExportedViews(_checkedExportedViewsLabels)
+    }
+    // console.log('|||>', _checkedExportedViews)
+    let response = await api.put(`/meta-mashups/${uri}/add-exported-views`, {
+      exportedViewCheckeds: _checkedExportedViewsURIs
     })
-    printt('', response)
+    console.log('addExportedViewForMetaMashup( )', response)
   }
-  useEffect(() => {
-    printt('EV foram selecionadas', checkedExportedViews)
 
-    if (checkedExportedViews) {
+  useEffect(() => {
+    if (checkedExportedViews.length > 0) {
+      // printt('EV foram selecionadas', checkedExportedViews)
       addExportedViewForMetaMashup()
     }
-  }, []);
+  }, [checkedExportedViews]);
 
 
 
 
 
 
-  /** ABRE FORM PARA SELECIONAR AS VISÕES EXPORTADAS */
+  /** ABRE FORM PARA SELECIONAR AS VISÕES EXPORTADAS SUGERIDAS*/
   const [openExportedViewDialog, setOpenExportedViewDialog] = useState<boolean>(false);
 
 
@@ -149,22 +160,20 @@ export function MetaMashupManage() {
                     Classe de Fusão
                   </Typography>
 
-                  <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button>
+                  {/* <Button variant="contained" size="small" onClick={() => setOpenExportedViewDialog(true)} sx={{ fontSize: 10 }}>Selecionar</Button> */}
                 </Stack>
               </Grid>
               <Grid>
-                {checkedExportedViews.length > 0
-                  ? checkedExportedViews.map((ele, idx) =>
-                    <Stack direction="row" spacing={1} key={ele} paddingBottom={0.5}>
-                      <Typography variant="caption" component="div">
-                        <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
-                      </Typography>
-                      <Typography variant="caption" component="div" color="purple">
-                        {ele}
-                      </Typography>
-                    </Stack>
-                  )
-                  : false}
+                {metaMashup &&
+                  <Stack direction="row" spacing={1} paddingBottom={0.5}>
+                    <Typography variant="caption" component="div">
+                      <CircleIcon color="secondary" sx={{ fontSize: 10 }} />
+                    </Typography>
+                    <Typography variant="caption" component="div" color="purple">
+                      {metaMashup.fusionClass.value}
+                    </Typography>
+                  </Stack>
+                }
               </Grid>
             </Grid>
           </MCard>
@@ -202,7 +211,7 @@ export function MetaMashupManage() {
         </Grid>
 
         {/* PARAMETROS PARA CONSULTA SPARQL 2 RML*/}
-        <Grid item sm={12}>
+        {/* <Grid item sm={12}>
           <MCard>
             <Grid container gap={1}>
               <Grid item sm={12}>
@@ -230,16 +239,16 @@ export function MetaMashupManage() {
               </Grid>
             </Grid>
           </MCard>
-        </Grid>
+        </Grid> */}
 
-        {/* METADADOS PARA O KG DE FUSÃO*/}
+        {/* PROPRIEDADES DE FUSÃO*/}
         <Grid item sm={12}>
           <MCard>
             <Grid container gap={1}>
               <Grid item sm={12}>
                 <Stack direction="row" spacing={2}>
                   <Typography variant="h6" component="div">
-                    Metadados para o KG de Fusão
+                    Propriedades de Fusão
                   </Typography>
 
                   {/* <Button variant="contained" size="small" onClick={() => navigate(ROUTES.META_MASHUP_SPARQP_QUERY_PARAMS_FORM, { state: metaMashup })} sx={{ fontSize: 10 }}>+ Adicionar</Button> */}
@@ -262,7 +271,7 @@ export function MetaMashupManage() {
             </Grid>
           </MCard>
         </Grid>
-      </Grid>
+      </Grid >
 
 
 
@@ -279,21 +288,22 @@ export function MetaMashupManage() {
         }
       </Grid>
 
-      {semanticView
-        ? <Grid item sm={12}>
-          <Divider />
-          <Stack gap={1} sx={{ mt: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Ontologia de Aplicação
-            </Typography>
+      {
+        semanticView
+          ? <Grid item sm={12}>
+            <Divider />
+            <Stack gap={1} sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Ontologia de Aplicação
+              </Typography>
 
-            {/* <Stack direction="row" gap={1}> */}
-            {/* <Chip label='Ontologia de Dominio' color="info" /> */}
-            {/* </Stack> */}
-            <Typography variant="body2" color="text.secondary">
-              Visões Exportadas
-            </Typography>
-            {/* <Box sx={{ width: "100%" }}>
+              {/* <Stack direction="row" gap={1}> */}
+              {/* <Chip label='Ontologia de Dominio' color="info" /> */}
+              {/* </Stack> */}
+              <Typography variant="body2" color="text.secondary">
+                Visões Exportadas
+              </Typography>
+              {/* <Box sx={{ width: "100%" }}>
                 {localgraphs.map((item) => <Chip
                   sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }}
                   label={item.title?.value}
@@ -301,17 +311,18 @@ export function MetaMashupManage() {
                   onClick={() => navigate(ROUTES.LOCAL_GRAPH_CONSTRUCT, { state: item })}
                 />)}
               </Box> */}
-            <Typography variant="body2" color="text.secondary">
-              Links Semânticos
-            </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Links Semânticos
+              </Typography>
 
-            {/* <Box sx={{ width: "100%" }}> */}
-            {/* {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }} />)} */}
-            {/* </Box> */}
+              {/* <Box sx={{ width: "100%" }}> */}
+              {/* {localgraphs.map((item) => <Chip label={item.title?.value} color="warning" sx={{ mr: 0.5, mb: 0.1, mt: 0.1 }} />)} */}
+              {/* </Box> */}
 
-          </Stack>
-        </Grid>
-        : false}
+            </Stack>
+          </Grid>
+          : false
+      }
       {/* </MCard> */}
 
 
@@ -333,13 +344,11 @@ export function MetaMashupManage() {
       /> */}
 
       {
-        selectedMetaEKG && <SelectExportedView
+        userMetaEKG && <SelectExportedView
           from="MetaMashupManage"
           open={openExportedViewDialog}
           setOpenEkgDialog={setOpenExportedViewDialog}
-          // metaMashup={metaMashup}
-          // setEkg={setEkg}
-          selectedMetaEKG={selectedMetaEKG}
+          userMetaEKG={userMetaEKG}
           setCheckedExportedViews={setCheckedExportedViews}
           submit={addExportedViewForMetaMashup}
         />

@@ -45,12 +45,12 @@ export function MetaMashups() {
     try {
       setLoading(true);
       const response = await api.get("/meta-mashups");
-      printt(`MetaMashups`, response.data)
+      // printt(`MetaMashups`, response.data)
       setMetaMashups(response.data)
       setSelectedMashup(response.data[0])
       setSelectedIndex(0)
     } catch (error) {
-      printt('error', error);
+      // printt('error', error);
     } finally {
       setLoading(false);
     }
@@ -69,9 +69,9 @@ export function MetaMashups() {
         setLoading(true);
         if (selectedMashup?.uri) {
           let _uri = double_encode_uri(selectedMashup?.uri?.value)
-          printt(`/properties/${_uri}`)
+          // printt(`/properties/${_uri}`)
           const response = await api.get(`/properties/${_uri}`);
-          printt(`properties/`, response.data)
+          // printt(`properties/`, response.data)
           serProperties(response.data)
         }
         // setMetaEKG(response.data)
@@ -85,7 +85,7 @@ export function MetaMashups() {
   }, [selectedMashup])
 
   const openForm = () => {
-    printt("ABRIR FORM MASHUP")
+    // printt("ABRIR FORM MASHUP")
     navigate(ROUTES.META_MASHUP_FORM);
   }
 
@@ -98,7 +98,7 @@ export function MetaMashups() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
+    // console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -106,7 +106,7 @@ export function MetaMashups() {
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
   const handleClickOpenDialogToConfirmDelete = (row: MetaMashupModel) => {
-    console.log(row)
+    // console.log(row)
     setSelectedMashup(row)
     setOpenDialogToConfirmDelete(true);
   };
@@ -125,7 +125,7 @@ export function MetaMashups() {
   //         // let state = location.state as MetadataGraphEntity;
   //         let state = location.state as SemanticViewEntity;
   //         printt(`Carregando a VS selecionada`, state)
-  //         // console.log(state)
+  //         //   e.log(state)
   //         // setMetagraph(state)
   //       }
   //     } catch (err) {
@@ -150,7 +150,7 @@ export function MetaMashups() {
     <div className={styles.listkg}>
 
       <TitleWithButtonBack
-        title="MetaMashups"
+        title="Meta Mashups"
         buttonLabel="+ Meta Mashup"
         openForm={openForm} />
 
@@ -182,7 +182,7 @@ export function MetaMashups() {
                       </Typography>
                     </Stack>
                     <Stack direction="row" spacing={1}>
-                      <Typography variant="caption" component="div" color="gray">
+                      <Typography variant="caption" component="div" color="gray" sx={{fontSize:"0.55rem"}}>
                         {row?.uri?.value}
                       </Typography>
                     </Stack>
@@ -221,11 +221,11 @@ export function MetaMashups() {
 
         {/* Listas da propriedades do mashup */}
         <Grid item sm={6}>
+          <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
+            Propriedades
+          </Typography>
           {properties.length > 0 && <Box sx={{ width: "100%", height: "400" }}>
             {/* <Paper sx={{ maxHeight: 400, bgcolor: 'None', background: "None" }}> */}
-            <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
-              Propriedades
-            </Typography>
             <Paper sx={{ maxHeight: 400, background: "None" }} elevation={0}>
               <List sx={{
                 // background: "None",

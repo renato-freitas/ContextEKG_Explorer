@@ -1,16 +1,9 @@
-import { useContext, useEffect, useState } from "react";
-import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, FormLabel, Grid, InputLabel, MenuItem, Modal, ModalManager, Select, SelectChangeEvent, TextField } from "@mui/material";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as zod from 'zod';
-import { addSemanticView, ISemanticViewForm, updateSemanticView } from "../../../services/sparql-semantic-view";
+import { useEffect, useState } from "react";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { Theme, useTheme } from '@mui/material/styles';
-import { LoadingContext } from "../../../App";
 import { api } from "../../../services/api";
-import { double_encode_uri, printt } from "../../../commons/utils";
-import { findAllKGOfMetadata } from "../../../services/sparql-vskg";
-import { EkgTulioEntity } from "../../../models/EkgTulioEntity";
-import { add_gk_metadados_on_mashup } from "../../../services/sparql-mashup";
+import { double_encode_uri } from "../../../commons/utils";
 import { MetaEKGProperties } from "../../../models/MetaEKGProperties";
 import { LocalGraphEntity } from "../../../models/LocalGraphEntity";
 
@@ -19,28 +12,28 @@ interface SelectExportedViewProps {
   open: any, 
   setOpenEkgDialog: any, 
   submit: any, 
-  selectedMetaEKG: any, 
+  userMetaEKG: any, 
   setCheckedExportedViews?: any
 }
 
 export const SelectExportedView = (props: SelectExportedViewProps) => {
-  let { from, open, setOpenEkgDialog, submit, selectedMetaEKG, setCheckedExportedViews } = props
+  let { from, open, setOpenEkgDialog, submit, userMetaEKG, setCheckedExportedViews } = props
   const theme = useTheme();
   const [exportedViewCheckeds, setExportedViewCheckeds] = useState<string[]>([]);
 
-  
+  /**COLOCAR AS VE NO COMBOBOX */
   const [exportedViews, setExportedViews] = useState<LocalGraphEntity[]>([]);
   useEffect(() => {
-    async function getSuggestedExportedViews(metaekgUri:string) {
-      let uri_encoded = double_encode_uri(metaekgUri)
-      const response = await api.get(`/meta-ekgs/${uri_encoded}/mashupClass/${"Estabelecimento"}`);
-      printt('CARREGANDO EVs', response.data)
+    async function getSuggestedExportedViews(metaEkgUri:string) {
+      let uri_encoded = double_encode_uri(metaEkgUri)
+      const response = await api.get(`/meta-ekgs/${uri_encoded}/fusion-class/${"Estabelecimento"}`);
+      // printt('CARREGANDO EVs', response.data)
       setExportedViews(response.data)
     }
-    if(selectedMetaEKG?.uri){
-      getSuggestedExportedViews(selectedMetaEKG?.uri.value);
+    if(userMetaEKG?.uri){
+      getSuggestedExportedViews(userMetaEKG?.uri.value);
     }
-  }, [selectedMetaEKG?.uri]);
+  }, [userMetaEKG?.uri]);
 
 
   const handleCloseDialog = () => {
@@ -63,7 +56,6 @@ export const SelectExportedView = (props: SelectExportedViewProps) => {
   const handleSubmitExporteViewsSelected: SubmitHandler<IEkgForm> = async (data) => {
     try {
       setCheckedExportedViews(exportedViewCheckeds)
-      submit()
       handleCloseDialog();
     } catch (error) {
       console.error(error)
@@ -110,7 +102,9 @@ export const SelectExportedView = (props: SelectExportedViewProps) => {
                   multiple
                   label="Visões Exportadas Sugeridas"
                 >
-                  {exportedViews.map((ele) => <MenuItem key={ele?.uri?.value} value={ele.label.value} style={getStyles(ele.uri.value, exportedViewCheckeds, theme)}>
+                  {/* value={ele?.uri?.value +"_"+ele.label.value} => GAMBIARRA */}
+                  {exportedViews.map((ele) => <MenuItem key={ele?.uri?.value} value={ele?.uri?.value +"|"+ele.label.value} style={getStyles(ele.uri.value, exportedViewCheckeds, theme)}>
+                  {/* {exportedViews.map((ele) => <MenuItem key={ele?.uri?.value} value={`${ele as LocalGraphEntity}`} style={getStyles(ele.uri.value, exportedViewCheckeds, theme)}> */}
                     {ele?.label?.value}
                   </MenuItem>)}
                 </Select>

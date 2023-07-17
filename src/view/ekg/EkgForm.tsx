@@ -10,13 +10,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
 import { IMetadataGraphForm, addtMetadataGraph, updateMetadataGraph } from "../../services/sparql-metagraph";
 import { LoadingContext } from "../../App";
-import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
+import { MetaEKGModel } from '../../models/MetaEKGModel';
 import { METADATA_GRAHP_TYPE } from "../../commons/constants";
 import { printt } from "../../commons/utils";
 
 export interface LocationParams {
   pathname: string;
-  state: MetadataGraphEntity;
+  state: MetaEKGModel;
   search: string;
   hash: string;
   key: string;
@@ -73,7 +73,7 @@ export function MetagraphForm() {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as MetadataGraphEntity;
+          let state = location.state as MetaEKGModel;
           console.log("*** Colocando o Grafo de Metadados Selecionado no Formulário ***")
           console.log(location)
           setValue("title", state.title.value);

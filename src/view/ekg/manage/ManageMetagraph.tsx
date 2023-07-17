@@ -13,7 +13,7 @@ import styles from './Manage.module.css'
 import { ROUTES } from "../../../commons/constants";
 import { findAllExportedViews } from "../../../services/sparql-exported-view";
 import { LocalGraphEntity } from "../../../models/LocalGraphEntity";
-import { MetadataGraphEntity } from "../../../models/MetadataGraphEntity";
+import { MetaEKGModel } from "../../../models/MetaEKGModel";
 import { SemanticViewEntity } from "../../../models/SemanticViewEntity";
 import { SemanticViewForm } from "../../semantic-view/SemanticViewForm";
 import { findOneSemanticView } from "../../../services/sparql-semantic-view";
@@ -23,7 +23,7 @@ import { TitleWithButtonBack } from "../../../components/MTitleWithButtonBack";
 export function ManageMetagraph() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [ekgMetadata, setEkgMetadata] = useState<MetadataGraphEntity>();
+  const [ekgMetadata, setEkgMetadata] = useState<MetaEKGModel>();
   const [semanticView, setSemanticView] = useState<SemanticViewEntity>();
 
   /**CARREGAR O EKG */
@@ -31,7 +31,7 @@ export function ManageMetagraph() {
     function onEdit() {
       try {
         if (location?.state) {
-          let state = location.state as MetadataGraphEntity;
+          let state = location.state as MetaEKGModel;
           console.log("*** CARREGANDO O KG DE METADADOS SELECIONADO ***", location.state)
           setEkgMetadata(state)
         }

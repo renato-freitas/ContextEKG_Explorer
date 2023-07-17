@@ -13,7 +13,7 @@ import { MTable } from '../../components/MTable';
 import { TablePaginationActions } from '../../commons/pagination';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 
-import { MetadataGraphEntity } from '../../models/MetadataGraphEntity';
+import { MetaEKGModel } from '../../models/MetaEKGModel';
 import { DataSourceEntity } from '../../models/DataSourceEntity';
 import { LocalGraphEntity } from '../../models/LocalGraphEntity';
 

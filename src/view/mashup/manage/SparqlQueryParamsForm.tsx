@@ -1,97 +1,86 @@
 import { useContext, useEffect } from "react";
-import React, { useState } from "react";
 import { Box, Button, FormControl, FormLabel, Stack, TextField, Typography } from "@mui/material";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
-import LinearProgress from "@mui/material/LinearProgress";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import { RDF_Node } from "../../models/RDF_Node";
+import { RDF_Node } from "../../../models/RDF_Node";
 
-import { LoadingContext } from "../../App";
-import { DataSourceEntity } from "../../models/DataSourceEntity";
-import { MetaEKGModel } from "../../models/MetaEKGModel";
-import { addtMetadataGraph, IMetadataGraphForm, updateMetadataGraph } from "../../services/sparql-metagraph";
-import { addExportedView } from "../../services/sparql-exported-view";
-import { LocalGraphEntity } from "../../models/LocalGraphEntity";
-import { SemanticViewEntity } from "../../models/SemanticViewEntity";
-import { double_encode_uri, printt } from "../../commons/utils";
-import { METADATA_GRAHP_TYPE } from "../../commons/constants";
-import { api } from "../../services/api";
-import { MetaMashupModel } from "../../models/MetaMashupModel";
+import { LoadingContext } from "../../../App";
+import { MetaEKGModel } from "../../../models/MetaEKGModel";
+import { double_encode_uri, printt } from "../../../commons/utils";
+import { api } from "../../../services/api";
 
 export interface LocationParams {
   pathname: string;
-  state: MetaMashupModel;
+  state: MetaEKGModel;
   search: string;
   hash: string;
   key: string;
 }
 
-// interface IMetaMashup {
-//   uri: RDF_Node;
-//   identifier: RDF_Node;
-//   title: RDF_Node;
-//   label: RDF_Node;
-//   description: RDF_Node;
-  // mashupClass: RDF_Node;
-  // fusionClass: RDF_Node;
-// }
-
-interface IMetaMashupForm {
+interface ISparqlQueryParams {
+  uri: RDF_Node;
+  identifier: RDF_Node;
+  title: RDF_Node;
+  label: RDF_Node;
+  description: RDF_Node;
+  exportedViewURI: RDF_Node;
+  localOntologyClass: RDF_Node;
+  sqpCol: RDF_Node;
+}
+interface ISparqlQueryParamsForm {
   label: string,
   description: string,
-  // mashupClass: string;
-  fusionClass: string;
+  exportedViewURI: string,
+  localOntologyClass: string
+  sqpCol: string
 }
-const MetaMashupSchema = zod.object({
+const SparqlQueryParamsSchema = zod.object({
   identifier: zod.string().optional(),
   uri: zod.string().optional(),
   label: zod.string().min(1, 'Digite ao menos 1 caracter'),
   description: zod.string().optional(),
-  // mashupClass: zod.string(),
-  fusionClass: zod.string(),
-
-  creator: zod.string().optional(),
-  created: zod.string().optional(),
-  modified: zod.string().optional(),
-  type: zod.string().optional(),
+  exportedViewURI: zod.string(),
+  localOntologyClass: zod.string().optional(),
+  sqpCol: zod.string().optional(),
 });
 
-export function MashupForm() {
+export function SparqlQueryParamsForm() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
 
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<IMetaMashupForm>({
-    resolver: zodResolver(MetaMashupSchema),
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<ISparqlQueryParamsForm>({
+    resolver: zodResolver(SparqlQueryParamsSchema),
     defaultValues: {
       label: '',
       description: '',
-      // mashupClass: '',
-      fusionClass: '',
+      exportedViewURI: '',
+      localOntologyClass: '',
+      sqpCol: ''
     }
   });
 
-  const handleSubmitMetaMashup: SubmitHandler<IMetaMashupForm> = async (data) => {
-    printt("ENVIANDO DADOS DO MASHUP", data);
+  const handleSubmitSparqlQueryParams: SubmitHandler<ISparqlQueryParamsForm> = async (data) => {
+    // printt("ENVIANDO DADOS DO MASHUP", data);
     try {
       setIsLoading(true);
-      let uri = location?.state as MetaMashupModel
-      if (uri) {
-        let uri_enc = double_encode_uri(uri.uri.value)
-        await api.put(`/meta-mashups/${uri_enc}`, data)
-      } else {
-        printt("CRIANDO MASHUP")
+      let uri = location?.state as ISparqlQueryParams
+      // if (uri) {
+        let uri_enc = double_encode_uri(uri?.uri?.value)
+        await api.put(`/meta-mashups/${uri_enc}/sparql-query-params`, data)
+      // } else {
+        // printt("CRIANDO MASHUP")
         // await addtMetadataGraph(data)
-        const response = await api.post(`/meta-mashups/`, data)
-      }
+        // const response = await api.post(`/meta-mashups/`, data)
+      // }
     } catch (error) {
-      console.error(error)
+      // console.error(error)
     } finally {
       reset();
       setIsLoading(false);
@@ -104,19 +93,13 @@ export function MashupForm() {
     function onEdit() {
       try {
         if (location.state) {
-          let state = location.state as MetaMashupModel;
-          printt("Colocando o Mashup Selecionado no Formulário", state)
+          let state = location.state as ISparqlQueryParams;
+          // printt("Colocando o Mashup Selecionado no Formulário", state)
           setValue("label", state.label.value);
           setValue("description", state.description.value);
-          // setValue("mashupClass", state?.mashupClass?.value);
-          setValue("fusionClass", state?.fusionClass?.value);
-          // setValue("creator", state.creator.value);
-          // setValue("created", state.created.value);
-          // setValue("identifier", state.identifier.value);
-          // setValue("hasSematicMetadata", state.hasSemanticMetadata)
         }
       } catch (err) {
-        printt("Erro", err)
+        // printt("Erro", err)
       }
     }
     onEdit();
@@ -125,8 +108,8 @@ export function MashupForm() {
 
   return (
     <Container fixed>
-      <h2>{`${location.state?'Editar':'Criar'} MetaMashup`}</h2>
-      <Typography variant='caption'>Instancia do Grafo de Metadados do Mashup</Typography>
+      <h2>{`${location.state ? 'Editar' : 'Cadastrar'} Parâmetro SPARQL/RML`}</h2>
+      <Typography variant='caption'>Parâmetros para consulta SPARQL necessários para construir mapeamento RML</Typography>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -134,7 +117,7 @@ export function MashupForm() {
             sx={{ p: 0 }}
           >
             <CardContent sx={{ padding: '30px' }}>
-              <form onSubmit={handleSubmit(handleSubmitMetaMashup)}>
+              <form onSubmit={handleSubmit(handleSubmitSparqlQueryParams)}>
                 <Grid container spacing={2}>
                   <Grid item sm={6}>
                     <FormControl fullWidth>
@@ -151,26 +134,38 @@ export function MashupForm() {
                   </Grid>
                   <Grid item sm={6}>
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="fusionClass">Classe de Fusão do Mashup</FormLabel>
+                      <FormLabel htmlFor="exportedViewURI">URI da visão exportada</FormLabel>
                       <TextField
                         variant="outlined"
                         placeholder="Ex: Empresa"
                         size="small"
-                        {...register("fusionClass")}
+                        {...register("exportedViewURI")}
                       />
-                      <p>{errors.fusionClass?.message}</p>
+                      <p>{errors.exportedViewURI?.message}</p>
                     </FormControl>
                   </Grid>
                   <Grid item sm={12}>
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="description">Descrição</FormLabel>
+                      <FormLabel htmlFor="localOntologyClass">Classe da ontologia local</FormLabel>
                       <TextField
                         variant="outlined"
                         placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
                         size="small"
-                        {...register('description')}
+                        {...register('localOntologyClass')}
                       />
-                      <p>{errors.description?.message}</p>
+                      <p>{errors.localOntologyClass?.message}</p>
+                    </FormControl>
+                  </Grid>
+                  <Grid item sm={12}>
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="sqpCol">Colunas da Tabela Lógica</FormLabel>
+                      <TextField
+                        variant="outlined"
+                        placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
+                        size="small"
+                        {...register('sqpCol')}
+                      />
+                      <p>{errors.sqpCol?.message}</p>
                     </FormControl>
                   </Grid>
                   {/* Botões */}

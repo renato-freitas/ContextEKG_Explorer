@@ -14,7 +14,7 @@ import { RDF_Node } from "../../models/RDF_Node";
 
 import { LoadingContext } from "../../App";
 import { DataSourceEntity } from "../../models/DataSourceEntity";
-import { MetadataGraphEntity } from "../../models/MetadataGraphEntity";
+import { MetaEKGModel } from "../../models/MetaEKGModel";
 import { ILocalGraphForm, insertOrganization } from "../../services/sparql-organization";
 import { addExportedView } from "../../services/sparql-exported-view";
 import { LocalGraphEntity } from "../../models/LocalGraphEntity";
@@ -22,7 +22,7 @@ import { SemanticViewEntity } from "../../models/SemanticViewEntity";
 
 export interface LocationParams {
   pathname: string;
-  state: MetadataGraphEntity;
+  state: MetaEKGModel;
   search: string;
   hash: string;
   key: string;

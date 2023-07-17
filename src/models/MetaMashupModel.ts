@@ -4,11 +4,10 @@ export interface MetaMashupModel {
   uri: RDF_Node;
   uri_l: RDF_Node;
   identifier: RDF_Node;
-  label?: RDF_Node;
-  description?: RDF_Node;
+  label: RDF_Node;
+  description: RDF_Node;
   mashupClass: RDF_Node;
   fusionClass: RDF_Node;
-  
   creator?: RDF_Node;
   created?: RDF_Node;
   modified?: RDF_Node;
