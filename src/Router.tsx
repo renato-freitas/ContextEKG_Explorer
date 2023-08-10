@@ -19,7 +19,8 @@ import { TableForm } from './view/datasources/tables/TableForm';
 import { ColumnList } from './view/datasources/columns/ColumnList';
 import { ColumnForm } from './view/datasources/columns/ColumnForm';
 
-import { Topics } from './view/topics/Topics';
+import { Navigation } from './view/navigation/Navigation';
+import { Resources } from './view/navigation/Resources';
 
 import { ManageMetagraph } from './view/ekg/manage/ManageMetagraph';
 import { MetaDataSources } from './view/ekg/manage/datasources/MetaDataSources';
@@ -51,7 +52,8 @@ export default function Router() {
         <Route path={ROUTES.ABOUT} element={<About />} />
         <Route path={ROUTES.METAGRAPHS} element={<MetagraphList />} />
         <Route path={ROUTES.METAGRAPHS_FORM} element={<MetagraphForm />} />
-        <Route path={ROUTES.TOPICS} element={<Topics />} />
+        <Route path={ROUTES.NAVIGATION} element={<Navigation />} />
+        <Route path={ROUTES.RESOURCES} element={<Resources />} />
         <Route path={ROUTES.ORGANIZATION_LIST} element={<OrganizationList />} />
         <Route path={ROUTES.ORGANIZATION_FORM} element={<OrganizationForm />} />
         <Route path={ROUTES.ORGANIZATION_DOC} element={<OrganizationDoc />} />

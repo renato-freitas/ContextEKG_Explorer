@@ -18,7 +18,9 @@ export const ENDPOINTS = {
     INTERFACE_MASHUP: "http://localhost:7200/repositories/INTERFACE_MASHUP",
     VSKG: "http://localhost:7200/repositories/VSKG_TULIO",
     DBPEDIA: "https://dbpedia.org/sparql",
-    WIKIDATA: "https://query.wikidata.org/sparql"
+    WIKIDATA: "https://query.wikidata.org/sparql",
+    OD_EKG_SEFAZMA: "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO",
+    GRAFOS_PRODUCAO: "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO",
   },
   PRODUCTION: {
     MOKG: "http://localhost:7200/repositories/metagraph",
@@ -97,6 +99,8 @@ export const ROUTES = {
   COLUMN_LIST: "/columns",
   COLUMN_FORM: "/column-form",
   TOPICS: "/topics",
+  NAVIGATION: "/classes",
+  RESOURCES: "/resources",
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
 

@@ -10,6 +10,7 @@ import { SidebarContainer } from './Sidebar.styles'
 
 import { menuEvolve, menuConsuming, menuConfig } from './menu';
 import { NavLink } from 'react-router-dom';
+import { Stack } from '@mui/material';
 
 export function Sidebar() {
   const { pathname } = useLocation();
@@ -19,10 +20,12 @@ export function Sidebar() {
         {menuEvolve.map((item, index) => (
           <ListItem key={item.title} disablePadding>
             <ListItemButton component={NavLink} to={item.href} selected={pathname === item.href}>
-              <ListItemIcon>
-                <item.icon size={22} />
-              </ListItemIcon>
-              <ListItemText primary={item.title} />
+              <Stack direction={'column'}>
+                <ListItemIcon>
+                  <item.icon size={20} />
+                </ListItemIcon>
+                <ListItemText primary={item.title} primaryTypographyProps={{ fontSize: '0.8rem' }} />
+              </Stack>
             </ListItemButton>
           </ListItem>
         ))}
@@ -32,10 +35,12 @@ export function Sidebar() {
         {menuConsuming.map((item, index) => (
           <ListItem key={item.title} disablePadding>
             <ListItemButton component={NavLink} to={item.href}>
-              <ListItemIcon>
-                <item.icon size={22} />
-              </ListItemIcon>
-              <ListItemText primary={item.title} />
+              <Stack direction={'column'}>
+                <ListItemIcon>
+                  <item.icon size={22} />
+                </ListItemIcon>
+                <ListItemText primary={item.title} primaryTypographyProps={{ fontSize: '0.8rem' }} />
+              </Stack>
             </ListItemButton>
           </ListItem>
         ))}
@@ -45,10 +50,12 @@ export function Sidebar() {
         {menuConfig.map((item, index) => (
           <ListItem key={item.title} disablePadding>
             <ListItemButton component={NavLink} to={item.href}>
-              <ListItemIcon>
-                <item.icon size={22} />
-              </ListItemIcon>
-              <ListItemText primary={item.title} />
+              <Stack direction={'column'}>
+                <ListItemIcon>
+                  <item.icon size={22} />
+                </ListItemIcon>
+                <ListItemText primary={item.title} primaryTypographyProps={{ fontSize: '0.8rem' }} />
+              </Stack>
             </ListItemButton>
           </ListItem>
         ))}
