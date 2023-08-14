@@ -65,6 +65,13 @@ PREFIXIES_SPARQL = {
     ORGANIZATION: "wd:Q43229"
   },
 
+  // A list with URIs of highlighted classes
+  HIGHLIGHT_CLASSES = [
+    'http://xmlns.com/foaf/0.1/Organization',
+    'http://www.sefaz.ma.gov.br/ontology/Estabelecimento', 
+    'http://xmlns.com/foaf/0.1/Person', 
+    'http://www.sefaz.ma.gov.br/ontology/Sociedade'],
+
   DATASOURCE_TYPES = {
     "Banco de Dados Relacional": `${VSKG}RelationalDataBase_DataSource`,
     "No-SQL": `${VSKG}NoSQL_DataSource`,
@@ -101,6 +108,7 @@ export const ROUTES = {
   TOPICS: "/topics",
   NAVIGATION: "/classes",
   RESOURCES: "/resources",
+  CONTEXT: "/contexts",
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
 

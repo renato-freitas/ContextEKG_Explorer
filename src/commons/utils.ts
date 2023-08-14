@@ -21,3 +21,14 @@ export function cutClassFromURI(uri:string|undefined){
     return lastToken2
   }
 }
+
+export function getcontextFromURI(uri:string|undefined){
+  if(uri){
+    let splitOne = uri?.split("/resource/")
+    let lastToken1 = splitOne[1]
+    
+    let split2 = lastToken1.split("/")
+    let lastToken2 = split2[0]
+    return lastToken2
+  }
+}
