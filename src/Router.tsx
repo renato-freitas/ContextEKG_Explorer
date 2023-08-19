@@ -21,7 +21,7 @@ import { ColumnForm } from './view/datasources/columns/ColumnForm';
 
 import { Classes } from './view/navigation/Classes';
 import { Resources } from './view/navigation/Resources';
-import { Context } from './view/navigation/Context';
+import { Properties } from './view/navigation/Properties';
 
 import { ManageMetagraph } from './view/ekg/manage/ManageMetagraph';
 import { MetaDataSources } from './view/ekg/manage/datasources/MetaDataSources';
@@ -55,7 +55,7 @@ export default function Router() {
         <Route path={ROUTES.METAGRAPHS_FORM} element={<MetagraphForm />} />
         <Route path={ROUTES.NAVIGATION} element={<Classes />} />
         <Route path={ROUTES.RESOURCES} element={<Resources />} />
-        <Route path={ROUTES.CONTEXT} element={<Context />} />
+        <Route path={ROUTES.PROPERTIES} element={<Properties />} />
         <Route path={ROUTES.ORGANIZATION_LIST} element={<OrganizationList />} />
         <Route path={ROUTES.ORGANIZATION_FORM} element={<OrganizationForm />} />
         <Route path={ROUTES.ORGANIZATION_DOC} element={<OrganizationDoc />} />

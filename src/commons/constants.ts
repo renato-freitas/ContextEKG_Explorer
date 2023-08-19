@@ -108,7 +108,7 @@ export const ROUTES = {
   TOPICS: "/topics",
   NAVIGATION: "/classes",
   RESOURCES: "/resources",
-  CONTEXT: "/contexts",
+  PROPERTIES: "/properties",
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
 
