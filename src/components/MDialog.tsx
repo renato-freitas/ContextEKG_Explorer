@@ -134,7 +134,11 @@ export const MDialogToConfirmDelete = (props: IMDailogToConfirmDelete) => {
   )
 }
 
-const emails = ['username@gmail.com', 'user02@gmail.com'];
+
+
+
+
+
 export interface ContextsDialogProps {
   open: boolean;
   selectedValue: PropertyObjectEntity;
@@ -152,63 +156,55 @@ export function ContextsDialog(props: ContextsDialogProps) {
     onClose(value);
   };
   printt(`contextos`, props.contexts)
+  let visao_contexto = ''
+
   return (
     <Dialog onClose={handleClose} open={open}>
       <DialogTitle>Contextos do Recurso</DialogTitle>
       <List sx={{ pt: 0 }}>
         {
-          props.contexts.map((contexto) => (
-            <ListItem disableGutters>
-              <ListItemButton onClick={() => handleListItemClick(contexto)} key={contexto.o.value}>
-                <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
-                    <PersonPinCircleOutlined />
-                  </Avatar>
-                </ListItemAvatar>
-                {
-                  contexto.o.value.includes("http://www.sefaz.ma.gov.br/resource/App")
-                    ? <ListItemText primary={"Visão Higienizada"} />
-                    : <ListItemText primary={getContextFromURI(contexto.o.value)} />
-                }
-              </ListItemButton>
-            </ListItem>
-          ))
-        }
-        {/* {
-          props.contexts.every((contexto) => {
+          /**VISÃO FONTE DE DADOS EXPORTADA */
+          props.contexts.map((contexto, idx) => {
             if (!contexto.o.value.includes("http://www.sefaz.ma.gov.br/resource/App")) {
-              return <ListItem disableGutters>
+              visao_contexto = contexto.o.value
+              return <ListItem key={idx} disableGutters>
                 <ListItemButton onClick={() => handleListItemClick(contexto)} key={contexto.o.value}>
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
                       <PersonPinCircleOutlined />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary={"Visão Unificada"} />
+                  <ListItemText primary={getContextFromURI(contexto.o.value)} />
                 </ListItemButton>
               </ListItem>
-
-            } else {
-              return false
-
             }
-
           })
-        } */}
-        {/* <ListItem disableGutters>
-          <ListItemButton
-            autoFocus
-            onClick={() => handleListItemClick()}
-          >
+        }
+
+        {/* VISÃO UNIFICADA */}
+        < ListItem key={- 1} disableGutters>
+          <ListItemButton onClick={() => handleListItemClick({ o: { value: visao_contexto }, label: { value: 'Visão Unificada' } } as PropertyObjectEntity)} key={-1}>
             <ListItemAvatar>
-              <Avatar>
-                <AddIcon />
+              <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+                <PersonPinCircleOutlined />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Visão Unificada" />
+            <ListItemText primary={"Visão Unificada"} />
           </ListItemButton>
-        </ListItem> */}
+        </ListItem>
+        {/* VISÃO HIGIENIZADA */}
+        <ListItem key={-2} disableGutters>
+          <ListItemButton onClick={() => handleListItemClick({ o: { value: visao_contexto }, label: { value: 'Visão Higienizada' } } as PropertyObjectEntity)}  key={-2}>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
+                <PersonPinCircleOutlined />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={"Visão Higienizada"} />
+          </ListItemButton>
+        </ListItem>
+
       </List>
-    </Dialog>
+    </Dialog >
   );
 }
