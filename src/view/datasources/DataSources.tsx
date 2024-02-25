@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import { IconButton, Stack } from '@mui/material';
-
+import { IconButton, ListItemIcon, TableCell, TableRow, Tooltip } from '@mui/material';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
 
 import { ROUTES } from '../../commons/constants';
-// import { findGlobalDataSources, removeDataSource } from '../../services/sparql-datasource';
 import { DataSourceModel } from '../../models/DataSourceModel';
 import styles from './DataSource.module.css';
-import { TitleWithButtonBack } from '../../components/MTitleWithButtonBack';
 import { api } from '../../services/api';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Paper, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
-// import { DeleteForever, EditTwoTone } from '@mui/icons-material';
+import { ListItem, ListItemButton, ListItemText, Paper, Typography } from '@mui/material';
 
-import { Table, CaretCircleLeft } from 'phosphor-react';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ConstructionIcon from '@mui/icons-material/Construction';
+import { Database, FileCsv, Table } from 'phosphor-react';
 
-import { MTable } from '../../components/MTable';
-import { TablePaginationActions } from '../../commons/pagination';
-import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 
-import { double_encode_uri, printt } from "../../commons/utils";
+import { double_encode_uri, getPropertyFromURI } from "../../commons/utils";
 import { MDialogToConfirmDelete } from '../../components/MDialog';
-import { MCard } from '../../components/mcard/MCard';
+import { DeleteForever, EditAttributesTwoTone, EditTwoTone } from '@mui/icons-material';
+
+const PAINEL_LEFT_SIZE = window.screen.width * 0.33
+const PAINEL_RIGHT_SIZE = window.screen.width * 0.46
+const DATASOURCE_TYPES_ICONS_SIZE = 20
+const DATASOURCE_TYPES_ICONS = {
+  "http://rdbs-o#Relational_Database": <Database size={DATASOURCE_TYPES_ICONS_SIZE} />,
+  "https://www.ntnu.no/ub/ontologies/csv#CsvDocument": <FileCsv size={DATASOURCE_TYPES_ICONS_SIZE} />
+}
 
 export function DataSources() {
   const navigate = useNavigate();
@@ -34,16 +34,20 @@ export function DataSources() {
   const [dataSources, setDataSources] = useState<DataSourceModel[]>([]);
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceModel>({} as DataSourceModel);
 
+
   async function loadDataSources() {
-    printt("Lista das fontes de dados")
+    console.log("*** Lista das fontes de dados")
     setLoading(true);
     try {
       const response = await api.get("/datasources");
       console.log(response.data)
       setLoading(false);
       setDataSources(response.data);
+      setSelectedDataSource(response.data[0])
     } catch (error) {
       console.error("loadDataSources", error)
+    } finally {
+      loadDataSourceProperties()
     }
   }
 
@@ -52,27 +56,31 @@ export function DataSources() {
   }, [])
 
 
-  const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
-  useEffect(() => {
-    async function loadDataSourceProperties() {
-      try {
-        setLoading(true);
-        if (selectedDataSource?.uri) {
-          printt(`/properties/${encodeURIComponent(selectedDataSource?.uri?.value)}`)
-          let decode_uri = encodeURIComponent(selectedDataSource?.uri?.value)
-          const response = await api.get(`/properties/${encodeURIComponent(decode_uri)}`);
-          printt(`properties/`, response.data)
-          serProperties(response.data)
-        }
-        // setMetaEKG(response.data)
-      } catch (error) {
-        alert(error)
-      } finally {
-        setLoading(false);
+  // const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
+  // const [properties, serProperties] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
+  const [properties, serProperties] = useState<any>({});
+  async function loadDataSourceProperties() {
+    try {
+      setLoading(true);
+      if (selectedDataSource?.uri) {
+        console.log(`/properties/${encodeURIComponent(selectedDataSource?.uri?.value)}`)
+        let decode_uri = encodeURIComponent(selectedDataSource?.uri?.value)
+        const response = await api.get(`/properties/${encodeURIComponent(decode_uri)}/False`);
+        console.log(`*** properties/`, response.data)
+        serProperties(response.data)
       }
+      // setMetaEKG(response.data)
+    } catch (error) {
+      alert(error)
+    } finally {
+      setLoading(false);
     }
+  }
+  useEffect(() => {
+
     loadDataSourceProperties()
   }, [selectedDataSource])
+
 
   const openForm = () => {
     console.log("*** call: Abrir formulário de Fonte de Dados ***")
@@ -107,115 +115,118 @@ export function DataSources() {
     await loadDataSources();
   }
 
-  const [selectedIndex, setSelectedIndex] = React.useState<Number>(1);
+  const [selectedIndex, setSelectedIndex] = React.useState<Number>(0);
   const handleListItemClick = (event: any, idx: Number, row: DataSourceModel) => {
     setSelectedIndex(idx);
     setSelectedDataSource(row)
   };
 
+  // const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+  // const handleListItemClick = (
+  //   event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+  //   index: number,
+  // ) => {
+  //   setSelectedIndex(index);
+  // };
+
   return (
     <div className={styles.listkg}>
 
-      <TitleWithButtonBack
-        title="Fonte de Dados"
-        buttonLabel="+ Fonte"
-        openForm={openForm} />
+      <h4>Fontes de Dados</h4>
+
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
+          <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
+          <Button variant="contained" onClick={openForm}>+ Nova Fonte de Dados</Button>
+        </Grid>
+      </Grid>
 
       <Grid container spacing={1}>
-        {/* Lista das fontes de dados */}
-        <Grid item sm={6}>
-          <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
-            Recursos
-          </Typography>
-          <List sx={{
-            bgcolor: 'None',
-            position: 'relative',
-            overflow: 'auto',
-            maxHeight: 400,
-            '& ul': { padding: 0 },
-          }}>
-            {dataSources.map((row, idx) => <ListItemButton key={row.uri?.value} sx={{ p: 0, mb: 1 }}
-              selected={selectedIndex === idx}
-              onClick={(event) => handleListItemClick(event, idx, row)}
-            >
-              <MCard>
-                <Box sx={{ width: 470 }}>
-                  <Grid item sm={12}>
-                    <Stack direction="row" spacing={2}>
-                      <Typography variant="h6" component="div">
-                        {row?.label?.value}
-                      </Typography>
-                    </Stack>
-                    <Stack direction="row" spacing={1}>
-                      <Typography variant="caption" component="div" color="purple">
-                        {row?.description?.value}
-                      </Typography>
-                    </Stack>
-                    {/* BOTÕES */}
-                    <Stack direction="row" gap={1}>
-                      <Tooltip title="Construir Metadados">
+        {/* <Grid item sm={5} bgcolor='#343434' justifyContent={'center'}> */}
+        <Grid item sm={5} justifyContent={'center'}>
+          <Box sx={{ width: '100%', maxWidth: PAINEL_LEFT_SIZE, bgcolor: 'background.paper', borderRadius: 1 }}>
+            <List component="nav" aria-label="main mailbox folders">
+              {
+                dataSources.map((resource, idx) => <ListItemButton
+                  selected={selectedIndex === idx}
+                  onClick={(event) => handleListItemClick(event, idx, resource)}
+                >
+                  <ListItemIcon>
+                    {DATASOURCE_TYPES_ICONS[resource?.type?.value]}
+                  </ListItemIcon>
+                  <ListItemText primary={resource.label?.value} />
+
+                  <TableRow key={resource?.uri?.value}>
+                    <TableCell align='center'>
+                      <Tooltip title="Tabelas">
                         <IconButton onClick={() => {
-                          navigate(ROUTES.META_MASHUP_MANAGE, { state: row })
+                          navigate(ROUTES.TABLE_LIST, { state: resource })
+                          console.log(resource)
+                          // setSelectedDataSource(resource);
                         }}>
-                          <ConstructionIcon />
+                          <Table size={22} />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Editar Metadados">
-                        <IconButton edge="end" onClick={() => { navigate(ROUTES.DATASOURCE_FORM, { state: row }) }}>
-                          <EditTwoToneIcon />
+                      <Tooltip title="Editar">
+                        <IconButton onClick={() => {
+                          console.log("*** Selecionando Grafo de Metadados ***")
+                          navigate(ROUTES.DATASOURCE_FORM, { state: resource })
+                        }}>
+                          <EditAttributesTwoTone />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Deletar Fonte de Dados">
-                        <IconButton edge="end" aria-label="delete" onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
-                          <DeleteIcon />
+                      <Tooltip title="Excluir">
+                        <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)}>
+                          <DeleteForever />
                         </IconButton>
                       </Tooltip>
-                    </Stack>
-                  </Grid>
-                </Box>
-              </MCard>
-            </ListItemButton>
-            )}
-          </List>
+                    </TableCell>
+                  </TableRow>
+
+                </ListItemButton>)
+              }
+            </List>
+          </Box>
         </Grid>
 
-        {/* Listas de propriedades */}
-        <Grid item sm={6}>
-          <Typography sx={{ fontSize: "1rem", fontWeight: 600 }} color="purple" gutterBottom>
-            Propriedades
-          </Typography>
-          {properties.length > 0 && <Box sx={{ width: "100%", height: "400" }}>
-            {/* <Paper sx={{ maxHeight: 400, background: "None" }} elevation={0}> */}
-            <Paper sx={{ maxHeight: 400 }} elevation={0}>
-              <List sx={{
-                width: '100%',
-                position: 'relative',
-                overflow: 'auto',
-                maxHeight: 400,
-                padding: 1
-              }}>
-
-                {properties.map((row, idx) => <>
-                  <ListItem key={idx}>
-                    <Stack>
-                      <Typography sx={{ fontSize: 14, fontWeight: 600 }} color="text.primary" gutterBottom>
-                        {row?.l ? row?.l?.value : row?.p?.value}
-                      </Typography>
-
-                      <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
-                        {row.o.value}
-                      </Typography>
-                    </Stack>
-                  </ListItem>
-                </>
-                )}
-              </List>
-            </Paper>
-          </Box>
+        {/* Propriedades */}
+        <Grid item sm={7}>
+          {
+            properties && <Box sx={{ width: "100%", maxWidth: PAINEL_RIGHT_SIZE }}>
+              <Paper elevation={0}>
+                <List sx={{
+                  width: '100%',
+                  position: 'relative',
+                  overflow: 'auto',
+                  // maxHeight: 400,
+                  padding: 1
+                }}>
+                  {
+                    Object.keys(properties).map((row, idx) => <ListItem key={idx}>
+                      <Grid container spacing={2}>
+                        {/* Propriedades */}
+                        <Grid item sm={3}>
+                          <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
+                            {getPropertyFromURI(properties[row][0]?.p?.value)}
+                          </Typography>
+                          <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
+                            . {properties[row][0]?.o?.value}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </ListItem>
+                    )
+                  }
+                </List>
+              </Paper>
+            </Box>
           }
         </Grid>
-        {/* Fim */}
       </Grid>
+
+
+
 
       <MDialogToConfirmDelete
         openConfirmDeleteDialog={openDialogToConfirmDelete}
@@ -225,6 +236,4 @@ export function DataSources() {
       />
     </div>
   )
-
-
 }

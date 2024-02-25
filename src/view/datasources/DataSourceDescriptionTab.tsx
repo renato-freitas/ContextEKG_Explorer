@@ -48,7 +48,7 @@ export function DataSourceDescriptionTab(props: DataSourceDescriptionProps) {
       </Grid>
       <Grid item sm={6}>
         <FormControl fullWidth size="small">
-          <FormLabel htmlFor="type">Tipo de Fonte</FormLabel>
+          <FormLabel htmlFor="type">Tipo da Fonte de Dados</FormLabel>
           <Controller
             name="type"
             defaultValue={""}

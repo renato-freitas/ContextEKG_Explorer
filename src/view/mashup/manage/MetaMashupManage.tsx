@@ -5,7 +5,7 @@ import { Button, Chip, Divider, Grid, Stack, Typography } from "@mui/material";
 
 import CircleIcon from '@mui/icons-material/Circle';
 
-import { VSGK_TBOX, ROUTES } from "../../../commons/constants";
+import { VSKG_TBOX, ROUTES } from "../../../commons/constants";
 import { MetaMashupModel } from "../../../models/MetaMashupModel";
 import { SemanticViewEntity } from "../../../models/SemanticViewEntity";
 import { TitleWithButtonBack } from "../../../components/MTitleWithButtonBack";
@@ -41,7 +41,7 @@ export function MetaMashupManage() {
           /**OBTER AS VISÕES EXPORTADAS SELECIONADAS DO MTMSHP */
           let _uri = double_encode_uri(state?.uri?.value)
           const response = await api.get(`/properties/${_uri}`);
-          let _properties = response.data.filter((ele: any) => ele.p.value == VSGK_TBOX.P_META_MASHUP_HAS_EXPORTED_VIEW)
+          let _properties = response.data.filter((ele: any) => ele.p.value == VSKG_TBOX.P_META_MASHUP_HAS_EXPORTED_VIEW)
           console.log(`properties/`, _properties)
           serProperties(_properties)
           setCheckedExportedViews(_properties.map((ele: any) => ele?.label?.value))

@@ -155,7 +155,7 @@ export function ContextsDialog(props: ContextsDialogProps) {
   const handleListItemClick = (value: PropertyObjectEntity) => {
     onClose(value);
   };
-  printt(`contextos`, props.contexts)
+  // console.log(`contextos`, props.contexts)
   let visao_contexto = ''
 
   return (

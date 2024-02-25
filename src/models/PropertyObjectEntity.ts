@@ -4,5 +4,6 @@ export interface PropertyObjectEntity {
   p: RDF_Node;
   o: RDF_Node;
   l?: RDF_Node;
+  same?: RDF_Node;
   label?: RDF_Node;
 }

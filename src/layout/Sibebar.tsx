@@ -17,18 +17,20 @@ export function Sidebar() {
   return (
     <SidebarContainer>
       <List>
-        {menuEvolve.map((item, index) => (
-          <ListItem key={item.title} disablePadding>
-            <ListItemButton component={NavLink} to={item.href} selected={pathname === item.href}>
-              <Stack direction={'column'}>
-                <ListItemIcon>
-                  <item.icon size={20} />
-                </ListItemIcon>
-                <ListItemText primary={item.title} primaryTypographyProps={{ fontSize: '0.8rem' }} />
-              </Stack>
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {
+          menuEvolve.map((item, index) => (
+            <ListItem key={item.title} disablePadding>
+              <ListItemButton component={NavLink} to={item.href} selected={pathname === item.href}>
+                <Stack direction={'column'}>
+                  <ListItemIcon>
+                    <item.icon size={20} />
+                  </ListItemIcon>
+                  <ListItemText primary={item.title} primaryTypographyProps={{ fontSize: '0.8rem' }} />
+                </Stack>
+              </ListItemButton>
+            </ListItem>
+          ))
+        }
       </List>
       <Divider />
       <List>

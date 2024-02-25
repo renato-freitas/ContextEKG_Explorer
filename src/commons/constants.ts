@@ -30,8 +30,9 @@ export const ENDPOINTS = {
     WIKIDATA: "https://query.wikidata.org/sparql"
   },
 
-},
-  MAIN_PREFIXIES = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+}
+
+export const MAIN_PREFIXIES = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
     PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -41,44 +42,40 @@ export const ENDPOINTS = {
     PREFIX vskg: <http://www.arida.ufc.br/VSKG#>
     BASE <http://www.arida.ufc.org/resource/>
     `
-,
-PREFIXIES_SPARQL = {
-  MOKG: TXT_PREFIX + " mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>\n",
-  VSKG: TXT_PREFIX + " vsgk: <http://www.arida.ufc.br/VSKG#>\n",
-  DC: TXT_PREFIX + " dc: <http://purl.org/dc/elements/1.1/>\n",
-  DCT: TXT_PREFIX + " dcterms: <http://purl.org/dc/terms/>\n",
-  OWL: TXT_PREFIX + " owl: <http://www.w3.org/2002/07/owl#>\n",
-  RDFS: TXT_PREFIX + " rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n",
-  RDF: TXT_PREFIX + " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n",
-  FOAF: TXT_PREFIX + " foaf: <http://xmlns.com/foaf/0.1/>\n",
-  DBO: TXT_PREFIX + " dbo: <http://dbpedia.org/ontology/>\n",
-  VANN: TXT_PREFIX + " vann: <http://purl.org/vocab/vann/>",
-  WIKIDATA_ENTITY: TXT_PREFIX + " wd: <http://www.wikidata.org/entity/>\n",
-  WIKIDATA_PROPS: TXT_PREFIX + " wdt: <http://www.wikidata.org/prop/direct/>\n",
-  WIKIBASE: TXT_PREFIX + " wikibase: <http://wikiba.se/ontology#>\n",
-  BLAZEGRAPH_BD: TXT_PREFIX + " bd: <http://www.bigdata.com/rdf#>\n"
-},
+  
+export const PREFIXIES_SPARQL = {
+    MOKG: TXT_PREFIX + " mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>\n",
+    VSKG: TXT_PREFIX + " vsgk: <http://www.arida.ufc.br/VSKG#>\n",
+    DC: TXT_PREFIX + " dc: <http://purl.org/dc/elements/1.1/>\n",
+    DCT: TXT_PREFIX + " dcterms: <http://purl.org/dc/terms/>\n",
+    OWL: TXT_PREFIX + " owl: <http://www.w3.org/2002/07/owl#>\n",
+    RDFS: TXT_PREFIX + " rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n",
+    RDF: TXT_PREFIX + " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n",
+    FOAF: TXT_PREFIX + " foaf: <http://xmlns.com/foaf/0.1/>\n",
+    DBO: TXT_PREFIX + " dbo: <http://dbpedia.org/ontology/>\n",
+    VANN: TXT_PREFIX + " vann: <http://purl.org/vocab/vann/>",
+    WIKIDATA_ENTITY: TXT_PREFIX + " wd: <http://www.wikidata.org/entity/>\n",
+    WIKIDATA_PROPS: TXT_PREFIX + " wdt: <http://www.wikidata.org/prop/direct/>\n",
+    WIKIBASE: TXT_PREFIX + " wikibase: <http://wikiba.se/ontology#>\n",
+    BLAZEGRAPH_BD: TXT_PREFIX + " bd: <http://www.bigdata.com/rdf#>\n"
+  }
 
-  WIKIDATA = {
+export const WIKIDATA = {
     INSTANCIA_DE: "wdt:P31",
     PAIS: "wd:Q6256",
     ORGANIZATION: "wd:Q43229"
-  },
+  }
 
   // A list with URIs of highlighted classes
-  HIGHLIGHT_CLASSES = [
+export const HIGHLIGHT_CLASSES = [
     'http://xmlns.com/foaf/0.1/Organization',
-    'http://www.sefaz.ma.gov.br/ontology/Estabelecimento', 
-    'http://xmlns.com/foaf/0.1/Person', 
-    'http://www.sefaz.ma.gov.br/ontology/Sociedade'],
+    'http://www.sefaz.ma.gov.br/ontology/Estabelecimento',
+    'http://xmlns.com/foaf/0.1/Person',
+    'http://www.sefaz.ma.gov.br/ontology/Sociedade']
 
-  DATASOURCE_TYPES = {
-    "Banco de Dados Relacional": `${VSKG}RelationalDataBase_DataSource`,
-    "No-SQL": `${VSKG}NoSQL_DataSource`,
-    "Triplestore": `${VSKG}Triplestore_DataSource`,
-    "CSV": `${VSKG}CSV_DataSource`,
-    "RDF": `${VSKG}RDF_DataSource`
-  };
+
+
+
 
 /**APPLICATION */
 export const ROUTES = {
@@ -139,6 +136,24 @@ export const ROUTES = {
   };
 
 /**Ontologia de Domínio */
-export const VSGK_TBOX = {
+export const VSKG_TBOX = {
+  CLASS: {
+    RELATIONAL_DATABASE: "http://rdbs-o#Relational_Database",
+    CSV_FILE: "https://www.ntnu.no/ub/ontologies/csv#CsvDocument"
+  },
   P_META_MASHUP_HAS_EXPORTED_VIEW: "http://www.arida.ufc.br/VSKG#hasExportedView"
+}
+
+export const DATASOURCE_TYPES = {
+  // "Banco de Dados Relacional": `${VSKG}RelationalDataBase_DataSource`,
+  "Banco de Dados Relacional": VSKG_TBOX.CLASS.RELATIONAL_DATABASE,
+  // "No-SQL": `${VSKG}NoSQL_DataSource`,
+  // "Triplestore": `${VSKG}Triplestore_DataSource`,
+  "CSV": VSKG_TBOX.CLASS.CSV_FILE,
+  // "RDF": `${VSKG}RDF_DataSource`
+}
+
+export const FONTE_PRINCIPAL = "http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA"
+export let APP_HIGIENIZACAO = {
+  Estabelecimento: "http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento"
 }

@@ -1,3 +1,4 @@
+
 export function printt(text: string, value?: any): void {
   console.log(`*** ${text.toUpperCase()} ***`, value ? value : "")
 }
@@ -10,14 +11,19 @@ export function double_encode_uri(normal_uri: string) {
 export const changeBgColorCard = (idx: Number, selectedIndex: Number) => selectedIndex == idx ? "#edf4fc" : "None";
 
 
-export function cutClassFromURI(uri: string): string {
+export function getPropertyFromURI(uri: string): string {
   if (uri) {
     let splitOne = uri?.split("/")
     let quantityOfTokens_1 = splitOne?.length
     let lastToken1 = splitOne[quantityOfTokens_1 - 1]
-    let split2 = lastToken1.split("#")
-    let quantityOfTokens_2 = split2?.length
-    let lastToken2 = split2[quantityOfTokens_2 - 1].toString()
+    // console.log(`1º split >>>`, lastToken1)
+    let lastToken2 = lastToken1
+    if(lastToken1.includes("#")){
+      let split2 = lastToken1.split("#")
+      let quantityOfTokens_2 = split2?.length
+      lastToken2 = split2[quantityOfTokens_2 - 1].toString()
+      // console.log(`2º split >>>`, lastToken2)
+    }
     return lastToken2;
   }
   return "";
@@ -36,6 +42,51 @@ export function getContextFromURI(uri: string): string {
   return "";
 }
 
+export function getClassFromURI(uri: string): string {
+  if (uri) {
+    let splitOne = uri?.split("/")
+    let quantityOfTokens_1 = splitOne?.length
+    let lastToken1 = splitOne[quantityOfTokens_1 - 2]
+    return `${lastToken1}`;
+  }
+  return "";
+}
+
+export function getClassAndIdentifierFromURI(uri: string): string {
+  if (uri) {
+    let splitOne = uri?.split("/")
+    let quantityOfTokens_1 = splitOne?.length
+    let lastToken1 = splitOne[quantityOfTokens_1 - 2]
+    let lastToken2 = splitOne[quantityOfTokens_1 - 1]
+    
+    return `${lastToken1}/${lastToken2}`;
+  }
+  return "";
+}
+
+export function getIdentifierFromURI(uri: string): string {
+  if (uri) {
+    let splitOne = uri?.split("/")
+    let quantityOfTokens_1 = splitOne?.length
+    let lastToken2 = splitOne[quantityOfTokens_1 - 1]
+    
+    return `${lastToken2}`;
+  }
+  return "";
+}
+
+export function getAppHigienizadoFromClasse(uri: string): string{
+  const classe = getClassFromURI(uri)
+  const id = getIdentifierFromURI(uri)
+  switch (classe) {
+    case 'Estabelecimento':
+      return `http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento/${id}`
+    case 'Empresa': 
+      return `http://www.sefaz.ma.gov.br/resource/AppEndereco/Empresa${id}`
+    default:
+      return "";
+  }
+}
 
 export function setContextLocalStorage(context: string): void {
   localStorage.setItem('context', context)

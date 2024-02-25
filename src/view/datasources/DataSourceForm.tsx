@@ -29,7 +29,7 @@ import { TableEntity } from "../../models/TableEntity";
 import { RDF_Node } from "../../models/RDF_Node";
 import { api } from "../../services/api";
 import PhoneMissedIcon from '@mui/icons-material/PhoneMissed';
-import { VSKG, NAMESPACES } from "../../commons/constants";
+import { VSKG, NAMESPACES, VSKG_TBOX } from "../../commons/constants";
 import { double_encode_uri, printt } from "../../commons/utils";
 
 interface IDataSource {
@@ -47,11 +47,11 @@ interface IDataSource {
 }
 
 enum DataSourceTypeEnum {
-  Banco_Dados_Relacional = `${VSKG}RelationalDataBase_DataSource`,
-  No_SQL = `${VSKG}NoSQL_DataSource`,
-  Triplestore = `${VSKG}Triplestore_DataSource`,
-  CSV = `${VSKG}CSV_DataSource`,
-  RDF = `${VSKG}RDF_DataSource`
+  Banco_Dados_Relacional = VSKG_TBOX.CLASS.RELATIONAL_DATABASE,
+  // No_SQL = `${VSKG}NoSQL_DataSource`,
+  // Triplestore = `${VSKG}Triplestore_DataSource`,
+  CSV = VSKG_TBOX.CLASS.CSV_FILE,
+  // RDF = `${VSKG}RDF_DataSource`
 }
 
 interface IDataSourceForm {
@@ -227,7 +227,7 @@ export function DataSourceForm() {
 
   return (
     <Container fixed>
-      <h1>Formulário de Fonte de Dados</h1>
+      <h4>Formulário de Fonte de Dados</h4>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -241,7 +241,8 @@ export function DataSourceForm() {
                   onChange={handleChange}
                   aria-label="basic tabs example"
                   indicatorColor="secondary">
-                  <Tab label={`Descrição`} icon={<PhoneMissedIcon />} iconPosition="end" {...a11yProps(0)} />
+                  {/* <Tab label={`Descrição`} icon={<PhoneMissedIcon />} iconPosition="end" {...a11yProps(0)} /> */}
+                  <Tab label={`Descrição`} {...a11yProps(0)} />
                   <Tab label="Credenciais" {...a11yProps(1)} />
                 </Tabs>
                 <form onSubmit={handleSubmit(handleSubmitDataSource)}>
