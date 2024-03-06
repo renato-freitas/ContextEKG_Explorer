@@ -1,15 +1,46 @@
 /**SEMANTIC WEB */
-const TXT_PREFIX = "PREFIX"
-const MOKG = "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#";
-export const VSKG = "http://www.arida.ufc.br/VSKG/";
+// const MOKG = "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#";
+// export const VSKG = "http://www.arida.ufc.br/VSKG/";
 
 export const NAMESPACES = {
+  RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+  RDFS: "http://www.w3.org/2000/01/rdf-schema#",
+  OWL: "http://www.w3.org/2002/07/owl#",
   DC: "http://purl.org/dc/elements/1.1/",
-  VSKG: "http://www.arida.ufc.br/VSKG/",
+  DCT: "http://purl.org/dc/terms/",
+  FOAF: "http://xmlns.com/foaf/0.1/",
+  D2RQ: "http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#",
+  DBO: "http://dbpedia.org/ontology/",
+  VANN: "http://purl.org/vocab/vann/",
+  WIKIDATA_ENTITY: "http://www.wikidata.org/entity/",
+  WIKIDATA_PROPS: "http://www.wikidata.org/prop/direct/",
+  WIKIBASE: "http://wikiba.se/ontology#",
+  BLAZEGRAPH_BD: "http://www.bigdata.com/rdf#",
   SEFAZMA: "http://www.sefaz.ma.gov.br/ontology/",
   BASE: "http://www.sefaz.ma.gov.br/resource/",
+  VSKG: "http://www.arida.ufc.br/VSKG#",
   VSKGR: "http://www.arida.ufc.br/VSKG/resource/",
-  META_EKG: "http://www.arida.ufc.br/meta-ekg/resource/"
+  META_EKG: "http://www.arida.ufc.br/meta-ekg/resource/",
+  MOKG: "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#"
+}
+
+export const PREFIXIES = {
+  RDF: `PREFIX rdf: <${NAMESPACES.RDF}>\n`,
+  RDFS: `PREFIX rdfs: <${NAMESPACES.RDFS}>\n`,
+  OWL: `PREFIX owl: <${NAMESPACES.OWL}>\n`,
+  D2RQ: `PREFIX d2rq: <${NAMESPACES.D2RQ}>\n`,
+  DCT: `PREFIX dcterms: <${NAMESPACES.DCT}>\n`,
+  FOAF: `PREFIX foaf: <${NAMESPACES.FOAF}>\n`,
+  DBO: `PREFIX dbo: <${NAMESPACES.DBO}>\n`,
+  VANN: `PREFIX vann: <${NAMESPACES.VANN}>`,
+  WIKIDATA_ENTITY: `PREFIX wd: <${NAMESPACES.WIKIDATA_ENTITY}>\n`,
+  WIKIDATA_PROPS: `PREFIX wdt: <${NAMESPACES.WIKIDATA_PROPS}>\n`,
+  WIKIBASE: `PREFIX wikibase: <${NAMESPACES.WIKIBASE}>\n`,
+  BLAZEGRAPH_BD: `PREFIX bd: <${NAMESPACES.BLAZEGRAPH_BD}>\n`,
+  SEFAZMA: `PREFIX : <${NAMESPACES.SEFAZMA}>\n`,
+  BASE: `PREFIX : <${NAMESPACES.BASE}>\n`,
+  VSKG: `PREFIX : <${NAMESPACES.VSKG}>\n`,
+  VSKGR: `PREFIX : <${NAMESPACES.VSKGR}>\n`,
 }
 
 export const ENDPOINTS = {
@@ -42,36 +73,36 @@ export const MAIN_PREFIXIES = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syn
     PREFIX vskg: <http://www.arida.ufc.br/VSKG#>
     BASE <http://www.arida.ufc.org/resource/>
     `
-  
+
 export const PREFIXIES_SPARQL = {
-    MOKG: TXT_PREFIX + " mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>\n",
-    VSKG: TXT_PREFIX + " vsgk: <http://www.arida.ufc.br/VSKG#>\n",
-    DC: TXT_PREFIX + " dc: <http://purl.org/dc/elements/1.1/>\n",
-    DCT: TXT_PREFIX + " dcterms: <http://purl.org/dc/terms/>\n",
-    OWL: TXT_PREFIX + " owl: <http://www.w3.org/2002/07/owl#>\n",
-    RDFS: TXT_PREFIX + " rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n",
-    RDF: TXT_PREFIX + " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n",
-    FOAF: TXT_PREFIX + " foaf: <http://xmlns.com/foaf/0.1/>\n",
-    DBO: TXT_PREFIX + " dbo: <http://dbpedia.org/ontology/>\n",
-    VANN: TXT_PREFIX + " vann: <http://purl.org/vocab/vann/>",
-    WIKIDATA_ENTITY: TXT_PREFIX + " wd: <http://www.wikidata.org/entity/>\n",
-    WIKIDATA_PROPS: TXT_PREFIX + " wdt: <http://www.wikidata.org/prop/direct/>\n",
-    WIKIBASE: TXT_PREFIX + " wikibase: <http://wikiba.se/ontology#>\n",
-    BLAZEGRAPH_BD: TXT_PREFIX + " bd: <http://www.bigdata.com/rdf#>\n"
-  }
+  MOKG: "PREFIX mokg: <http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#>\n",
+  VSKG: "PREFIX vsgk: <http://www.arida.ufc.br/VSKG#>\n",
+  DC: "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n",
+  DCT: "PREFIX dcterms: <http://purl.org/dc/terms/>\n",
+  OWL: "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n",
+  RDFS: "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n",
+  RDF: "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n",
+  FOAF: "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n",
+  DBO: "PREFIX dbo: <http://dbpedia.org/ontology/>\n",
+  VANN: "PREFIX vann: <http://purl.org/vocab/vann/>",
+  WIKIDATA_ENTITY: "PREFIX wd: <http://www.wikidata.org/entity/>\n",
+  WIKIDATA_PROPS: "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n",
+  WIKIBASE: "PREFIX wikibase: <http://wikiba.se/ontology#>\n",
+  BLAZEGRAPH_BD: "PREFIX bd: <http://www.bigdata.com/rdf#>\n"
+}
 
 export const WIKIDATA = {
-    INSTANCIA_DE: "wdt:P31",
-    PAIS: "wd:Q6256",
-    ORGANIZATION: "wd:Q43229"
-  }
+  INSTANCIA_DE: "wdt:P31",
+  PAIS: "wd:Q6256",
+  ORGANIZATION: "wd:Q43229"
+}
 
-  // A list with URIs of highlighted classes
+// A list with URIs of highlighted classes
 export const HIGHLIGHT_CLASSES = [
-    'http://xmlns.com/foaf/0.1/Organization',
-    'http://www.sefaz.ma.gov.br/ontology/Estabelecimento',
-    'http://xmlns.com/foaf/0.1/Person',
-    'http://www.sefaz.ma.gov.br/ontology/Sociedade']
+  'http://xmlns.com/foaf/0.1/Organization',
+  'http://www.sefaz.ma.gov.br/ontology/Estabelecimento',
+  'http://xmlns.com/foaf/0.1/Person',
+  'http://www.sefaz.ma.gov.br/ontology/Sociedade']
 
 
 
@@ -140,6 +171,23 @@ export const VSKG_TBOX = {
   CLASS: {
     RELATIONAL_DATABASE: "http://rdbs-o#Relational_Database",
     CSV_FILE: "https://www.ntnu.no/ub/ontologies/csv#CsvDocument"
+  },
+  PROPERTY: {
+    RDF_TYPE: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+    IS_A: `${NAMESPACES.RDF}type`,
+    LABEL: `${NAMESPACES.RDFS}label`,
+    DOMAIN: `${NAMESPACES.RDFS}domain`,
+    RANGE: `${NAMESPACES.RDFS}range`,
+    DC_IDENTIFIER: `${NAMESPACES.DC}identifier`,
+    DC_DESCRIPTION: `${NAMESPACES.DC}description`,
+    HAS_APPLICATION: `${NAMESPACES.VSKG}hasApplication`,
+    // FONTE DE DADOS
+    DATASOURCE_TYPE: `${NAMESPACES.VSKG}datasourceType`,
+    DB_USERNAME: `${NAMESPACES.D2RQ}username`,
+    DB_PASSWORD: `${NAMESPACES.D2RQ}password`,
+    DB_JDBC_DRIVER: `${NAMESPACES.D2RQ}jdbcDriver`,
+    DB_CONNECTION_URL: `${NAMESPACES.D2RQ}jdbcDSN`,
+    CSV_FILE_PATH: `${NAMESPACES.VSKG}csvFilePath`
   },
   P_META_MASHUP_HAS_EXPORTED_VIEW: "http://www.arida.ufc.br/VSKG#hasExportedView"
 }

@@ -29,8 +29,9 @@ import { TableEntity } from "../../models/TableEntity";
 import { RDF_Node } from "../../models/RDF_Node";
 import { api } from "../../services/api";
 import PhoneMissedIcon from '@mui/icons-material/PhoneMissed';
-import { VSKG, NAMESPACES, VSKG_TBOX } from "../../commons/constants";
+import { NAMESPACES, VSKG_TBOX, DATASOURCE_TYPES } from "../../commons/constants";
 import { double_encode_uri, printt } from "../../commons/utils";
+import { Autocomplete, MenuItem, Select } from "@mui/material";
 
 interface IDataSource {
   uri: RDF_Node;
@@ -47,10 +48,10 @@ interface IDataSource {
 }
 
 enum DataSourceTypeEnum {
-  Banco_Dados_Relacional = VSKG_TBOX.CLASS.RELATIONAL_DATABASE,
+  Banco_Dados_Relacional = "http://rdbs-o#Relational_Database",
   // No_SQL = `${VSKG}NoSQL_DataSource`,
   // Triplestore = `${VSKG}Triplestore_DataSource`,
-  CSV = VSKG_TBOX.CLASS.CSV_FILE,
+  CSV = "https://www.ntnu.no/ub/ontologies/csv#CsvDocument"
   // RDF = `${VSKG}RDF_DataSource`
 }
 
@@ -58,7 +59,9 @@ interface IDataSourceForm {
   label: string,
   description: string,
   subject_datasource: string,
-  type: DataSourceTypeEnum,
+  // type: DataSourceTypeEnum,
+  // type: string | null,
+  type: string,
   connection_url: string,
   username: string,
   password: string,
@@ -93,17 +96,23 @@ const DataSourceSchema = zod.object({
  * ii) Ou atualizar individualmente cada GM
  */
 
+const options = ['Option 1', 'Option 2'];
 
 export function DataSourceForm() {
   const location = useLocation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [selectecDataSourceType, setSelectecDataSourceType] = useState<DataSourceTypeEnum>();
 
   const [tables, setTables] = useState([]);
   const [tableNames, setTableNames] = useState<string[]>([]);
 
+  const [value, setValuei] = React.useState<string | null>(null);
+  const [inputValuei, setInputValue] = React.useState('');
+
+
   const { register, control, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IDataSourceForm>({
-    resolver: zodResolver(DataSourceSchema),
+    // resolver: zodResolver(DataSourceSchema),
     // defaultValues: {
     // title: '',
     // label: '',
@@ -116,7 +125,7 @@ export function DataSourceForm() {
   });
 
   const handleSubmitDataSource: SubmitHandler<IDataSourceForm> = async (data) => {
-    console.log("*** Enviando dados de Fonte de Dados ***")
+    console.log("*** Enviando dados de uma Fonte de Dados ***")
     console.log(data);
 
     try {
@@ -124,13 +133,12 @@ export function DataSourceForm() {
       // if (location?.state) {
       let uri = location?.state as IDataSource
 
-      printt('data 2 update', uri)
+      console.log('*** Dados para atualizar ***', uri)
       if (uri) {
         let uri_enc = double_encode_uri(uri.uri.value)
         await api.put(`/datasources/${uri_enc}`, data)
       } else {
-        console.log("*** INSERT ***")
-        // const response = await insertDataSource(data)
+        console.log("*** Criando ***")
         const response = await api.post(`/datasources`, data)
         console.log("*** RESPOSTA DO INSERT ***")
         console.log(response)
@@ -140,6 +148,7 @@ export function DataSourceForm() {
       console.error(error)
     } finally {
       setLoading(false);
+      navigate(-1)
     }
   };
 
@@ -153,25 +162,33 @@ export function DataSourceForm() {
           console.log(location, state)
           setValue("label", state.label.value);
 
-          printt('onEdite(), uri', state.uri.value)
+          console.log('onEdite(), uri', state.uri.value)
           try {
             let encoded_uri = double_encode_uri(state.uri.value)
-            const response = await api.get(`/properties/${encoded_uri}`);
-            response.data.forEach((p: any) => {
-              // if (p.p.value.includes(`${NAMESPACES.VSKG}uri`)) { setValue("uri", p.o.value); }
-              if (p.p.value.includes(`${NAMESPACES.DC}description`)) { setValue("description", p.o.value); }
-              if (p.p.value.includes(`${NAMESPACES.VSKG}type`)) {
-                if (p.o.value == DataSourceTypeEnum.Banco_Dados_Relacional) {
-                  setValue("type", DataSourceTypeEnum.Banco_Dados_Relacional);
+            // const response = await api.get(`/properties/${encoded_uri}`);
+            const response = await api.get(`/properties/${encoded_uri}/False`);
+            // console.log(`response: ${JSON.stringify(response.data)}`)
+
+            Object.keys(response.data).map((p, idx) => {
+              response.data[p][0]?.p?.value
+              let _p: any = response.data[p][0]?.p,
+                _o: any = response.data[p][0]?.o
+              console.log(`props: ${_p.value}`)
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DC_DESCRIPTION}`)) { setValue("description", _o?.value); }
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DATASOURCE_TYPE}`)) {
+                if (_o?.value == `${VSKG_TBOX.CLASS.RELATIONAL_DATABASE}`) {
+                  setValue("type", `${VSKG_TBOX.CLASS.RELATIONAL_DATABASE}`);
+                  setValuei("Banco de Dados Relacional")
                 }
-                if (p.o.value == DataSourceTypeEnum.CSV) {
-                  setValue("type", DataSourceTypeEnum.CSV);
+                if (_o?.value == `${VSKG_TBOX.CLASS.CSV_FILE}`) {
+                  setValue("type", `${VSKG_TBOX.CLASS.CSV_FILE}`);
+                  setValuei("CSV")
                 }
               }
-              if (p.p.value.includes(`${NAMESPACES.VSKG}connection_url`)) { setValue("connection_url", p.o.value); }
-              if (p.p.value.includes(`${NAMESPACES.VSKG}username`)) { setValue("username", p.o.value); }
-              if (p.p.value.includes(`${NAMESPACES.VSKG}password`)) { setValue("password", p.o.value); }
-              if (p.p.value.includes(`${NAMESPACES.VSKG}jdbc_driver`)) { setValue("jdbc_driver", p.o.value); }
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_CONNECTION_URL}`)) { setValue("connection_url", _o?.value); }
+              if (response.data[p][0]?.p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_USERNAME}`)) { setValue("username", response.data[p][0]?.o?.value); }
+              if (response.data[p][0]?.p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_PASSWORD}`)) { setValue("password", response.data[p][0]?.o?.value); }
+              if (response.data[p][0]?.p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_JDBC_DRIVER}`)) { setValue("jdbc_driver", response.data[p][0]?.o?.value); }
             })
           } catch (error) {
             console.error("load properties", error)
@@ -186,7 +203,7 @@ export function DataSourceForm() {
   }, [location.state]);
 
 
-  // Tabs
+  Tabs
   interface TabPanelProps {
     children?: React.ReactNode;
     index: number;
@@ -225,9 +242,10 @@ export function DataSourceForm() {
     setValueTab(newValue);
   };
 
+
   return (
     <Container fixed>
-      <h4>Formulário de Fonte de Dados</h4>
+      <h3>{`${'Cadastrar'} Fonte de Dados`}</h3>
       <Grid container spacing={0}>
         <Grid item lg={12} md={12} xs={12}>
           <Card
@@ -235,40 +253,203 @@ export function DataSourceForm() {
             sx={{ p: 0 }}
           >
             <CardContent sx={{ padding: '30px' }}>
-              {/* <Box sx={{ borderBottom: 1, borderColor: 'divider' }}> */}
-              <Box>
-                <Tabs value={valueTab}
-                  onChange={handleChange}
-                  aria-label="basic tabs example"
-                  indicatorColor="secondary">
-                  {/* <Tab label={`Descrição`} icon={<PhoneMissedIcon />} iconPosition="end" {...a11yProps(0)} /> */}
-                  <Tab label={`Descrição`} {...a11yProps(0)} />
-                  <Tab label="Credenciais" {...a11yProps(1)} />
-                </Tabs>
-                <form onSubmit={handleSubmit(handleSubmitDataSource)}>
-                  <TabPanel value={valueTab} index={0}>
-                    <DataSourceDescriptionTab
-                      schema={DataSourceSchema}
-                      register={register}
-                      control={control}
-                      errors={errors}
-                    />
-                  </TabPanel>
+              <form onSubmit={handleSubmit(handleSubmitDataSource)}>
+                <Grid container spacing={2}>
+                  <Grid item sm={6}>
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="label">Rótulo</FormLabel>
+                      <TextField
+                        variant="outlined"
+                        placeholder="Ex: REDESIM"
+                        size="small"
+                        {...register('label')}
+                      />
+                      <p>{errors.label?.message}</p>
+                    </FormControl>
+                  </Grid>
 
-                  <TabPanel value={valueTab} index={1}>
-                    <DataSourceCredentialsTab
-                      schema={DataSourceSchema}
-                      register={register}
-                      errors={errors}
-                    />
-                  </TabPanel>
-                </form>
-              </Box>
+
+                  <Grid item sm={6}>
+                    <FormControl fullWidth size="small">
+                      <FormLabel htmlFor="type">Tipo da Fonte de Dados</FormLabel>
+                      <Autocomplete
+                        size="small"
+                        value={value}
+                        onChange={(event: any, newValue: string | null) => {
+                          setValuei(newValue);
+                          if(newValue == "Banco de Dados Relacional"){
+                            setValue("type", DATASOURCE_TYPES[newValue])
+                          }else if(newValue == "CSV"){
+                            setValue("type", DATASOURCE_TYPES[newValue])
+                          }
+                        }}
+                        inputValue={inputValuei}
+                        onInputChange={(event, newInputValue) => {
+                          setInputValue(newInputValue);
+                        }}
+                        id="controllable-states-demo"
+                        // options={options}
+                        options={Object.entries(DATASOURCE_TYPES).map(([k, v]) => k)}
+                        // sx={{ width: 300 }}
+                        // renderInput={(params) => <TextField {...params} label="Controllable" />}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item sm={12}>
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="descriptin">Descrição</FormLabel>
+                      <TextField
+                        variant="outlined"
+                        placeholder="Ex: Essa fontes é sobre..."
+                        size="small"
+                        {...register('description')}
+                      />
+                      <p>{errors.description?.message}</p>
+                    </FormControl>
+                  </Grid>
+
+                  {
+                    value == "Banco de Dados Relacional" && <>
+                      <Grid item sm={7}>
+                        <FormControl fullWidth>
+                          <FormLabel htmlFor="title">URL de Conexão</FormLabel>
+                          <TextField
+                            variant="outlined"
+                            placeholder="Ex: jdbc:postgresql://ip:porta/nome_bd"
+                            size="small"
+                            {...register('connection_url')}
+                          />
+                          <p>{errors.connection_url?.message}</p>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item sm={5}>
+                        <FormControl fullWidth>
+                          <FormLabel htmlFor="title">Driver JDBC</FormLabel>
+                          <TextField
+                            variant="outlined"
+                            placeholder="Ex: org.postgresql.Driver"
+                            size="small"
+                            {...register('jdbc_driver')}
+                          />
+                          <p>{errors.jdbc_driver?.message}</p>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item sm={6}>
+                        <FormControl fullWidth>
+                          <FormLabel htmlFor="creator">Nome de Usuário</FormLabel>
+                          <TextField
+                            variant="outlined"
+                            placeholder="Ex: public"
+                            size="small"
+                            {...register("username")}
+                          />
+                          <p>{errors.username?.message}</p>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item sm={6}>
+                        <FormControl fullWidth>
+                          <FormLabel htmlFor="password">Senha</FormLabel>
+                          <TextField
+                            variant="outlined"
+                            placeholder="Ex: Metadados que descrevem o KG do MDCC ..."
+                            size="small"
+                            {...register('password')}
+                          />
+                          <p>{errors.password?.message}</p>
+                        </FormControl>
+                      </Grid>
+                    </>
+                  }
+
+                  {
+                    value == "CSV" &&
+                    <Grid item sm={12}>
+                      <FormControl fullWidth>
+                        <FormLabel htmlFor="csv_file">Path do arquivo CSV</FormLabel>
+                        <TextField
+                          variant="outlined"
+                          placeholder="Ex: http://www.meu-repositorio.com/csv-file.csv"
+                          size="small"
+                          {...register('csv_file')}
+                        />
+                        <p>{errors.csv_file?.message}</p>
+                      </FormControl>
+                    </Grid>
+                  }
+
+
+                  {/* Botões */}
+                  <Grid item sm={12}>
+                    <Box display="flex" justifyContent="flex-start">
+                      <Stack spacing={1} direction={{ xs: "column", sm: "row" }}>
+                        <Button type="submit" color="primary" variant="contained">
+                          Salvar
+                        </Button>
+                        <Button color="secondary" variant="contained"
+                          onClick={() => navigate(-1)}>
+                          Cancelar
+                        </Button>
+                      </Stack>
+                    </Box>
+                  </Grid>
+                </Grid>
+
+              </form>
             </CardContent>
-            {loading && <LinearProgress />}
+            {/* {isLoading && <LinearProgress />} */}
           </Card>
         </Grid>
       </Grid>
-    </Container >
+    </Container>
   )
+
+  // return (
+  //   <Container fixed>
+  //     <h4>Formulário de Fonte de Dados</h4>
+  //     <Grid container spacing={0}>
+  //       <Grid item lg={12} md={12} xs={12}>
+  //         <Card
+  //           variant="outlined"
+  //           sx={{ p: 0 }}
+  //         >
+  //           <CardContent sx={{ padding: '30px' }}>
+  //             <Box>
+  //               <Tabs value={valueTab}
+  //                 onChange={handleChange}
+  //                 aria-label="basic tabs example"
+  //                 indicatorColor="secondary">
+  //                 <Tab label={`Descrição`} {...a11yProps(0)} />
+  //                 <Tab label="Credenciais" {...a11yProps(1)} />
+  //               </Tabs>
+  //               <form onSubmit={handleSubmit(handleSubmitDataSource)}>
+  //                 <TabPanel value={valueTab} index={0}>
+  //                   <DataSourceDescriptionTab
+  //                     schema={DataSourceSchema}
+  //                     register={register}
+  //                     control={control}
+  //                     errors={errors}
+  //                   />
+  //                 </TabPanel>
+
+  //                 <TabPanel value={valueTab} index={1}>
+  //                   <DataSourceCredentialsTab
+  //                     schema={DataSourceSchema}
+  //                     register={register}
+  //                     errors={errors}
+  //                   />
+  //                 </TabPanel>
+  //               </form>
+  //             </Box>
+  //           </CardContent>
+  //           {loading && <LinearProgress />}
+  //         </Card>
+  //       </Grid>
+  //     </Grid>
+  //   </Container >
+  // )
 }

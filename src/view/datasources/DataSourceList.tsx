@@ -12,7 +12,7 @@ import { ROUTES } from '../../commons/constants';
 import { findGlobalDataSources, removeDataSource } from '../../services/sparql-datasource';
 import { DataSourceEntity } from '../../models/DataSourceEntity';
 import { MTable } from '../../components/MTable';
-import styles from '../../datasources/DataSource.module.css';
+import styles from './DataSource.module.css';
 import { TablePaginationActions } from '../../commons/pagination';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 

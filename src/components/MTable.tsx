@@ -20,25 +20,27 @@ interface MTable {
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const PAINEL_LEFT_SIZE = window.screen.width * 0.356
+
 export function MTable(props: MTable) {
   return (
-    <TableContainer component={Paper} sx={{ mt: 2 }}>
+    <TableContainer component={Paper}>
       <Table
         stickyHeader={false}
         aria-label={"sticky table"}
-        sx={{ whiteSpace: 'nowrap', minWidth: 650 }}
+        sx={{ whiteSpace: 'nowrap', minWidth: PAINEL_LEFT_SIZE }}
       >
         <TableHead>
           <TableRow>
             {props.header.map((column: [string, typeAlignOfCell]) =>
               <TableCell key={column[0]} align={column[1]}>
-                <Typography component={'p'} variant="body1" fontWeight="800">{column[0]}</Typography>
+                <Typography component={'p'} variant="caption" fontWeight="800">{column[0]}</Typography>
               </TableCell>
             )}
             {
               props.hasActions &&
               <TableCell key={'Ações'} align='center'>
-                <Typography component={'p'} variant="body1" fontWeight="800">Ações</Typography>
+                <Typography component={'p'} variant="caption" fontWeight="800">Ações</Typography>
               </TableCell>
             }
           </TableRow>

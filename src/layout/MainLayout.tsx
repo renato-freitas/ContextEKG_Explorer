@@ -15,10 +15,10 @@ export const MainLayout = () => {
     <>
       <TopBar />
       <Grid container>
-        <Grid item sm={1.5}>
+        <Grid item sm={1}>
           <Sidebar />
         </Grid>
-        <Grid item sm={10.5} sx={{background: "#f6f6f6", height: "100%"}}>
+        <Grid item sm={11} sx={{background: "#f0f0f0", height: "100%", mt:1}}>
           <Outlet />
         </Grid>
       </Grid>

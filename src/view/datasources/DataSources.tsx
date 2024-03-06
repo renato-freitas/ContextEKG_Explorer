@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import { IconButton, ListItemIcon, TableCell, TableRow, Tooltip } from '@mui/material';
+import { CircularProgress, IconButton, Stack, TableCell, TableRow, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 
-import { ROUTES } from '../../commons/constants';
+import { ROUTES, VSKG_TBOX } from '../../commons/constants';
 import { DataSourceModel } from '../../models/DataSourceModel';
 import styles from './DataSource.module.css';
 import { api } from '../../services/api';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { ListItem, ListItemButton, ListItemText, Paper, Typography } from '@mui/material';
+import { ListItem, Paper, Typography } from '@mui/material';
 
-import { Database, FileCsv, Table } from 'phosphor-react';
+import { Database, FileCsv, Eye, Trash, PencilSimpleLine } from 'phosphor-react';
 
 
 import { double_encode_uri, getPropertyFromURI } from "../../commons/utils";
 import { MDialogToConfirmDelete } from '../../components/MDialog';
-import { DeleteForever, EditAttributesTwoTone, EditTwoTone } from '@mui/icons-material';
+import { MTable } from '../../components/MTable';
 
-const PAINEL_LEFT_SIZE = window.screen.width * 0.33
-const PAINEL_RIGHT_SIZE = window.screen.width * 0.46
+const PAINEL_LEFT_SIZE = window.screen.width * 0.356
+const PAINEL_RIGHT_SIZE = window.screen.width * 0.5
 const DATASOURCE_TYPES_ICONS_SIZE = 20
+const PAPER_ELEVATION = 2
 const DATASOURCE_TYPES_ICONS = {
   "http://rdbs-o#Relational_Database": <Database size={DATASOURCE_TYPES_ICONS_SIZE} />,
   "https://www.ntnu.no/ub/ontologies/csv#CsvDocument": <FileCsv size={DATASOURCE_TYPES_ICONS_SIZE} />
@@ -73,7 +74,7 @@ export function DataSources() {
     } catch (error) {
       alert(error)
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 500)
     }
   }
   useEffect(() => {
@@ -100,6 +101,20 @@ export function DataSources() {
   //   setRowsPerPage(parseInt(event.target.value, 10));
   //   setPage(0);
   // };
+
+  /**Pagination */
+  const [page, setPage] = useState(0);
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value)
+    setRowsPerPage(parseInt(event.target.value, 10));
+    // setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
@@ -133,19 +148,23 @@ export function DataSources() {
   return (
     <div className={styles.listkg}>
 
-      <h4>Fontes de Dados</h4>
-
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item gap={2} sm={12} justifyContent="flex-end" display="flex">
+      {/* HEADER */}
+      <Grid container spacing={1} sx={{ p: '10px' }}>
+        <Grid item xs={4}>
+          <h4>Fontes de Dados</h4>
+        </Grid>
+        <Grid item xs={8} gap={1} display='flex' justifyContent='flex-end'
+          sx={{ pt: '0px !important' }}>
           <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
           <Button variant="contained" onClick={openForm}>+ Nova Fonte de Dados</Button>
         </Grid>
       </Grid>
 
-      <Grid container spacing={1}>
-        {/* <Grid item sm={5} bgcolor='#343434' justifyContent={'center'}> */}
-        <Grid item sm={5} justifyContent={'center'}>
-          <Box sx={{ width: '100%', maxWidth: PAINEL_LEFT_SIZE, bgcolor: 'background.paper', borderRadius: 1 }}>
+      {/* CONTENT */}
+      <Grid container spacing={1} sx={{ mb: 1 }}>
+        {/* DATA SOURCES */}
+        <Grid item sm={6} justifyContent={'center'}>
+          {/* <Paper elevation={PAPER_ELEVATION} sx={{ width: '100%', maxWidth: PAINEL_LEFT_SIZE, bgcolor: 'background.paper', borderRadius: 1 }}>
             <List component="nav" aria-label="main mailbox folders">
               {
                 dataSources.map((resource, idx) => <ListItemButton
@@ -187,31 +206,90 @@ export function DataSources() {
                 </ListItemButton>)
               }
             </List>
-          </Box>
+          </Paper> */}
+          <MTable
+            header={[["Recursos", "left"]]}
+            size={dataSources.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+            hasActions
+            loading={false}
+          >
+            {
+              (rowsPerPage > 0
+                ? dataSources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : dataSources
+              ).map((resource, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>
+                    <Stack direction={'row'} gap={1}>
+                      {DATASOURCE_TYPES_ICONS[resource?.type?.value]}
+                      <Typography>{resource.label.value}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align='center'>
+                    <Tooltip title="Ver Propriedades">
+                      <IconButton onClick={(event) => handleListItemClick(event, idx, resource)}>
+                        <Eye size={22} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Editar">
+                      <IconButton onClick={() => {
+                        console.log("*** Selecionando a Fonte de Dados ***")
+                        navigate(ROUTES.DATASOURCE_FORM, { state: resource })
+                      }}>
+                        <PencilSimpleLine size={22} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Excluir">
+                      <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)}>
+                        <Trash size={22} />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </MTable>
         </Grid>
 
-        {/* Propriedades */}
-        <Grid item sm={7}>
+        {/* PROPERTIES */}
+        <Grid item sm={6}>
           {
             properties && <Box sx={{ width: "100%", maxWidth: PAINEL_RIGHT_SIZE }}>
-              <Paper elevation={0}>
+              <Paper elevation={PAPER_ELEVATION}>
+                <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
+
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    <Stack direction='row'>
+                      {DATASOURCE_TYPES_ICONS[selectedDataSource?.type?.value]}
+                      <h4>{selectedDataSource?.label?.value}</h4>
+                    </Stack>
+                    {loading && <CircularProgress size={20} />}
+                  </Stack>
+
+                </div>
                 <List sx={{
                   width: '100%',
                   position: 'relative',
                   overflow: 'auto',
-                  // maxHeight: 400,
                   padding: 1
                 }}>
                   {
-                    Object.keys(properties).map((row, idx) => <ListItem key={idx}>
+                    Object.keys(properties).map((row, idx) => (properties[row][0]?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && properties[row][0]?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx}>
                       <Grid container spacing={2}>
-                        {/* Propriedades */}
-                        <Grid item sm={3}>
+                        <Grid item sm={12}>
                           <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
                             {getPropertyFromURI(properties[row][0]?.p?.value)}
                           </Typography>
                           <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
-                            . {properties[row][0]?.o?.value}
+                            {properties[row][0]?.o?.value}
                           </Typography>
                         </Grid>
                       </Grid>
@@ -234,6 +312,6 @@ export function DataSources() {
         deleteInstance={handleRemove}
         instance={selectedDataSource}
       />
-    </div>
+    </div >
   )
 }
