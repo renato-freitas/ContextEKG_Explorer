@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField"
 import Button from "@mui/material/Button"
 import { useNavigate } from 'react-router-dom';
 import { CaretCircleLeft } from "phosphor-react"
-import { Chip } from "@mui/material"
+import { Chip, IconButton } from "@mui/material"
 import { MenuContext } from './MenuContext'
 import { getContextFromURI } from "../commons/utils"
 
@@ -22,21 +22,26 @@ export const MHeader = ({ hasButtonBack, title, buttonLabel, chip, openForm }: T
   return (
     <Grid container>
       <Grid item sm={12}>
-        <Stack direction="row" alignItems="center" spacing={1} margin={1}>
+        {/* <Stack direction="row" alignItems="center" spacing={1} margin={1}> */}
+        <Stack direction="row" alignItems="center" spacing={1}>
           {
             hasButtonBack
-              ? <Box
-                display="flex"
-                sx={{ '&:hover': { color: '#ddaa00' }, cursor: "pointer" }}
-              >
+              ?
+              // <Box
+              //   display="flex"
+              //   fontSize={35}
+              //   sx={{ '&:hover': { color: '#ddaa00' }, cursor: "pointer" }}
+              // >
+              <IconButton onClick={() => navigate(-1)} sx={{p:"0.2px 0"}}>
                 <CaretCircleLeft
-                  size={35}
-                  onClick={() => navigate(-1)}
+                  size={30}
+                  // onClick={() => navigate(-1)}
                 />
-              </Box>
+              </IconButton>
+              // </Box>
               : false
           }
-          <h3>{title}</h3>
+          <h4>{title}</h4>
           {
             !buttonLabel
               ? false

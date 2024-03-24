@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { ListItem, Paper, Typography } from '@mui/material';
 
-import { Database, FileCsv, Eye, Trash, PencilSimpleLine } from 'phosphor-react';
+import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table } from 'phosphor-react';
 
 
 import { double_encode_uri, getPropertyFromURI } from "../../commons/utils";
@@ -40,7 +40,7 @@ export function DataSources() {
     console.log("*** Lista das fontes de dados")
     setLoading(true);
     try {
-      const response = await api.get("/datasources");
+      const response = await api.get("/datasources/");
       console.log(response.data)
       setLoading(false);
       setDataSources(response.data);
@@ -59,14 +59,15 @@ export function DataSources() {
 
   // const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   // const [properties, serProperties] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
-  const [properties, serProperties] = useState<any>({});
+  // const [properties, serProperties] = useState<any>({});
+  const [properties, serProperties] = useState<any>([]);
   async function loadDataSourceProperties() {
     try {
       setLoading(true);
       if (selectedDataSource?.uri) {
-        console.log(`/properties/${encodeURIComponent(selectedDataSource?.uri?.value)}`)
+        console.log(`*** /datasources/${encodeURIComponent(selectedDataSource?.uri?.value)}/properties/`)
         let decode_uri = encodeURIComponent(selectedDataSource?.uri?.value)
-        const response = await api.get(`/properties/${encodeURIComponent(decode_uri)}/False`);
+        const response = await api.get(`/datasources/${encodeURIComponent(decode_uri)}/properties/`);
         console.log(`*** properties/`, response.data)
         serProperties(response.data)
       }
@@ -145,11 +146,17 @@ export function DataSources() {
   //   setSelectedIndex(index);
   // };
 
+  const handleAddSchemas = async (normal_uri: string) => {
+    let encoded_uri = double_encode_uri(normal_uri)
+    await api.post(`/datasources/schemas/${encoded_uri}`)
+    // await loadDataSources();
+  }
+
   return (
     <div className={styles.listkg}>
 
       {/* HEADER */}
-      <Grid container spacing={1} sx={{ p: '10px' }}>
+      <Grid container spacing={1} sx={{ p: '10px 0' }}>
         <Grid item xs={4}>
           <h4>Fontes de Dados</h4>
         </Grid>
@@ -161,52 +168,9 @@ export function DataSources() {
       </Grid>
 
       {/* CONTENT */}
-      <Grid container spacing={1} sx={{ mb: 1 }}>
+      <Grid container spacing={4} sx={{ mb: 1 }}>
         {/* DATA SOURCES */}
         <Grid item sm={6} justifyContent={'center'}>
-          {/* <Paper elevation={PAPER_ELEVATION} sx={{ width: '100%', maxWidth: PAINEL_LEFT_SIZE, bgcolor: 'background.paper', borderRadius: 1 }}>
-            <List component="nav" aria-label="main mailbox folders">
-              {
-                dataSources.map((resource, idx) => <ListItemButton
-                  selected={selectedIndex === idx}
-                  onClick={(event) => handleListItemClick(event, idx, resource)}
-                >
-                  <ListItemIcon>
-                    {DATASOURCE_TYPES_ICONS[resource?.type?.value]}
-                  </ListItemIcon>
-                  <ListItemText primary={resource.label?.value} />
-
-                  <TableRow key={resource?.uri?.value}>
-                    <TableCell align='center'>
-                      <Tooltip title="Tabelas">
-                        <IconButton onClick={() => {
-                          navigate(ROUTES.TABLE_LIST, { state: resource })
-                          console.log(resource)
-                          // setSelectedDataSource(resource);
-                        }}>
-                          <Table size={22} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Editar">
-                        <IconButton onClick={() => {
-                          console.log("*** Selecionando Grafo de Metadados ***")
-                          navigate(ROUTES.DATASOURCE_FORM, { state: resource })
-                        }}>
-                          <EditAttributesTwoTone />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Excluir">
-                        <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)}>
-                          <DeleteForever />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-
-                </ListItemButton>)
-              }
-            </List>
-          </Paper> */}
           <MTable
             header={[["Recursos", "left"]]}
             size={dataSources.length}
@@ -215,6 +179,7 @@ export function DataSources() {
             handleChangePage={handleChangePage}
             handleChangeRowsPerPage={handleChangeRowsPerPage}
             hasActions
+            alignActions='right'
             loading={false}
           >
             {
@@ -222,29 +187,37 @@ export function DataSources() {
                 ? dataSources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 : dataSources
               ).map((resource, idx) => (
-                <TableRow key={idx}>
+                <TableRow key={idx} >
                   <TableCell>
                     <Stack direction={'row'} gap={1}>
                       {DATASOURCE_TYPES_ICONS[resource?.type?.value]}
                       <Typography>{resource.label.value}</Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell align='center'>
-                    <Tooltip title="Ver Propriedades">
-                      <IconButton onClick={(event) => handleListItemClick(event, idx, resource)}>
+                  <TableCell align='right' sx={{p:"0 6px 0 0"}}>
+                    <Tooltip title="Propriedades">
+                      <IconButton onClick={(event) => handleListItemClick(event, idx, resource)} sx={{p:"4px !important"}}> 
                         <Eye size={22} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Editar">
-                      <IconButton onClick={() => {
-                        console.log("*** Selecionando a Fonte de Dados ***")
-                        navigate(ROUTES.DATASOURCE_FORM, { state: resource })
-                      }}>
+                      <IconButton 
+                        onClick={() => navigate(ROUTES.DATASOURCE_FORM, { state: resource }) } 
+                        sx={{p:"4px !important"}}>
                         <PencilSimpleLine size={22} />
                       </IconButton>
                     </Tooltip>
+                    <Tooltip title="Esquemas">
+                      <IconButton onClick={() => {
+                        console.log("*** Selecionando a Fonte de Dados ***")
+                        // handleAddSchemas(resource.uri.value)
+                        navigate(ROUTES.TABLE_LIST, { state: resource })
+                      }} sx={{p:"4px !important"}}>
+                        <Table size={22} />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Excluir">
-                      <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)}>
+                      <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)} sx={{p:"4px !important"}}>
                         <Trash size={22} />
                       </IconButton>
                     </Tooltip>
@@ -259,7 +232,7 @@ export function DataSources() {
           {
             properties && <Box sx={{ width: "100%", maxWidth: PAINEL_RIGHT_SIZE }}>
               <Paper elevation={PAPER_ELEVATION}>
-                <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
+                <div style={{ background: "#1976d214", padding: "0px 10px 0px 10px" }}>
 
                   <Stack
                     direction="row"
@@ -267,7 +240,7 @@ export function DataSources() {
                     alignItems="center"
                     spacing={2}
                   >
-                    <Stack direction='row'>
+                    <Stack direction='row' gap={1}>
                       {DATASOURCE_TYPES_ICONS[selectedDataSource?.type?.value]}
                       <h4>{selectedDataSource?.label?.value}</h4>
                     </Stack>
@@ -281,15 +254,30 @@ export function DataSources() {
                   overflow: 'auto',
                   padding: 1
                 }}>
-                  {
-                    Object.keys(properties).map((row, idx) => (properties[row][0]?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && properties[row][0]?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx}>
-                      <Grid container spacing={2}>
+                  {/* {
+                    Object.keys(properties).map((row, idx) => (properties[row][0]?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && properties[row][0]?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{pb:0}}>
+                      <Grid container>
                         <Grid item sm={12}>
                           <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
                             {getPropertyFromURI(properties[row][0]?.p?.value)}
                           </Typography>
-                          <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
+                          <Typography key={idx} variant="body2" sx={{ m: "10px 0px 0x 1px" }} color="text.secondary" gutterBottom>
                             {properties[row][0]?.o?.value}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </ListItem>
+                    )
+                  } */}
+                  {
+                    properties.map((row, idx) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{pb:0}}>
+                      <Grid container>
+                        <Grid item sm={12}>
+                          <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
+                            {getPropertyFromURI(row?.p?.value)}
+                          </Typography>
+                          <Typography key={idx} variant="body2" sx={{ m: "10px 0px 0x 1px" }} color="text.secondary" gutterBottom>
+                            {row?.o?.value}
                           </Typography>
                         </Grid>
                       </Grid>

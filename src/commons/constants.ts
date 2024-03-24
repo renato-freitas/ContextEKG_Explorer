@@ -63,6 +63,12 @@ export const ENDPOINTS = {
 
 }
 
+export const NAMED_GRAPHS = {
+  DATA: "",
+  KG_METADATA: "http://www.arida.ufc.br/metakg/named-graph/KG-METADATA",
+  KG_MASHUP: "http://www.arida.ufc.br/metakg/named-graph/KG-MASHUP"
+}
+
 export const MAIN_PREFIXIES = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -129,7 +135,7 @@ export const ROUTES = {
   DATASOURCE_LIST_: "/datasources",
   DATASOURCE_FORM_: "/datasources-form",
 
-  TABLE_LIST: "/tables",
+  TABLE_LIST: "/datasources/tables",
   TABLE_FORM: "/table-form",
   COLUMN_LIST: "/columns",
   COLUMN_FORM: "/column-form",
@@ -176,6 +182,7 @@ export const VSKG_TBOX = {
     RDF_TYPE: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
     IS_A: `${NAMESPACES.RDF}type`,
     LABEL: `${NAMESPACES.RDFS}label`,
+    NAME: `${NAMESPACES.FOAF}name`,
     DOMAIN: `${NAMESPACES.RDFS}domain`,
     RANGE: `${NAMESPACES.RDFS}range`,
     DC_IDENTIFIER: `${NAMESPACES.DC}identifier`,

@@ -5,12 +5,12 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-
   }
 
   body {
-    background: "#dcdcdc";
-    color: "#fff"
+    background: rgba(250, 250, 250) !important;
+    background-color: rgba(23, 23, 24);
+    color: rgba(0, 0, 0)
   }
 
   body, input, textArea, button {

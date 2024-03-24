@@ -11,6 +11,7 @@ type typeAlignOfCell = "right" | "left" | "inherit" | "center" | "justify" | und
 interface MTable {
   header: Array<[string, typeAlignOfCell]>;
   hasActions?: boolean;
+  alignActions?: typeAlignOfCell;
   loading?: boolean;
   size: number,
   rowsPerPage: number;
@@ -20,7 +21,7 @@ interface MTable {
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const PAINEL_LEFT_SIZE = window.screen.width * 0.356
+const PAINEL_LEFT_SIZE = window.screen.width * 0.2
 
 export function MTable(props: MTable) {
   return (
@@ -39,7 +40,7 @@ export function MTable(props: MTable) {
             )}
             {
               props.hasActions &&
-              <TableCell key={'Ações'} align='center'>
+              <TableCell key={'Ações'} align={props.alignActions ? props.alignActions : 'center'}>
                 <Typography component={'p'} variant="caption" fontWeight="800">Ações</Typography>
               </TableCell>
             }

@@ -57,6 +57,7 @@ enum DataSourceTypeEnum {
 
 interface IDataSourceForm {
   label: string,
+  name: string,
   description: string,
   subject_datasource: string,
   // type: DataSourceTypeEnum,
@@ -79,6 +80,7 @@ export interface LocationParams {
 
 const DataSourceSchema = zod.object({
   label: zod.string().min(1, { message: "Preencher!" }),
+  name: zod.string().min(1, { message: "Preencher!" }),
   description: zod.string().optional(),
   subject_datasource: zod.string().optional(),
   type: zod.nativeEnum(DataSourceTypeEnum),
@@ -166,14 +168,16 @@ export function DataSourceForm() {
           try {
             let encoded_uri = double_encode_uri(state.uri.value)
             // const response = await api.get(`/properties/${encoded_uri}`);
-            const response = await api.get(`/properties/${encoded_uri}/False`);
-            // console.log(`response: ${JSON.stringify(response.data)}`)
+            const response = await api.get(`/datasources/${encoded_uri}/properties/`);
+            console.log(`response: ${JSON.stringify(response.data)}`)
 
-            Object.keys(response.data).map((p, idx) => {
-              response.data[p][0]?.p?.value
-              let _p: any = response.data[p][0]?.p,
-                _o: any = response.data[p][0]?.o
+            // Object.keys(response.data).map((p, idx) => {
+            response.data.map((row, idx) => {
+              row?.p?.value
+              let _p: any = row?.p,
+                _o: any = row?.o
               console.log(`props: ${_p.value}`)
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.NAME}`)) { setValue("name", _o?.value); }
               if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DC_DESCRIPTION}`)) { setValue("description", _o?.value); }
               if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DATASOURCE_TYPE}`)) {
                 if (_o?.value == `${VSKG_TBOX.CLASS.RELATIONAL_DATABASE}`) {
@@ -186,9 +190,10 @@ export function DataSourceForm() {
                 }
               }
               if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_CONNECTION_URL}`)) { setValue("connection_url", _o?.value); }
-              if (response.data[p][0]?.p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_USERNAME}`)) { setValue("username", response.data[p][0]?.o?.value); }
-              if (response.data[p][0]?.p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_PASSWORD}`)) { setValue("password", response.data[p][0]?.o?.value); }
-              if (response.data[p][0]?.p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_JDBC_DRIVER}`)) { setValue("jdbc_driver", response.data[p][0]?.o?.value); }
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_USERNAME}`)) { setValue("username", _o?.value); }
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_PASSWORD}`)) { setValue("password", _o?.value); }
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DB_JDBC_DRIVER}`)) { setValue("jdbc_driver", _o?.value); }
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.CSV_FILE_PATH}`)) { setValue("csv_file", _o?.value); }
             })
           } catch (error) {
             console.error("load properties", error)
@@ -277,9 +282,9 @@ export function DataSourceForm() {
                         value={value}
                         onChange={(event: any, newValue: string | null) => {
                           setValuei(newValue);
-                          if(newValue == "Banco de Dados Relacional"){
+                          if (newValue == "Banco de Dados Relacional") {
                             setValue("type", DATASOURCE_TYPES[newValue])
-                          }else if(newValue == "CSV"){
+                          } else if (newValue == "CSV") {
                             setValue("type", DATASOURCE_TYPES[newValue])
                           }
                         }}
@@ -312,7 +317,19 @@ export function DataSourceForm() {
 
                   {
                     value == "Banco de Dados Relacional" && <>
-                      <Grid item sm={7}>
+                      <Grid item sm={4}>
+                        <FormControl fullWidth>
+                          <FormLabel htmlFor="title">Nome do Banco de Dados</FormLabel>
+                          <TextField
+                            variant="outlined"
+                            placeholder="Ex: DB_Empresa"
+                            size="small"
+                            {...register('name')}
+                          />
+                          <p>{errors.name?.message}</p>
+                        </FormControl>
+                      </Grid>
+                      <Grid item sm={4}>
                         <FormControl fullWidth>
                           <FormLabel htmlFor="title">URL de Conexão</FormLabel>
                           <TextField
@@ -325,7 +342,7 @@ export function DataSourceForm() {
                         </FormControl>
                       </Grid>
 
-                      <Grid item sm={5}>
+                      <Grid item sm={4}>
                         <FormControl fullWidth>
                           <FormLabel htmlFor="title">Driver JDBC</FormLabel>
                           <TextField
@@ -367,19 +384,33 @@ export function DataSourceForm() {
                   }
 
                   {
-                    value == "CSV" &&
-                    <Grid item sm={12}>
-                      <FormControl fullWidth>
-                        <FormLabel htmlFor="csv_file">Path do arquivo CSV</FormLabel>
-                        <TextField
-                          variant="outlined"
-                          placeholder="Ex: http://www.meu-repositorio.com/csv-file.csv"
-                          size="small"
-                          {...register('csv_file')}
-                        />
-                        <p>{errors.csv_file?.message}</p>
-                      </FormControl>
-                    </Grid>
+                    value == "CSV" && <>
+                      <Grid item sm={4}>
+                        <FormControl fullWidth>
+                          <FormLabel htmlFor="title">Nome do Documento</FormLabel>
+                          <TextField
+                            variant="outlined"
+                            placeholder="Ex: DB_Empresa"
+                            size="small"
+                            {...register('name')}
+                          />
+                          <p>{errors.name?.message}</p>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item sm={8}>
+                        <FormControl fullWidth>
+                          <FormLabel htmlFor="csv_file">Path do arquivo CSV</FormLabel>
+                          <TextField
+                            variant="outlined"
+                            placeholder="Ex: http://www.meu-repositorio.com/csv-file.csv"
+                            size="small"
+                            {...register('csv_file')}
+                          />
+                          <p>{errors.csv_file?.message}</p>
+                        </FormControl>
+                      </Grid>
+                    </>
                   }
 
 

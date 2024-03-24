@@ -15,7 +15,7 @@ import { DataSourceForm } from './view/datasources/DataSourceForm';
 
 import { DataSources } from './view/datasources/DataSources';
 // import { DataSourceList } from './view/datasources/DataSourceList';
-import { NewTableList } from './view/datasources/tables/NewTableList';
+import { TablesOrFiles } from './view/datasources/tables/TablesOrFiles';
 import { TableForm } from './view/datasources/tables/TableForm';
 import { ColumnList } from './view/datasources/columns/ColumnList';
 import { ColumnForm } from './view/datasources/columns/ColumnForm';
@@ -67,7 +67,7 @@ export default function Router() {
         {/* <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} /> */}
         <Route path={ROUTES.DATASOURCE_FORM} element={<DataSourceForm />} />
 
-        <Route path={ROUTES.TABLE_LIST} element={<NewTableList />} />
+        <Route path={ROUTES.TABLE_LIST} element={<TablesOrFiles />} />
         <Route path={ROUTES.TABLE_FORM} element={<TableForm />} />
         <Route path={ROUTES.COLUMN_LIST} element={<ColumnList />} />
         <Route path={ROUTES.COLUMN_FORM} element={<ColumnForm />} />
