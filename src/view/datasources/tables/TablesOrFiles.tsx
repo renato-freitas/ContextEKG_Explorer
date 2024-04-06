@@ -56,6 +56,7 @@ export function TablesOrFiles() {
         let encoded_uri_datasource = double_encode_uri(state.uri.value)
         /** Verificar se os esquemas das tabelas foram processados */
         const response = await api.get(`/datasources/${encoded_uri_datasource}/schema/`)
+        console.log('*** LOAD TABLES',response.data)
         getOrCreateSchemas(encoded_uri_datasource, response.data);
       }
     } catch (error) {
@@ -114,7 +115,7 @@ export function TablesOrFiles() {
 
   async function getOrCreateSchemas(encoded_uri_datasource: string, data: any[]) {
     if (data.length > 0) {
-      console.log(`Esquemas já foram processados`)
+      console.log(`Esquemas (tabelas e colunas) já foram processados`)
       setTables(data)
     }
     else { // extrair e registrar os esquemas
@@ -220,12 +221,12 @@ export function TablesOrFiles() {
                             </Typography>
                           </Grid>
                           <Grid item sm={4} display={'flex'} justifyContent={'flex-end'}>
-                            <Tooltip title="Obter Esquemas das Colunas">
+                            <Tooltip title="Colunas">
                               <IconButton onClick={() => handleClickLoadColumns(row)}>
                                 <Equalizer size={22} />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="Remover Tabela">
+                            <Tooltip title="Remover">
                               <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
                                 <Trash size={22} />
                               </IconButton>
@@ -279,7 +280,7 @@ export function TablesOrFiles() {
                             </Typography>
                           </Grid>
                           <Grid item sm={4} display={'flex'} justifyContent={'flex-end'}>
-                            <Tooltip title="Ver Propriedades">
+                            <Tooltip title="Propriedades">
                               <IconButton onClick={(event) => handleClickLoadColumnsProperties(row)} sx={{ p: "4px !important" }}>
                                 <Graph size={22} />
                               </IconButton>

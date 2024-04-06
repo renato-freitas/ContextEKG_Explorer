@@ -1,5 +1,5 @@
 import { ROUTES, USER_TYPE } from '../commons/constants';
-import { Horse, Person, Cube, Graph, Database, Storefront, PuzzlePiece, NavigationArrow } from "phosphor-react";
+import { Binoculars, Person, Graph, Database, Storefront, PuzzlePiece, NavigationArrow, PaperPlaneTilt } from "phosphor-react";
 
 export const menuEvolve = [
   {
@@ -15,8 +15,8 @@ export const menuEvolve = [
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: 'Navegação',
-    icon: NavigationArrow,
+    title: 'Exploração',
+    icon: PaperPlaneTilt,
     href: ROUTES.NAVIGATION,
     type: [USER_TYPE.ADMIN]
   },

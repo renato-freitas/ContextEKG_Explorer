@@ -11,7 +11,7 @@ export function double_encode_uri(normal_uri: string) {
 export const changeBgColorCard = (idx: Number, selectedIndex: Number) => selectedIndex == idx ? "#edf4fc" : "None";
 
 
-export function getPropertyFromURI(uri: string): string {
+export function getPropertyFromURI(uri: string | undefined): string {
   if (uri) {
     let splitOne = uri?.split("/")
     let quantityOfTokens_1 = splitOne?.length

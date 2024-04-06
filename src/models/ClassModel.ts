@@ -8,7 +8,8 @@ export interface ClassModel {
   comment?: RDF_Node;
   created?: RDF_Node;
   modified?: RDF_Node;
-  uri: RDF_Node;
-  class: RDF_Node;
+  uri?: RDF_Node;
+  class?: RDF_Node;
   subclass?: RDF_Node;
 }
+

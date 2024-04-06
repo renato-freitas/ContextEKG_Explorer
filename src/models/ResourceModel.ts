@@ -14,3 +14,10 @@ export interface ResourceModel {
   subclass?: RDF_Node;
   resource: RDF_Node;
 }
+
+export interface ContextModel {
+  p: RDF_Node;
+  o: RDF_Node;
+  label: RDF_Node;
+  same?: RDF_Node;
+}

@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { ListItem, Paper, Typography } from '@mui/material';
 
-import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table } from 'phosphor-react';
+import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table, Star } from 'phosphor-react';
 
 
 import { double_encode_uri, getPropertyFromURI } from "../../commons/utils";
@@ -79,7 +79,6 @@ export function DataSources() {
     }
   }
   useEffect(() => {
-
     loadDataSourceProperties()
   }, [selectedDataSource])
 
@@ -90,18 +89,6 @@ export function DataSources() {
   }
 
 
-  /**Pagination */
-  // const [page, setPage] = useState(0);
-  // const handleChangePage = (event: unknown, newPage: number) => {
-  //   setPage(newPage);
-  // };
-
-  // const [rowsPerPage, setRowsPerPage] = useState(5);
-  // const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   console.log(event.target.value)
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
 
   /**Pagination */
   const [page, setPage] = useState(0);
@@ -146,9 +133,11 @@ export function DataSources() {
   //   setSelectedIndex(index);
   // };
 
-  const handleAddSchemas = async (normal_uri: string) => {
-    let encoded_uri = double_encode_uri(normal_uri)
-    await api.post(`/datasources/schemas/${encoded_uri}`)
+  const handleClickDatasourceQuality = async (resource: DataSourceModel) => {
+    let encoded_uri = double_encode_uri(resource.uri.value)
+    let response = await api.get(`/datasources/${encoded_uri}/quality`)
+    console.log(response)
+    alert(response.data)
     // await loadDataSources();
   }
 
@@ -194,30 +183,33 @@ export function DataSources() {
                       <Typography>{resource.label.value}</Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell align='right' sx={{p:"0 6px 0 0"}}>
+                  <TableCell align='right' sx={{ p: "0 6px 0 0" }}>
                     <Tooltip title="Propriedades">
-                      <IconButton onClick={(event) => handleListItemClick(event, idx, resource)} sx={{p:"4px !important"}}> 
+                      <IconButton onClick={(event) => handleListItemClick(event, idx, resource)} sx={{ p: "4px !important" }}>
                         <Eye size={22} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Editar">
-                      <IconButton 
-                        onClick={() => navigate(ROUTES.DATASOURCE_FORM, { state: resource }) } 
-                        sx={{p:"4px !important"}}>
+                      <IconButton
+                        onClick={() => navigate(ROUTES.DATASOURCE_FORM, { state: resource })}
+                        sx={{ p: "4px !important" }}>
                         <PencilSimpleLine size={22} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Esquemas">
-                      <IconButton onClick={() => {
-                        console.log("*** Selecionando a Fonte de Dados ***")
-                        // handleAddSchemas(resource.uri.value)
-                        navigate(ROUTES.TABLE_LIST, { state: resource })
-                      }} sx={{p:"4px !important"}}>
+                      <IconButton onClick={() => {navigate(ROUTES.TABLE_LIST, { state: resource })}} 
+                        sx={{ p: "4px !important" }}>
                         <Table size={22} />
                       </IconButton>
                     </Tooltip>
+                    <Tooltip title="Qualidade">
+                      <IconButton onClick={() => {handleClickDatasourceQuality(resource)}} 
+                          sx={{ p: "4px !important" }}>
+                        <Star size={22} />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Excluir">
-                      <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)} sx={{p:"4px !important"}}>
+                      <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)} sx={{ p: "4px !important" }}>
                         <Trash size={22} />
                       </IconButton>
                     </Tooltip>
@@ -270,7 +262,7 @@ export function DataSources() {
                     )
                   } */}
                   {
-                    properties.map((row, idx) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{pb:0}}>
+                    properties.map((row, idx) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
                       <Grid container>
                         <Grid item sm={12}>
                           <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>

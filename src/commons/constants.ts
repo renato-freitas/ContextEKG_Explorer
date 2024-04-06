@@ -66,7 +66,8 @@ export const ENDPOINTS = {
 export const NAMED_GRAPHS = {
   DATA: "",
   KG_METADATA: "http://www.arida.ufc.br/metakg/named-graph/KG-METADATA",
-  KG_MASHUP: "http://www.arida.ufc.br/metakg/named-graph/KG-MASHUP"
+  KG_MASHUP: "http://www.arida.ufc.br/metakg/named-graph/KG-MASHUP",
+  T_BOX: "http://www.arida.ufc.br/metakg/named-graph/T-BOX",
 }
 
 export const MAIN_PREFIXIES = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -211,4 +212,11 @@ export const DATASOURCE_TYPES = {
 export const FONTE_PRINCIPAL = "http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA"
 export let APP_HIGIENIZACAO = {
   Estabelecimento: "http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento"
+}
+
+export const NUMBERS = {
+  TIME_OUT_FROM_REQUEST: 350,
+  SIZE_TEXT_MENU_CONTEXT: "0.8rem",
+  SIZE_ICONS_MENU_CONTEXT: 19.4,
+  PADDING_ITEMS_MENU_CONTEXT: 0.8
 }

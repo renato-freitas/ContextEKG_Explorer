@@ -21,7 +21,11 @@ interface MTable {
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const PAINEL_LEFT_SIZE = window.screen.width * 0.2
+let widthOfBody = document.body.clientWidth;
+// const PAINEL_LEFT_SIZE = window.screen.width * 0.2
+const PAINEL_LEFT_SIZE = widthOfBody * 0.2
+// const element = document.getElementById("body");
+// console.log("Width: " + element?.offsetWidth + "px"); 
 
 export function MTable(props: MTable) {
   return (
