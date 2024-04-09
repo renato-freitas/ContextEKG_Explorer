@@ -1,16 +1,17 @@
-import React, { createContext, useContext } from "react";
-import { Backdrop, CircularProgress } from "@mui/material";
+import { useState, useContext } from "react";
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import { LoadingContext } from "../App";
 
 export function Loading() {
-  const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const [open, setOpen] = React.useState(false);
+  const { isLoading } = useContext(LoadingContext);
+  const [open, setOpen] = useState(false);
   const handleClose = () => {
     setOpen(false);
   };
-  const handleToggle = () => {
-    setOpen(!open);
-  };
+  // const handleToggle = () => {
+  //   setOpen(!open);
+  // };
   return (
     <div>
       {/* <Button onClick={handleToggle}>Show backdrop</Button> */}

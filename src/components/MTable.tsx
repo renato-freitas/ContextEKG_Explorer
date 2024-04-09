@@ -63,7 +63,7 @@ export function MTable(props: MTable) {
         <TableFooter>
           <TableRow>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: 'Todas', value: -1 }]}
+              rowsPerPageOptions={[5, 10, 25, 50, { label: 'Todas', value: -1 }]}
               colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
               count={props.size}
               rowsPerPage={props.rowsPerPage}

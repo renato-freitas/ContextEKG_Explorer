@@ -1,30 +1,18 @@
-import { useState, useEffect, useContext, ChangeEvent } from "react";
-// import React, { useState } from "react";
-import { Box, IconButton, List, ListItemButton, Stack, TableCell, TableRow, Tooltip, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import { useState, useEffect, useContext, ChangeEvent, KeyboardEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { IconButton, Stack, TableCell, TableRow, TextField, Tooltip, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 import { LoadingContext } from "../../App";
-import { getPropertyFromURI, double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
+import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
 import { NUMBERS, ROUTES } from "../../commons/constants";
 import { api } from "../../services/api";
-import { MetaMashupModel } from "../../models/MetaMashupModel";
-import { MCard } from "../../components/mcard/MCard";
 import { ResourceModel } from "../../models/ResourceModel";
 import { MHeader } from "../../components/MHeader";
 import { ClassModel } from "../../models/ClassModel";
 import styles from './navigation.module.css';
 import { MTable } from "../../components/MTable";
 import { Eye } from "phosphor-react";
-import { findAllExportedViews } from "../../services/sparql-exported-view";
-
-// export interface LocationParams {
-//   pathname: string;
-//   state: MetaMashupModel;
-//   search: string;
-//   hash: string;
-//   key: string;
-// }
 
 
 export function Resources() {
@@ -35,27 +23,42 @@ export function Resources() {
   const [selectedClassRDF, setSelectedClassRDF] = useState<ClassModel>();
   const [selectedResource, setSelectedResource] = useState<ResourceModel>();
   const [resources, setResources] = useState<ResourceModel[]>([]);
+  const [labelToSearch, setLabelToSearch] = useState<string>("");
+  const [runingSearch, setRuningSearch] = useState<boolean>(false);
+  const [totalOfResources, setTotalOfResources] = useState<number>(0);
 
 
   async function loadResourcesOfSelectedClass(RDFClass: string, page: Number) {
     let response: any
     try {
       setIsLoading(true)
-      // const element = document.getElementsByName("body");
-      // var width = document.body.clientWidth;
-      // console.log("Width: " + JSON.stringify(element) + "px" + width);
-
-
+      console.log(`label to search: ${labelToSearch}`)
+      console.log(`label to search: ${page}`)
       let uri = double_encode_uri(RDFClass)
-      response = await api.get(`/resources/?classURI=${uri}&page=${page}`)
+      response = await api.get(`/resources/?classURI=${uri}&page=${page}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
       console.log(`2. RECURSOS DA CLASSE`, response.data)
-      console.log('')
     } catch (error) {
       console.log(`><`, error);
     } finally {
       setTimeout(() => {
         setIsLoading(false)
         setResources(response.data)
+      }, NUMBERS.TIME_OUT_FROM_REQUEST)
+    }
+  }
+
+  async function getTotalResources(RDFClass: string) {
+    let response: any
+    try {
+      let uri = double_encode_uri(RDFClass)
+      response = await api.get(`/resources/count/?classURI=${uri}`)
+    } catch (error) {
+      console.log(`><`, error);
+    } finally {
+      setTimeout(() => {
+        setTotalOfResources(response.data)
+        console.log(`total: `, response.data)
+        console.log(`total: `, typeof response.data)
       }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
@@ -69,6 +72,7 @@ export function Resources() {
           setSelectedClass(classURI)
           setSelectedClassRDF(classRDF)
           loadResourcesOfSelectedClass(classURI, page)
+          getTotalResources(classURI)
         }
       } catch (err) {
         printt("Erro", err)
@@ -77,10 +81,12 @@ export function Resources() {
       }
     }
     onEdit();
-  }, [location.state]);
+  }, [location.state, runingSearch]);
 
 
-
+  // useEffect(() => {
+  //   loadResourcesOfSelectedClass(selectedClassRDF?.class?.value as string, page)
+  // }, [runingSearch]);
 
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
@@ -103,64 +109,97 @@ export function Resources() {
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
-    // setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    // setPage(0);
+  };
+
+
+
+  const handleSearchResourceLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLabelToSearch((event.target as HTMLInputElement).value);
+    console.log((event.target as HTMLInputElement).value)
+  };
+  const handleSearchEscape = (event: KeyboardEvent) => {
+    if (event.key == 'Escape') {
+      setLabelToSearch("")
+      setPage(0)
+      if (labelToSearch != "") {
+        setRuningSearch(!runingSearch)
+      }
+    }
+    if (event.key == "Enter") {
+      setRuningSearch(!runingSearch)
+    }
   };
   return (
     <div className={styles.listkg}>
-      {/* <div> */}
-      <MHeader
-        // title={`Recursos da classe ${getPropertyFromURI(selectedClass)}`}
-        title={`Recursos da classe ${selectedClassRDF?.label?.value}`}
-        hasButtonBack
-      />
-
-      {/* CONTENT */}
-      {!isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
-        {/* DATA SOURCES */}
-        <Grid item sm={12} justifyContent={'center'}>
-          <MTable
-            header={[["Recursos", "left"], ["Proveniência", "left"]]}
-            size={resources.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            handleChangePage={handleChangePage}
-            handleChangeRowsPerPage={handleChangeRowsPerPage}
-            hasActions
-            alignActions='right'
-            loading={false}
-          >
-            {
-              (rowsPerPage > 0
-                ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : resources
-              ).map((resource, idx) => (
-                <TableRow key={idx} >
-                  <TableCell>
-                    <Stack direction={'row'} gap={1}>
-                      {/* {DATASOURCE_TYPES_ICONS[resource?.type?.value]} */}
-                      <Typography>{resource.label.value}</Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell sx={{ p: "0 6px 0 0" }}>
-                    <Tooltip title="Propriedades">
-                      <Typography variant="caption" component="div" color="gray">
-                        {getContextFromURI(resource?.uri?.value)}
-                      </Typography>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell align='right' sx={{ p: "0 6px 0 0" }}>
-                    <Tooltip title="Propriedades">
-                      <IconButton onClick={(event) => handleListItemClick(event, idx, resource)} sx={{ p: "4px !important" }}>
-                        <Eye size={22} />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </MTable>
+      <Grid container spacing={1} sx={{ p: '2px 0' }}>
+        <Grid item xs={6} sx={{ bgcolor: null }}>
+          <MHeader
+            // title={`Recursos da classe ${getPropertyFromURI(selectedClass)}`}
+            title={`Recursos da classe ${selectedClassRDF?.label?.value}`}
+            hasButtonBack
+          />
+        </Grid>
+        <Grid item xs={6} display='flex' justifyContent='flex-end' sx={{ bgcolor: null }}>
+          <TextField sx={{ width: 500 }}
+            id="outlined-basic" label="Pesquisar" variant="outlined" size="small"
+            value={labelToSearch}
+            onChange={handleSearchResourceLabel}
+            // error={labelToSearch.length > 1 && foundClasses.length == 0}
+            // helperText={(labelToSearch.length > 1 && foundClasses.length == 0) ? "Sem corespondência." : null}
+            onKeyUp={handleSearchEscape}
+          />
         </Grid>
       </Grid>
+
+      {/* CONTENT */}
+      {
+        !isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
+          {/* DATA SOURCES */}
+          <Grid item sm={12} justifyContent={'center'}>
+            <MTable
+              header={[["Recursos", "left"], ["Proveniência", "left"]]}
+              // size={resources.length}
+              size={totalOfResources}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              handleChangePage={handleChangePage}
+              handleChangeRowsPerPage={handleChangeRowsPerPage}
+              hasActions
+              alignActions='right'
+              loading={false}
+            >
+              {
+                (rowsPerPage > 0
+                  ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  : resources
+                ).map((resource, idx) => (
+                  <TableRow key={idx} >
+                    <TableCell>
+                      <Stack direction={'row'} gap={1}>
+                        {/* {DATASOURCE_TYPES_ICONS[resource?.type?.value]} */}
+                        <Typography>{resource.label.value}</Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell sx={{ p: "0 6px 0 0" }}>
+                      <Tooltip title="Propriedades">
+                        <Typography variant="caption" component="div" color="gray">
+                          {getContextFromURI(resource?.uri?.value)}
+                        </Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align='right' sx={{ p: "0 6px 0 0" }}>
+                      <Tooltip title="Propriedades">
+                        <IconButton onClick={(event) => handleListItemClick(event, idx, resource)} sx={{ p: "4px !important" }}>
+                          <Eye size={22} />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </MTable>
+          </Grid>
+        </Grid>
       }
 
       {/* <Grid container spacing={1}>
@@ -195,6 +234,6 @@ export function Resources() {
           </List>
         </Grid>
       </Grid> */}
-    </div>
+    </div >
   )
 }
