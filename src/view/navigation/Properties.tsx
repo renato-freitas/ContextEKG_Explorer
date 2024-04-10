@@ -1,33 +1,27 @@
 import React, { useState, useEffect, useContext, Key } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import { Avatar, Box, Chip, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { Box, Chip, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Typography } from '@mui/material';
 import { api } from "../../services/api";
-import { getClassAndIdentifierFromURI, getClassFromURI, getPropertyFromURI, double_encode_uri, getContextFromURI, getAppHigienizadoFromClasse } from "../../commons/utils";
+import { getClassAndIdentifierFromURI, getPropertyFromURI, double_encode_uri, getContextFromURI, getAppHigienizadoFromClasse } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
-import { MetaMashupModel } from '../../models/MetaMashupModel';
-import { ContextModel, ResourceModel } from '../../models/ResourceModel';
+import { ResourceModel } from '../../models/ResourceModel';
 import { MHeader } from '../../components/MHeader';
-import { MenuContext } from '../../components/MenuContext';
-import { RDF_Node } from '../../models/RDF_Node';
-import { APP_HIGIENIZACAO, FONTE_PRINCIPAL, NUMBERS, ROUTES } from '../../commons/constants';
+import { FONTE_PRINCIPAL, NUMBERS, ROUTES } from '../../commons/constants';
 import { LoadingContext } from "../../App";
 import styles from './navigation.module.css';
-import { Eye, LinkBreak, Link as LinkIcon } from 'phosphor-react';
-import { Unite, LinkSimple, LinkSimpleBreak, Graph } from '@phosphor-icons/react';
-import { PersonPinCircleOutlined } from '@mui/icons-material';
-import { blue } from '@mui/material/colors';
-// import { ContextModel } from '../../models/ContextModel';
+import { Link as LinkIcon } from 'phosphor-react';
+import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
 
 export function Properties() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  // const [loading, setLoading] = useState<boolean>(false);
   const [selectedResource, setSelectedResource] = useState<ResourceModel>({} as ResourceModel);
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
-  const [selectedContext, setSelectedContext] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
+  // const [selectedContext, setSelectedContext] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
+  const [selectedContext, setSelectedContext] = useState<string>();
   // const [contextos, setContextos] = useState<{ origin: RDF_Node, target: RDF_Node }[]>([])
   const [contextos, setContextos] = useState<any>({})
   let auxLabelOfClasses = [] as string[];
@@ -107,30 +101,24 @@ export function Properties() {
       // }
       loadPropertiesOfSelectedResource(resource.uri.value)
       loadSameAs(resource.uri.value);
+      setSelectedIndex(-1)
       // setContextos(oldState => [...oldState, primeiroContexto])
     }
     window.scrollTo(0, 0)
 
-    // const element = document.getElementById("body");
   }, [location?.state])
 
 
 
 
 
-  // useEffect(() => {
-  //   Object.keys(agroupedProperties).filter((row: any) => {
-  //     agroupedProperties[row].filter((el: any) => {
-  //       if (el.p.value == "http://www.w3.org/2002/07/owl#sameAs") {
-  //         console.log(el)
-  //         setContextos(oldState => [...oldState, el])
-  //       }
-  //     })
-  //   })
-  // }, [])
 
-  const [selectedIndex, setSelectedIndex] = useState<Number>(0);
-  const handleSelecteContextClick = (index: Number, contexto: PropertyObjectEntity) => {
+
+  const [selectedIndex, setSelectedIndex] = useState<Number>(-1);
+  // const [selectedIndex, setSelectedIndex] = useState<string>('');
+  // const handleSelecteContextClick = (index: Number, contexto: PropertyObjectEntity) => {
+  const handleSelecteContextClick = (index: Number, contexto: string) => {
+    console.log(`. indx do menu de contexto: `, index)
     console.log(`. CONTEXTO SELECIONADO: `, contexto)
     setSelectedIndex(index);
     setSelectedContext(contexto)
@@ -138,21 +126,7 @@ export function Properties() {
 
 
 
-  // useEffect(() => {
-  // if (selectedContext?.o?.value) {
-  /** LIMPAR A LISTA DAS PROPRIEDADES AGRUPADAS */
-  // Object.keys(agroupedProperties).forEach(ele => {
-  //   delete agroupedProperties[ele]
-  // })
-  // const _uri_context = selectedContext?.o?.value
-  // let expandSameAs = selectedContext?.label?.value == "Visão Unificada" ? true : false
 
-  /**Ao selecionar um contexto, buscas as propriedades desse contexto */
-
-
-  // loadPropertiesOfSelectedResource(_uri_context, expandSameAs);
-  //   }
-  // }, [])
 
 
   async function handleListLinkClick(event: any, uri: string) {
@@ -175,13 +149,6 @@ export function Properties() {
   }
 
 
-  // const handleListItemClick = (event: any, idx: Number, row: MetaMashupModel) => {
-  //   setSelectedIndex(idx);
-  //   // setSelectedMashup(row)
-  // };
-
-  // const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#edf4fc" : "None";
-  // const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#f5f5fd" : "None";
 
 
   return (
@@ -206,7 +173,10 @@ export function Properties() {
           </Grid>
           <Grid item sm={2.5}>
             <div style={{ background: "#aaa", padding: "0px 10px 0px 10px" }}>
-              <h4>Contextos</h4>
+              <h4>Contexto</h4>
+              <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
+                Menu
+              </Typography>
             </div>
           </Grid>
         </Grid>
@@ -325,16 +295,20 @@ export function Properties() {
             }}>
 
               {/* VISÃO DE FUSÃO */}
-              <ListItem key={-2} disablePadding>
+              <ListItem key={-3} disablePadding>
                 <ListItemButton
-                  selected={selectedIndex === -2}
+                  selected={selectedIndex === -3}
+                  // selected={selectedIndex === "VF"}
                   onClick={() => {
-                    handleSelecteContextClick(-2, {
-                      o: { type: 'uri', value: getAppHigienizadoFromClasse(selectedResource.uri.value) },
-                      p: { type: 'uri', value: '' },
-                      label: { type: '', value: "Visão de Fusão" }
-                    })
+                    handleSelecteContextClick(-3, "Visão de Fusão")
                   }}
+                // onClick={() => {
+                //   handleSelecteContextClick("VF", {
+                //     o: { type: 'uri', value: getAppHigienizadoFromClasse(selectedResource.uri.value) },
+                //     p: { type: 'uri', value: '' },
+                //     label: { type: '', value: "Visão de Fusão" }
+                //   })
+                // }}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -342,15 +316,17 @@ export function Properties() {
                   <ListItemText primary={"Visão de Fusão"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                 </ListItemButton>
               </ListItem>
-              {/* VISÃO UNIFICADA */}
-              <ListItem key={-1} disablePadding>
+              {/* VISÃO DE UNIFICAÇÃO */}
+              <ListItem key={-2} disablePadding>
                 <ListItemButton
-                  selected={selectedIndex === -1}
-                  onClick={() => handleSelecteContextClick(-1, {
-                    o: { type: 'uri', value: `${FONTE_PRINCIPAL}/${getClassAndIdentifierFromURI(selectedResource.uri.value)}` },
-                    p: { type: 'uri', value: '' },
-                    label: { type: '', value: "Visão de Unificação" }
-                  })}
+                  selected={selectedIndex === -2}
+                  // selected={selectedIndex === "VU"}
+                  onClick={() => handleSelecteContextClick(-2, "Visão de Unificação"
+                    // onClick={() => handleSelecteContextClick("VU", {
+                    //   o: { type: 'uri', value: `${FONTE_PRINCIPAL}/${getClassAndIdentifierFromURI(selectedResource.uri.value)}` },
+                    //   p: { type: 'uri', value: '' },
+                    //   label: { type: '', value: "Visão de Unificação" }
+                  )}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -358,15 +334,14 @@ export function Properties() {
                   <ListItemText primary={"Visão de Unificação"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                 </ListItemButton>
               </ListItem>
-              
+
               {/* RECURSO ORIGEM */}
-              {/* <ListItem key={-3} disablePadding> */}
-              <ListItem key={-3} disablePadding>
-                {/* <ListItemButton selected={pathname === item.href}> */}
+              <ListItem key={-1} disablePadding>
                 <ListItemButton
-                  selected={selectedIndex === -3}
-                // onClick={(event) => handleListItemClick(event, idx, row)}
-                // onClick={() => handleSelecteContextClick(index, item)}
+                  // selected={selectedIndex === getContextFromURI(Object.keys(contextos)[0])}
+                  selected={selectedIndex === -1}
+                  // onClick={(event) => handleListItemClick(event, idx, row)}
+                  onClick={() => handleSelecteContextClick(-1, getContextFromURI(Object.keys(contextos)[0]))}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -384,8 +359,8 @@ export function Properties() {
                         {/* <ListItemButton selected={pathname === item.href}> */}
                         <ListItemButton
                           selected={selectedIndex === idx}
-                        // onClick={(event) => handleListItemClick(event, idx, row)}
-                        // onClick={() => handleSelecteContextClick(index, item)}
+                          // onClick={(event) => handleListItemClick(event, idx, row)}
+                          onClick={() => handleSelecteContextClick(idx as Number, same)}
                         >
                           {/* <Stack direction={'column'}> */}
                           <ListItemIcon sx={{ minWidth: '30px' }}>
@@ -409,3 +384,45 @@ export function Properties() {
     </div >
   )
 }
+
+
+
+
+
+// const handleListItemClick = (event: any, idx: Number, row: MetaMashupModel) => {
+//   setSelectedIndex(idx);
+//   // setSelectedMashup(row)
+// };
+
+// const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#edf4fc" : "None";
+// const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#f5f5fd" : "None";
+
+
+// useEffect(() => {
+// if (selectedContext?.o?.value) {
+/** LIMPAR A LISTA DAS PROPRIEDADES AGRUPADAS */
+// Object.keys(agroupedProperties).forEach(ele => {
+//   delete agroupedProperties[ele]
+// })
+// const _uri_context = selectedContext?.o?.value
+// let expandSameAs = selectedContext?.label?.value == "Visão Unificada" ? true : false
+
+/**Ao selecionar um contexto, buscas as propriedades desse contexto */
+
+
+// loadPropertiesOfSelectedResource(_uri_context, expandSameAs);
+//   }
+// }, [])
+
+
+
+// useEffect(() => {
+//   Object.keys(agroupedProperties).filter((row: any) => {
+//     agroupedProperties[row].filter((el: any) => {
+//       if (el.p.value == "http://www.w3.org/2002/07/owl#sameAs") {
+//         console.log(el)
+//         setContextos(oldState => [...oldState, el])
+//       }
+//     })
+//   })
+// }, [])

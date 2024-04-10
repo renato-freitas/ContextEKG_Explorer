@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Typography,
   TableHead, Table, TableBody, TableCell, TablePagination, TableRow, TableFooter, TableContainer, Paper,
+  IconButton,
+  TextField,
+  Stack,
+  Pagination,
 } from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
 import { TablePaginationActions } from '../commons/pagination';
+import { CaretLeft, CaretRight } from 'phosphor-react';
 
 type typeAlignOfCell = "right" | "left" | "inherit" | "center" | "justify" | undefined
 
@@ -28,6 +33,13 @@ const PAINEL_LEFT_SIZE = widthOfBody * 0.2
 // console.log("Width: " + element?.offsetWidth + "px"); 
 
 export function MTable(props: MTable) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  // const [page, setPage] = React.useState(1);
+  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value); console.log(value)
+  };
+
   return (
     <TableContainer component={Paper}>
       <Table
@@ -62,22 +74,26 @@ export function MTable(props: MTable) {
         </TableBody>
         <TableFooter>
           <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, 50, { label: 'Todas', value: -1 }]}
-              colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
-              count={props.size}
-              rowsPerPage={props.rowsPerPage}
-              page={props.page}
-              SelectProps={{
-                inputProps: {
-                  "aria-label": "oxi"
-                },
-                native: false,
-              }}
-              onPageChange={props.handleChangePage}
-              onRowsPerPageChange={props.handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
+            {/* <TableCell align="ri" colSpan={(props.header.length + 1)}> */}
+            {/* <TableCell align='right'> */}
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50, { label: 'Todas', value: -1 }]}
+                colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
+                count={props.size}
+                rowsPerPage={props.rowsPerPage}
+                page={props.page ? props.page : page}
+                SelectProps={{
+                  inputProps: {
+                    "aria-label": "oxi"
+                  },
+                  native: false,
+                }}
+                labelRowsPerPage="Linhas por Página"
+                onPageChange={props.handleChangePage}
+                onRowsPerPageChange={props.handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            {/* </TableCell> */}
           </TableRow>
         </TableFooter>
       </Table>

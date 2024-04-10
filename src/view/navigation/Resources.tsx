@@ -19,6 +19,7 @@ export function Resources() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
+  const [page, setPage] = useState(0);
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedClassRDF, setSelectedClassRDF] = useState<ClassModel>();
   const [selectedResource, setSelectedResource] = useState<ResourceModel>();
@@ -28,14 +29,14 @@ export function Resources() {
   const [totalOfResources, setTotalOfResources] = useState<number>(0);
 
 
-  async function loadResourcesOfSelectedClass(RDFClass: string, page: Number) {
+  async function loadResourcesOfSelectedClass(RDFClass: string, newPage: number) {
     let response: any
     try {
       setIsLoading(true)
       console.log(`label to search: ${labelToSearch}`)
-      console.log(`label to search: ${page}`)
+      console.log(`página atual: ${newPage}`)
       let uri = double_encode_uri(RDFClass)
-      response = await api.get(`/resources/?classURI=${uri}&page=${page}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
+      response = await api.get(`/resources/?classURI=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
       console.log(`2. RECURSOS DA CLASSE`, response.data)
     } catch (error) {
       console.log(`><`, error);
@@ -43,6 +44,7 @@ export function Resources() {
       setTimeout(() => {
         setIsLoading(false)
         setResources(response.data)
+        // setPage(0)
       }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
@@ -100,9 +102,10 @@ export function Resources() {
 
 
   /**Pagination */
-  const [page, setPage] = useState(0);
+
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
+    loadResourcesOfSelectedClass(selectedClassRDF?.class?.value as string, newPage)
   };
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -159,8 +162,8 @@ export function Resources() {
           <Grid item sm={12} justifyContent={'center'}>
             <MTable
               header={[["Recursos", "left"], ["Proveniência", "left"]]}
-              // size={resources.length}
               size={totalOfResources}
+              // size={ ((page +1) * rowsPerPage) < totalOfResources ? totalOfResources : resources.length}
               rowsPerPage={rowsPerPage}
               page={page}
               handleChangePage={handleChangePage}
@@ -170,10 +173,11 @@ export function Resources() {
               loading={false}
             >
               {
-                (rowsPerPage > 0
-                  ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  : resources
-                ).map((resource, idx) => (
+                // (rowsPerPage > 0
+                //   ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                //   : resources
+                // ).map((resource, idx) => (
+                resources && resources.map((resource, idx) => (
                   <TableRow key={idx} >
                     <TableCell>
                       <Stack direction={'row'} gap={1}>
