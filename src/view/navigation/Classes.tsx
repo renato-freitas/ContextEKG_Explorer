@@ -75,7 +75,7 @@ export function Classes() {
 	useEffect(() => {
 		function matchClasses() {
 			if (name.length % 2 == 0) {
-				setIsLoading(true)
+				// setIsLoading(true)
 				let name_lower_case = name.toLowerCase()
 				let _foundClasses = classes.filter((_class) => {
 					let class_lower_case = _class?.label?.value.toLowerCase()
@@ -84,7 +84,7 @@ export function Classes() {
 				console.log(_foundClasses)
 				_foundClasses.length > 0 ? setClasses(_foundClasses) : setClasses(copyAllclasses)
 				setFoundClasses(_foundClasses)
-				setIsLoading(false)
+				// setIsLoading(false)
 			}
 			if (name.length == 0) {
 				setClasses(copyAllclasses)
@@ -127,7 +127,7 @@ export function Classes() {
 				{/* PESQUISAR */}
 				<Grid item xs={6} display='flex' justifyContent='flex-end' sx={{ bgcolor: null }}>
 					<TextField sx={{ width: 500 }}
-						id="outlined-basic" label="Pesquisar" variant="outlined" size="small"
+						id="outlined-basic" label="Pesquisar pelo nome da classe" variant="outlined" size="small"
 						value={name}
 						onChange={handleSearchClassName}
 						error={name.length > 1 && foundClasses.length == 0}

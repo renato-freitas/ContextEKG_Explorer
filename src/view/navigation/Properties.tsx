@@ -17,11 +17,12 @@ export function Properties() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const [selectedResource, setSelectedResource] = useState<ResourceModel>({} as ResourceModel);
+  // const [selectedResource, setSelectedResource] = useState<ResourceModel>({} as ResourceModel);
+  const [selectedResourceURI, setSelectedResourceURI] = useState<string>("");
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
   // const [selectedContext, setSelectedContext] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
-  const [selectedContext, setSelectedContext] = useState<string>();
+  const [selectedContext, setSelectedContext] = useState<string>("");
   // const [contextos, setContextos] = useState<{ origin: RDF_Node, target: RDF_Node }[]>([])
   const [contextos, setContextos] = useState<any>({})
   let auxLabelOfClasses = [] as string[];
@@ -80,15 +81,16 @@ export function Properties() {
 
   useEffect(() => {
     if (location?.state) {
-      let resource = location.state as ResourceModel;
-      console.log(`3. RECURSO ESCOLHIDO`, resource)
-      setSelectedResource(resource);
-      let primeiroContexto = {
-        p: { type: '', value: '' },
-        o: { ...resource.uri },
-        label: { ...resource.label },
-        same: { ...resource.uri }
-      }
+      // let resource = location.state as ResourceModel;
+      let resource_uri = location.state as string;
+      console.log(`RECURSO ESCOLHIDO`, resource_uri)
+      setSelectedResourceURI(resource_uri);
+      // let primeiroContexto = {
+      //   p: { type: '', value: '' },
+      //   o: { ...resource.uri },
+      //   label: { ...resource.label },
+      //   same: { ...resource.uri }
+      // }
       // if (resource?.same?.value) {
       //   loadSameAs(resource.same.value, false);
       //   primeiroContexto = {
@@ -99,11 +101,15 @@ export function Properties() {
       //   }
       // } else {
       // }
-      loadPropertiesOfSelectedResource(resource.uri.value)
-      loadSameAs(resource.uri.value);
+      loadPropertiesOfSelectedResource(resource_uri)
+      loadSameAs(resource_uri);
       setSelectedIndex(-1)
       // setContextos(oldState => [...oldState, primeiroContexto])
     }
+    // else {
+    //   loadPropertiesOfSelectedResource(selectedContext)
+    //   loadSameAs(selectedContext);
+    // }
     window.scrollTo(0, 0)
 
   }, [location?.state])
@@ -117,11 +123,14 @@ export function Properties() {
   const [selectedIndex, setSelectedIndex] = useState<Number>(-1);
   // const [selectedIndex, setSelectedIndex] = useState<string>('');
   // const handleSelecteContextClick = (index: Number, contexto: PropertyObjectEntity) => {
-  const handleSelecteContextClick = (index: Number, contexto: string) => {
-    console.log(`. indx do menu de contexto: `, index)
-    console.log(`. CONTEXTO SELECIONADO: `, contexto)
+  const handleSelectedContextClick = (index: Number, contexto: string) => {
+    console.log(`*** ÍNDICE DO CONTEXTO: `, index)
+    console.log(`*** CONTEXTO SELECIONADO: `, contexto)
     setSelectedIndex(index);
     setSelectedContext(contexto)
+    // setSelectedResourceURI(contexto)
+    navigate(ROUTES.PROPERTIES, { state: contexto })
+    // setSelectedResource(contexto)
   };
 
 
@@ -160,26 +169,29 @@ export function Properties() {
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
         {/* LABEL DO RECURSO */}
-        <Grid container spacing={1}>
-          <Grid item sm={9.5}>
-            <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
-              <>
-                <h4>{selectedResource?.label?.value}</h4>
+        {
+          !isLoading && agroupedProperties && <Grid container spacing={1}>
+            <Grid item sm={9.5}>
+              <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
+                {/* <> */}
+                  <h4>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]}</h4>
+                  <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
+                    {selectedResourceURI}
+                  </Typography>
+                {/* </> */}
+              </div>
+
+            </Grid>
+            <Grid item sm={2.5}>
+              <div style={{ background: "#aaa", padding: "0px 10px 0px 10px" }}>
+                <h4>Contexto</h4>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {selectedResource?.uri?.value}
+                  Menu
                 </Typography>
-              </>
-            </div>
+              </div>
+            </Grid>
           </Grid>
-          <Grid item sm={2.5}>
-            <div style={{ background: "#aaa", padding: "0px 10px 0px 10px" }}>
-              <h4>Contexto</h4>
-              <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                Menu
-              </Typography>
-            </div>
-          </Grid>
-        </Grid>
+        }
 
         {!isLoading && <Grid container spacing={1}>
           {/* LISTA DAS PROPRIEDADES DO RECURSO */}
@@ -300,7 +312,7 @@ export function Properties() {
                   selected={selectedIndex === -3}
                   // selected={selectedIndex === "VF"}
                   onClick={() => {
-                    handleSelecteContextClick(-3, "Visão de Fusão")
+                    handleSelectedContextClick(-3, "Visão de Fusão")
                   }}
                 // onClick={() => {
                 //   handleSelecteContextClick("VF", {
@@ -321,7 +333,7 @@ export function Properties() {
                 <ListItemButton
                   selected={selectedIndex === -2}
                   // selected={selectedIndex === "VU"}
-                  onClick={() => handleSelecteContextClick(-2, "Visão de Unificação"
+                  onClick={() => handleSelectedContextClick(-2, "Visão de Unificação"
                     // onClick={() => handleSelecteContextClick("VU", {
                     //   o: { type: 'uri', value: `${FONTE_PRINCIPAL}/${getClassAndIdentifierFromURI(selectedResource.uri.value)}` },
                     //   p: { type: 'uri', value: '' },
@@ -335,13 +347,13 @@ export function Properties() {
                 </ListItemButton>
               </ListItem>
 
-              {/* RECURSO ORIGEM */}
+              {/* VISÃO EXPORTADA DO RECURSO ORIGEM */}
               <ListItem key={-1} disablePadding>
                 <ListItemButton
                   // selected={selectedIndex === getContextFromURI(Object.keys(contextos)[0])}
                   selected={selectedIndex === -1}
                   // onClick={(event) => handleListItemClick(event, idx, row)}
-                  onClick={() => handleSelecteContextClick(-1, getContextFromURI(Object.keys(contextos)[0]))}
+                  onClick={() => handleSelectedContextClick(-1, getContextFromURI(Object.keys(contextos)[0]))}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -360,7 +372,7 @@ export function Properties() {
                         <ListItemButton
                           selected={selectedIndex === idx}
                           // onClick={(event) => handleListItemClick(event, idx, row)}
-                          onClick={() => handleSelecteContextClick(idx as Number, same)}
+                          onClick={() => handleSelectedContextClick(idx as Number, same)}
                         >
                           {/* <Stack direction={'column'}> */}
                           <ListItemIcon sx={{ minWidth: '30px' }}>

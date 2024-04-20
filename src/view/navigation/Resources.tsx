@@ -12,7 +12,7 @@ import { MHeader } from "../../components/MHeader";
 import { ClassModel } from "../../models/ClassModel";
 import styles from './navigation.module.css';
 import { MTable } from "../../components/MTable";
-import { Eye } from "phosphor-react";
+import { Eye, Info } from "phosphor-react";
 
 
 export function Resources() {
@@ -41,6 +41,7 @@ export function Resources() {
     } catch (error) {
       console.log(`><`, error);
     } finally {
+      window.scrollTo(0, 0)
       setTimeout(() => {
         setIsLoading(false)
         setResources(response.data)
@@ -53,7 +54,7 @@ export function Resources() {
     let response: any
     try {
       let uri = double_encode_uri(RDFClass)
-      response = await api.get(`/resources/count/?classURI=${uri}`)
+      response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}`)
     } catch (error) {
       console.log(`><`, error);
     } finally {
@@ -64,6 +65,9 @@ export function Resources() {
       }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
+
+
+
   useEffect(() => {
     function onEdit() {
       try {
@@ -92,26 +96,27 @@ export function Resources() {
 
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
-  const handleListItemClick = (event: any, idx: Number, resource: ResourceModel) => {
+  const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
     setSelectedIndex(idx);
     setSelectedResource(resource)
-    navigate(ROUTES.PROPERTIES, { state: resource })
+    // navigate(ROUTES.PROPERTIES, { state: resource })
+    navigate(ROUTES.PROPERTIES, { state: resource.uri.value })
   };
 
   const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#edf4fc" : "None";
 
 
   /**Pagination */
-
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
     loadResourcesOfSelectedClass(selectedClassRDF?.class?.value as string, newPage)
   };
 
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
+    setRuningSearch(!runingSearch)
     // setPage(0);
   };
 
@@ -133,25 +138,34 @@ export function Resources() {
       setRuningSearch(!runingSearch)
     }
   };
+
+
+
   return (
     <div className={styles.listkg}>
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={6} sx={{ bgcolor: null }}>
           <MHeader
             // title={`Recursos da classe ${getPropertyFromURI(selectedClass)}`}
-            title={`Recursos da classe ${selectedClassRDF?.label?.value}`}
+            title={`Classe "${selectedClassRDF?.label?.value}"`}
             hasButtonBack
           />
         </Grid>
+
         <Grid item xs={6} display='flex' justifyContent='flex-end' sx={{ bgcolor: null }}>
-          <TextField sx={{ width: 500 }}
-            id="outlined-basic" label="Pesquisar" variant="outlined" size="small"
+          {/* <Stack direction={'row'} gap={1} alignItems={'center'}>
+            <Tooltip title="Teste">
+              <Info size={32}></Info>
+            </Tooltip> */}
+          <TextField sx={{ width: 450 }}
+            id="outlined-basic" label="Pesquisar somente pelo nome do recurso" variant="outlined" size="small"
             value={labelToSearch}
             onChange={handleSearchResourceLabel}
             // error={labelToSearch.length > 1 && foundClasses.length == 0}
-            // helperText={(labelToSearch.length > 1 && foundClasses.length == 0) ? "Sem corespondência." : null}
+            helperText={(labelToSearch.length > 1 && resources.length == 0) ? "Sem corespondência." : false}
             onKeyUp={handleSearchEscape}
           />
+          {/* </Stack> */}
         </Grid>
       </Grid>
 
@@ -186,15 +200,13 @@ export function Resources() {
                       </Stack>
                     </TableCell>
                     <TableCell sx={{ p: "0 6px 0 0" }}>
-                      <Tooltip title="Propriedades">
-                        <Typography variant="caption" component="div" color="gray">
-                          {getContextFromURI(resource?.uri?.value)}
-                        </Typography>
-                      </Tooltip>
+                      <Typography variant="caption" component="div" color="gray">
+                        {getContextFromURI(resource?.uri?.value)}
+                      </Typography>
                     </TableCell>
                     <TableCell align='right' sx={{ p: "0 6px 0 0" }}>
                       <Tooltip title="Propriedades">
-                        <IconButton onClick={(event) => handleListItemClick(event, idx, resource)} sx={{ p: "4px !important" }}>
+                        <IconButton onClick={(event) => handleListOfResourcesClick(event, idx, resource)} sx={{ p: "4px !important" }}>
                           <Eye size={22} />
                         </IconButton>
                       </Tooltip>

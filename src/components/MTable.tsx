@@ -34,7 +34,7 @@ const PAINEL_LEFT_SIZE = widthOfBody * 0.2
 
 export function MTable(props: MTable) {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   // const [page, setPage] = React.useState(1);
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value); console.log(value)
@@ -77,7 +77,7 @@ export function MTable(props: MTable) {
             {/* <TableCell align="ri" colSpan={(props.header.length + 1)}> */}
             {/* <TableCell align='right'> */}
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25, 50, { label: 'Todas', value: -1 }]}
+                rowsPerPageOptions={[10, 25, 50, { label: 'Todas', value: -1 }]}
                 colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
                 count={props.size}
                 rowsPerPage={props.rowsPerPage}
