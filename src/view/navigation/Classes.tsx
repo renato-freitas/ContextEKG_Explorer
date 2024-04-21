@@ -28,7 +28,7 @@ export function Classes() {
 	const [copyAllclasses, setCopyAllClasses] = useState<ClassModel[]>([]);
 	const [foundClasses, setFoundClasses] = useState<ClassModel[]>([]);
 	const [typeOfClass, setTypeOfClass] = useState<String>(GENERALIZATION);
-	const [name, setName] = useState('');
+	const [nameOfClassToFind, setNameOfClassToFind] = useState('');
 
 
 
@@ -63,20 +63,19 @@ export function Classes() {
 
 
 	const handleSearchClassName = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setName((event.target as HTMLInputElement).value);
+		setNameOfClassToFind((event.target as HTMLInputElement).value);
 		console.log(event.target.onkeyup)
 	};
 	const handleSearchEscape = (event: KeyboardEvent) => {
 		if(event.key == 'Escape'){
-			setName('')
+			setNameOfClassToFind('')
 		}
 	};
 
 	useEffect(() => {
 		function matchClasses() {
-			if (name.length % 2 == 0) {
-				// setIsLoading(true)
-				let name_lower_case = name.toLowerCase()
+			if (nameOfClassToFind.length % 2 == 0) {
+				let name_lower_case = nameOfClassToFind.toLowerCase()
 				let _foundClasses = classes.filter((_class) => {
 					let class_lower_case = _class?.label?.value.toLowerCase()
 					return class_lower_case?.includes(name_lower_case) == true ? _class : null
@@ -84,14 +83,13 @@ export function Classes() {
 				console.log(_foundClasses)
 				_foundClasses.length > 0 ? setClasses(_foundClasses) : setClasses(copyAllclasses)
 				setFoundClasses(_foundClasses)
-				// setIsLoading(false)
 			}
-			if (name.length == 0) {
+			if (nameOfClassToFind.length == 0) {
 				setClasses(copyAllclasses)
 			}
 		}
 		matchClasses()
-	}, [name])
+	}, [nameOfClassToFind])
 
 
 	const Item = styled(Paper)(({ theme }) => ({
@@ -126,12 +124,12 @@ export function Classes() {
 				</Grid>
 				{/* PESQUISAR */}
 				<Grid item xs={6} display='flex' justifyContent='flex-end' sx={{ bgcolor: null }}>
-					<TextField sx={{ width: 500 }}
+					<TextField sx={{ width: 300 }}
 						id="outlined-basic" label="Pesquisar pelo nome da classe" variant="outlined" size="small"
-						value={name}
+						value={nameOfClassToFind}
 						onChange={handleSearchClassName}
-						error={name.length > 1 && foundClasses.length == 0}
-						helperText={(name.length > 1 && foundClasses.length == 0) ? "Sem corespondência." : null}
+						error={nameOfClassToFind.length > 1 && foundClasses.length == 0}
+						helperText={(nameOfClassToFind.length > 1 && foundClasses.length == 0) ? "Sem corespondência." : null}
 						onKeyUp={handleSearchEscape}
 					/>
 				</Grid>

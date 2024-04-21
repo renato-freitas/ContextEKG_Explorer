@@ -35,7 +35,6 @@ export function Properties() {
       setProperties([])
       let _uri = double_encode_uri(uri);
       response = await api.get(`/properties/?resourceURI=${_uri}`)
-      // console.log(`response`, response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
@@ -48,68 +47,56 @@ export function Properties() {
 
   async function loadSameAs(uri: string) {
     try {
-      // setLoading(true);
       if (uri) {
         setProperties([])
-        // setContextos([])
         let _uri = double_encode_uri(uri);
-        // const response = await api.get(`/properties/${_uri}/${expand_sameas}`)
-        // const response = await api.get(`/properties/?resourceURI=${_uri}`)
         const response = await api.get(`/links/?sameas=${_uri}`)
-        console.log(`LINKS SAMEAS:`, response.data)
-        // setContextos(oldState => [...oldState, response.data])
+        console.log(`RECURSOS SAMEAS QUE VÃO PARA O MENU DE CONTEXTO`, response.data)
         setContextos(response.data)
-        // if (response.data) {
-        //   setAgroupedProperties(response.data)
-        //   Object.keys(response.data).filter((row: any) => {
-        //     response.data[row].filter((el: any) => {
-        //       if (el.p.value == "http://www.w3.org/2002/07/owl#sameAs") {
-        //         console.log(el)
-        //         setContextos(oldState => [...oldState, el])
-        //       }
-        //     })
-        //   })
-        // }
       }
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
-      // setLoading(false);
+    }
+  }
+
+  async function loadUnification(object: any) {
+    let response: any
+    try {
+      setIsLoading(true)
+      setProperties([])
+      response = await api.post(`/properties/unification/`, { resources: object })
+      console.log('PROPRIEDADES UNIFICADAS', response.data)
+    } catch (error) {
+      alert(JSON.stringify(error));
+    } finally {
+      setTimeout(() => {
+        setAgroupedProperties(response.data)
+        setIsLoading(false)
+      }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
 
   useEffect(() => {
     if (location?.state) {
-      // let resource = location.state as ResourceModel;
       let resource_uri = location.state as string;
-      console.log(`RECURSO ESCOLHIDO`, resource_uri)
-      setSelectedResourceURI(resource_uri);
-      // let primeiroContexto = {
-      //   p: { type: '', value: '' },
-      //   o: { ...resource.uri },
-      //   label: { ...resource.label },
-      //   same: { ...resource.uri }
-      // }
-      // if (resource?.same?.value) {
-      //   loadSameAs(resource.same.value, false);
-      //   primeiroContexto = {
-      //     p: { type: '', value: '' },
-      //     o: { ...resource.same },
-      //     label: { ...resource.label },
-      //     same: { ...resource.same }
-      //   }
-      // } else {
-      // }
-      loadPropertiesOfSelectedResource(resource_uri)
-      loadSameAs(resource_uri);
-      setSelectedIndex(-1)
-      // setContextos(oldState => [...oldState, primeiroContexto])
+
+      // if (resource_uri == "Visão de Unificação") {
+      if (selectedIndex == -2) {
+        loadUnification(contextos)
+        setSelectedResourceURI(resource_uri);
+        loadSameAs(resource_uri);
+        setSelectedIndex(-2)
+      } else {
+        console.log(`RECURSO ESCOLHIDO`, resource_uri)
+        setSelectedResourceURI(resource_uri);
+        loadPropertiesOfSelectedResource(resource_uri)
+        loadSameAs(resource_uri);
+        setSelectedIndex(-1)
+      }
     }
-    // else {
-    //   loadPropertiesOfSelectedResource(selectedContext)
-    //   loadSameAs(selectedContext);
-    // }
+
     window.scrollTo(0, 0)
 
   }, [location?.state])
@@ -121,16 +108,11 @@ export function Properties() {
 
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(-1);
-  // const [selectedIndex, setSelectedIndex] = useState<string>('');
-  // const handleSelecteContextClick = (index: Number, contexto: PropertyObjectEntity) => {
   const handleSelectedContextClick = (index: Number, contexto: string) => {
-    console.log(`*** ÍNDICE DO CONTEXTO: `, index)
-    console.log(`*** CONTEXTO SELECIONADO: `, contexto)
+    // console.log(`*** ÍNDICE DO CONTEXTO: `, index)
     setSelectedIndex(index);
     setSelectedContext(contexto)
-    // setSelectedResourceURI(contexto)
     navigate(ROUTES.PROPERTIES, { state: contexto })
-    // setSelectedResource(contexto)
   };
 
 
@@ -173,12 +155,11 @@ export function Properties() {
           !isLoading && agroupedProperties && <Grid container spacing={1}>
             <Grid item sm={9.5}>
               <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
-                {/* <> */}
-                  <h4>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]}</h4>
-                  <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                    {selectedResourceURI}
-                  </Typography>
-                {/* </> */}
+                <h4>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]}</h4>
+                <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
+                  {/* {selectedResourceURI} */}
+                  RENATO
+                </Typography>
               </div>
 
             </Grid>
@@ -210,86 +191,41 @@ export function Properties() {
                       Object.keys(agroupedProperties).map((prop, idx) =>
                         <Stack direction={"row"} spacing={1} key={idx}>
                           {
-                            agroupedProperties[prop].map((ele: any, idx: React.Key) => {
-                              if ((prop == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") && !auxLabelOfClasses.includes(ele[0])) {
-                                auxLabelOfClasses.push(ele[0])
-                                return <Chip label={getPropertyFromURI(ele[0])} color='primary' />
-                              }
-                              if ((prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") &&
-                                (prop != "http://www.w3.org/2000/01/rdf-schema#label")) {
-                                return <ListItem key={idx}>
-                                  <Grid container spacing={2}>
-                                    <Grid item sm={3}>
-                                      <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
-                                        {getPropertyFromURI(prop)}
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item sm={8}>
-                                      <Stack direction={"column"}>
-                                        {
-                                          agroupedProperties[prop].map((ele: any, idx: number) => {
-                                            if (ele[0].includes("http://")) {
-                                              return <a href='' key={idx} onClick={(e) => handleListLinkClick(e, ele[0])}>
-                                                <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
-                                                  {ele[0]}
-                                                </Typography>
-                                              </a>
-                                            } else {
-                                              return <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
-                                                {ele[0]}
-                                              </Typography>
-                                            }
-                                          }
-
-                                          )
-                                        }
-                                      </Stack>
-                                    </Grid>
-                                  </Grid>
-                                </ListItem>
+                            // CHIP DAS CLASSES ÚNICAS
+                            agroupedProperties && agroupedProperties[prop].map((valuesOfPropsArray: any, idx: React.Key) => {
+                              if ((prop == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") && !auxLabelOfClasses.includes(valuesOfPropsArray[0])) {
+                                auxLabelOfClasses.push(valuesOfPropsArray[0])
+                                return <Chip key={idx} label={getPropertyFromURI(valuesOfPropsArray[0])} color='primary' />
                               }
                             })
+                          }
+                          {
+                            // LABEL DAS PROPRIEDADES
+                            (prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
+                              prop != "http://www.w3.org/2000/01/rdf-schema#label") && <ListItem key={idx}>
+                              <Grid container spacing={2}>
+                                <Grid item sm={3}>
+                                  <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
+                                    {getPropertyFromURI(prop)}
+                                  </Typography>
+                                </Grid>
+                                <Grid item sm={9}>
+                                  <Stack direction={"column"}>
+                                    {
+                                      agroupedProperties[prop].map((values: any) => {
+                                        return <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
+                                          {values[0]}
+                                        </Typography>
+                                      })
+                                    }
+                                  </Stack>
+                                </Grid>
+                              </Grid>
+                            </ListItem>
                           }
                         </Stack>
                       )
                     }
-                    {/* {
-                      Object.keys(agroupedProperties).map((row, idx) => {
-                        if ((agroupedProperties[row][0]?.p?.value != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") &&
-                          (agroupedProperties[row][0]?.p?.value != "http://www.w3.org/2000/01/rdf-schema#label")) {
-                          return <ListItem key={idx}>
-                            <Grid container spacing={2}>
-                              <Grid item sm={3}>
-                                <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
-                                  {getPropertyFromURI(agroupedProperties[row][0]?.p?.value)}
-                                </Typography>
-                              </Grid>
-
-                              <Grid item sm={8}>
-                                <Stack direction={"column"}>
-                                  {
-                                    agroupedProperties[row].map((ele: any, idx: number) => {
-                                      if (ele.o.value.includes("http://")) {
-                                        console.log(`href`, ele)
-                                        return <a href='' key={idx} onClick={() => navigate(ROUTES.PROPERTIES, { state: ele })}>
-                                          . {ele.o.value}
-                                        </a>
-                                      } else {
-                                        return <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
-                                          . {ele.o.value}
-                                        </Typography>
-                                      }
-                                    }
-
-                                    )
-                                  }
-                                </Stack>
-                              </Grid>
-                            </Grid>
-                          </ListItem>
-                        }
-                      }
-                      )} */}
                   </List >
                 </Paper>
               </Box>
@@ -305,22 +241,13 @@ export function Properties() {
               overflow: 'auto',
               padding: 0
             }}>
-
               {/* VISÃO DE FUSÃO */}
               <ListItem key={-3} disablePadding>
                 <ListItemButton
                   selected={selectedIndex === -3}
-                  // selected={selectedIndex === "VF"}
                   onClick={() => {
                     handleSelectedContextClick(-3, "Visão de Fusão")
                   }}
-                // onClick={() => {
-                //   handleSelecteContextClick("VF", {
-                //     o: { type: 'uri', value: getAppHigienizadoFromClasse(selectedResource.uri.value) },
-                //     p: { type: 'uri', value: '' },
-                //     label: { type: '', value: "Visão de Fusão" }
-                //   })
-                // }}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -332,13 +259,7 @@ export function Properties() {
               <ListItem key={-2} disablePadding>
                 <ListItemButton
                   selected={selectedIndex === -2}
-                  // selected={selectedIndex === "VU"}
-                  onClick={() => handleSelectedContextClick(-2, "Visão de Unificação"
-                    // onClick={() => handleSelecteContextClick("VU", {
-                    //   o: { type: 'uri', value: `${FONTE_PRINCIPAL}/${getClassAndIdentifierFromURI(selectedResource.uri.value)}` },
-                    //   p: { type: 'uri', value: '' },
-                    //   label: { type: '', value: "Visão de Unificação" }
-                  )}
+                  onClick={() => handleSelectedContextClick(-2, Object.keys(contextos)[0])}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -346,25 +267,21 @@ export function Properties() {
                   <ListItemText primary={"Visão de Unificação"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                 </ListItemButton>
               </ListItem>
-
               {/* VISÃO EXPORTADA DO RECURSO ORIGEM */}
               <ListItem key={-1} disablePadding>
                 <ListItemButton
-                  // selected={selectedIndex === getContextFromURI(Object.keys(contextos)[0])}
                   selected={selectedIndex === -1}
-                  // onClick={(event) => handleListItemClick(event, idx, row)}
-                  onClick={() => handleSelectedContextClick(-1, getContextFromURI(Object.keys(contextos)[0]))}
+                  onClick={() => handleSelectedContextClick(-1, Object.keys(contextos)[0])}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
                   </ListItemIcon>
                   <ListItemText primary={getContextFromURI(Object.keys(contextos)[0])} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                  {/* <ListItemText primary={item?.target?.value} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} /> */}
                 </ListItemButton>
               </ListItem>
               {
                 contextos && Object.keys(contextos).map((item: any, index: any) => {
-                  console.log('ITEMS DOS LINKS >>> ', contextos[item])
+                  // console.log('ITEMS DOS LINKS >>> ', contextos[item])
                   return contextos[item].map((same: string, idx: Key) => {
                     return (
                       <ListItem key={idx} disablePadding>
