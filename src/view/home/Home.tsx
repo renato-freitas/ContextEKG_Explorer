@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { TopBar } from "../../layout/TopBar";
+import { MHeader } from "../../components/MHeader";
 import styles from '../../styles/global.module.css'
 
 export function Home() {
   return (
     <div className={styles.container}>
-      <h1>Home</h1>
+      <MHeader title={`Home`} />
       <nav>
         <Link to="/about">About</Link>
       </nav>

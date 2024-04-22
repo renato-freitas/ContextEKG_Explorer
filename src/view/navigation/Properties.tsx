@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext, Key } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import { Box, Chip, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Typography } from '@mui/material';
+import { Box, Chip, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Typography, getIconButtonUtilityClass } from '@mui/material';
 import { api } from "../../services/api";
-import { getClassAndIdentifierFromURI, getPropertyFromURI, double_encode_uri, getContextFromURI, getAppHigienizadoFromClasse } from "../../commons/utils";
+import { getClassAndIdentifierFromURI, getPropertyFromURI, double_encode_uri, getContextFromURI, getAppHigienizadoFromClasse, getIdentifierFromURI } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { ResourceModel } from '../../models/ResourceModel';
 import { MHeader } from '../../components/MHeader';
@@ -18,7 +18,7 @@ export function Properties() {
   const location = useLocation();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   // const [selectedResource, setSelectedResource] = useState<ResourceModel>({} as ResourceModel);
-  const [selectedResourceURI, setSelectedResourceURI] = useState<string>("");
+  const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
   // const [selectedContext, setSelectedContext] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
@@ -83,14 +83,15 @@ export function Properties() {
       let resource_uri = location.state as string;
 
       // if (resource_uri == "Visão de Unificação") {
-      if (selectedIndex == -2) {
+      console.log(`RECURSO ESCOLHIDO`, resource_uri)
+      if (selectedIndex == -2) { /**-2 = Visão de Unificação */
         loadUnification(contextos)
-        setSelectedResourceURI(resource_uri);
-        loadSameAs(resource_uri);
+        setUriOfSelectedResource(resource_uri);
+        // loadSameAs(resource_uri); //passar recurso origem
+        loadSameAs(Object.keys(contextos)[0]); //passar recurso origem
         setSelectedIndex(-2)
       } else {
-        console.log(`RECURSO ESCOLHIDO`, resource_uri)
-        setSelectedResourceURI(resource_uri);
+        setUriOfSelectedResource(resource_uri);
         loadPropertiesOfSelectedResource(resource_uri)
         loadSameAs(resource_uri);
         setSelectedIndex(-1)
@@ -108,11 +109,11 @@ export function Properties() {
 
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(-1);
-  const handleSelectedContextClick = (index: Number, contexto: string) => {
+  const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     // console.log(`*** ÍNDICE DO CONTEXTO: `, index)
     setSelectedIndex(index);
-    setSelectedContext(contexto)
-    navigate(ROUTES.PROPERTIES, { state: contexto })
+    // setSelectedContext(contextoSelecionado)
+    navigate(ROUTES.PROPERTIES, { state: contextoSelecionado })
   };
 
 
@@ -140,6 +141,12 @@ export function Properties() {
   }
 
 
+  const obtemURICanonica = (uri: string) => {
+    
+    let uri_separada = uri.split("resource")
+    let uri_canonica = uri_separada[0] + "resource/canonical/" + getIdentifierFromURI(uri)
+    return uri_canonica
+  }
 
 
   return (
@@ -152,13 +159,14 @@ export function Properties() {
       <Box sx={{ flexGrow: 1, padding: 1 }}>
         {/* LABEL DO RECURSO */}
         {
-          !isLoading && agroupedProperties && <Grid container spacing={1}>
+          !isLoading && Object.keys(agroupedProperties).length > 0 && <Grid container spacing={1}>
             <Grid item sm={9.5}>
               <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
-                <h4>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]}</h4>
+                <h4>{ agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]?.length == 1 ?
+                agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"] :
+                agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"][0][0]}</h4>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {/* {selectedResourceURI} */}
-                  RENATO
+                  {uriOfselectedResource}
                 </Typography>
               </div>
 
@@ -189,9 +197,9 @@ export function Properties() {
                   }}>
                     {
                       Object.keys(agroupedProperties).map((prop, idx) =>
-                        <Stack direction={"row"} spacing={1} key={idx}>
+                        <Stack direction={"row"} spacing={1} key={idx + prop}>
                           {
-                            // CHIP DAS CLASSES ÚNICAS
+                            // CHIP DAS CLASSES DISTINTAS
                             agroupedProperties && agroupedProperties[prop].map((valuesOfPropsArray: any, idx: React.Key) => {
                               if ((prop == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") && !auxLabelOfClasses.includes(valuesOfPropsArray[0])) {
                                 auxLabelOfClasses.push(valuesOfPropsArray[0])
@@ -202,7 +210,8 @@ export function Properties() {
                           {
                             // LABEL DAS PROPRIEDADES
                             (prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
-                              prop != "http://www.w3.org/2000/01/rdf-schema#label") && <ListItem key={idx}>
+                              prop != "http://www.w3.org/2000/01/rdf-schema#label" &&
+                              prop != "http://www.bigdatafortaleza.com/ontology#uri") && <ListItem key={idx + prop}>
                               <Grid container spacing={2}>
                                 <Grid item sm={3}>
                                   <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
@@ -210,12 +219,21 @@ export function Properties() {
                                   </Typography>
                                 </Grid>
                                 <Grid item sm={9}>
-                                  <Stack direction={"column"}>
-                                    {
-                                      agroupedProperties[prop].map((values: any) => {
-                                        return <Typography key={idx} variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
-                                          {values[0]}
-                                        </Typography>
+                                  <Stack direction={"column"} key={idx}>
+                                    { /** VALORES DAS PROPRIEDADES */
+                                      agroupedProperties[prop].map((values: any, i: React.Key) => {
+                                        return <Stack key={i} direction={'row'} gap={1} justifyContent="flex-start"
+                                          alignItems="center" padding={"0 50px"}>
+                                          <Typography  variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
+                                            {values[0]}
+                                          </Typography>
+                                          {/* <Typography  variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
+                                            &rarr;
+                                          </Typography> */}
+                                          <Typography  variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.55rem" }} color="text.secondary" gutterBottom>
+                                            {values[1]}
+                                          </Typography>
+                                        </Stack>
                                       })
                                     }
                                   </Stack>
@@ -259,7 +277,8 @@ export function Properties() {
               <ListItem key={-2} disablePadding>
                 <ListItemButton
                   selected={selectedIndex === -2}
-                  onClick={() => handleSelectedContextClick(-2, Object.keys(contextos)[0])}
+                  // onClick={() => handleSelectedContextClick(-2, contextos[Object.keys(contextos)[0]][0])}
+                  onClick={() => handleSelectedContextClick(-2, obtemURICanonica(contextos[Object.keys(contextos)[0]][0].toString()))}
                 >
                   <ListItemIcon sx={{ minWidth: '30px' }}>
                     <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />

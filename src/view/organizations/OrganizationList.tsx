@@ -19,6 +19,7 @@ import { OrganizationEntity } from '../../models/OrganizationEntity';
 import { findAllOrganizations } from '../../services/sparql-organization';
 import { ROUTES } from '../../commons/constants';
 import styles from '../datasources/DataSource.module.css';
+import { MHeader } from '../../components/MHeader';
 
 export function OrganizationList() {
   const navigate = useNavigate();
@@ -82,8 +83,9 @@ export function OrganizationList() {
   return (
     <div className={styles.listkg}>
 
-      <h4>Organizações</h4>
-      <nav><Link to={ROUTES.ORGANIZATION_DOC}>Documento</Link></nav>
+      <MHeader title={`Organizações`} />
+
+      <nav><Link to={ROUTES.ORGANIZATION_DOC}>Documentação</Link></nav>
       <Typography variant='caption'>Nessa tela são listas as organizações cadastradas globalmente na plataforma. Elas podem ser reutilizadas na construção de vários Grafos de Metadados</Typography>
 
       <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -95,66 +97,66 @@ export function OrganizationList() {
 
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item gap={2} sm={6} justifyContent="flex-end" display="flex">
-        <MTable
-          header={[["Título", "left"]]}
-          size={organizations.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          handleChangePage={handleChangePage}
-          handleChangeRowsPerPage={handleChangeRowsPerPage}
-          hasActions
-          loading={false}
-        >
-          {
-            (rowsPerPage > 0
-              ? organizations.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              : organizations
-            ).map(row => (
-              <TableRow key={row.identifier.value}>
-                <TableCell>
-                  <Typography>{row.title.value}</Typography>
-                </TableCell>
-                <TableCell align='right'>
-                  <Stack>
-                    <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
-                    <Typography variant="caption" display="block" gutterBottom>{new Date(row.created.value).toLocaleTimeString()}</Typography>
-                  </Stack>
-                </TableCell>
-                <TableCell align='right'>
-                  <Stack>
-                    <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
-                    <Typography variant="caption" display="block" gutterBottom>{new Date(row.modified.value).toLocaleTimeString()}</Typography>
-                  </Stack>
-                </TableCell>
-                <TableCell align='center'>
-                  <Tooltip title="Fontes de Dados">
-                    <IconButton onClick={() => {
-                      navigate(ROUTES.DATASOURCE_LIST, { state: row })
-                      console.log("*** Selecionando a Organização ***")
-                      console.log(row)
-                      // setSelectedDataSource(row);
-                    }}>
-                      <Database size={22} />
-                      {/* <Storage /> */}
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Editar">
-                    <IconButton onClick={() => {
-                      console.log("*** Selecionando a Organização ***")
-                      navigate(ROUTES.ORGANIZATION_FORM, { state: row })
-                    }}>
-                      <EditTwoTone />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Excluir">
-                    <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
-                      <DeleteForever />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-        </MTable>
+          <MTable
+            header={[["Título", "left"]]}
+            size={organizations.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+            hasActions
+            loading={false}
+          >
+            {
+              (rowsPerPage > 0
+                ? organizations.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : organizations
+              ).map(row => (
+                <TableRow key={row.identifier.value}>
+                  <TableCell>
+                    <Typography>{row.title.value}</Typography>
+                  </TableCell>
+                  <TableCell align='right'>
+                    <Stack>
+                      <Typography>{new Date(row.created.value).toLocaleDateString()}</Typography>
+                      <Typography variant="caption" display="block" gutterBottom>{new Date(row.created.value).toLocaleTimeString()}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align='right'>
+                    <Stack>
+                      <Typography>{new Date(row.modified.value).toLocaleDateString()}</Typography>
+                      <Typography variant="caption" display="block" gutterBottom>{new Date(row.modified.value).toLocaleTimeString()}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align='center'>
+                    <Tooltip title="Fontes de Dados">
+                      <IconButton onClick={() => {
+                        navigate(ROUTES.DATASOURCE_LIST, { state: row })
+                        console.log("*** Selecionando a Organização ***")
+                        console.log(row)
+                        // setSelectedDataSource(row);
+                      }}>
+                        <Database size={22} />
+                        {/* <Storage /> */}
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Editar">
+                      <IconButton onClick={() => {
+                        console.log("*** Selecionando a Organização ***")
+                        navigate(ROUTES.ORGANIZATION_FORM, { state: row })
+                      }}>
+                        <EditTwoTone />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Excluir">
+                      <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(row)}>
+                        <DeleteForever />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </MTable>
         </Grid>
       </Grid>
 
