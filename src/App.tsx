@@ -4,13 +4,8 @@ import { Link } from 'react-router-dom';
 import { Loading } from './components/Loading';
 import Router from './Router';
 import { GlobalStyle } from './styles/global';
+import { ClassModel } from './models/ClassModel';
 
-// const LoadingContext = React.createContext({
-//   loading: false,
-//   message: null,
-//   showLoading: (message: string) => { },
-//   hideLoading: () => { }
-// })
 
 interface LoadingContextData {
   isLoading: boolean;
@@ -19,17 +14,30 @@ interface LoadingContextData {
 }
 export const LoadingContext = createContext({} as LoadingContextData);
 
+// interface ClassRDFContextData {
+//   contextClassRDF: string;
+//   setContextClassRDF: React.Dispatch<React.SetStateAction<string>>
+// }
+interface ClassRDFContextData {
+  contextClassRDF: ClassModel;
+  setContextClassRDF: React.Dispatch<React.SetStateAction<ClassModel>>
+}
+export const ClassRDFContext = createContext({} as ClassRDFContextData);
+
 
 function App() {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [contextClassRDF, setContextClassRDF] = React.useState({} as ClassModel);
   return (
     <>
       <CssBaseline />
       <GlobalStyle />
       <LoadingContext.Provider value={{ isLoading, setIsLoading }}>
         <Loading />
-        <Router />
-      </LoadingContext.Provider>
+        <ClassRDFContext.Provider value={{ contextClassRDF, setContextClassRDF }}>
+          <Router />
+        </ClassRDFContext.Provider>
+      </LoadingContext.Provider >
     </>
   )
 }

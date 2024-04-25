@@ -3,9 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { IconButton, Stack, TableCell, TableRow, TextField, Tooltip, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
-import { LoadingContext } from "../../App";
-import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
-import { NUMBERS, ROUTES } from "../../commons/constants";
+import { LoadingContext, ClassRDFContext } from "../../App";
+import { double_encode_uri, getContextFromURI, getIdentifierFromURI, printt } from "../../commons/utils";
+import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
 import { api } from "../../services/api";
 import { ResourceModel } from "../../models/ResourceModel";
 import { MHeader } from "../../components/MHeader";
@@ -19,6 +19,7 @@ export function Resources() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
+  const { contextClassRDF, setContextClassRDF } = useContext(ClassRDFContext);
   const [page, setPage] = useState(0);
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedClassRDF, setSelectedClassRDF] = useState<ClassModel>();
@@ -29,14 +30,15 @@ export function Resources() {
   const [totalOfResources, setTotalOfResources] = useState<number>(0);
 
 
-  async function loadResourcesOfSelectedClass(RDFClass: string, newPage: number) {
+  async function loadResourcesOfSelectedClass(ClassURI: string, newPage: number) {
     let response: any
     try {
       setIsLoading(true)
       console.log(`label to search: ${labelToSearch}`)
       console.log(`página atual: ${newPage}`)
-      let uri = double_encode_uri(RDFClass)
-      response = await api.get(`/resources/?classURI=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
+      // let uri = double_encode_uri(ClassURI)
+      let uri = double_encode_uri(contextClassRDF.classURI.value)
+      response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
       console.log(`2. RECURSOS DA CLASSE`, response.data)
     } catch (error) {
       console.log(`><`, error);
@@ -53,7 +55,8 @@ export function Resources() {
   async function getTotalResources(RDFClass: string) {
     let response: any
     try {
-      let uri = double_encode_uri(RDFClass)
+      // let uri = double_encode_uri(RDFClass)
+      let uri = double_encode_uri(contextClassRDF.classURI.value)
       response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}`)
     } catch (error) {
       console.log(`><`, error);
@@ -70,15 +73,19 @@ export function Resources() {
 
   useEffect(() => {
     function onEdit() {
+      console.log('CLASS RDF CONTEXTO', contextClassRDF)
       try {
         if (location.state) {
           let classRDF = location.state as ClassModel;
-          let classURI = classRDF.class?.value as string
-          console.log("1. CLASSE ESCOLHIDA", classRDF.class?.value)
+          let classURI = classRDF.classURI?.value as string
+          console.log("1. CLASSE ESCOLHIDA", classRDF.classURI?.value)
           setSelectedClass(classURI)
           setSelectedClassRDF(classRDF)
           loadResourcesOfSelectedClass(classURI, page)
           getTotalResources(classURI)
+        }else{
+          loadResourcesOfSelectedClass(contextClassRDF.classURI.value, page)
+          getTotalResources(contextClassRDF.classURI.value)
         }
       } catch (err) {
         printt("Erro", err)
@@ -109,7 +116,7 @@ export function Resources() {
   /**Pagination */
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
-    loadResourcesOfSelectedClass(selectedClassRDF?.class?.value as string, newPage)
+    loadResourcesOfSelectedClass(selectedClassRDF?.classURI?.value as string, newPage)
   };
 
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -147,8 +154,10 @@ export function Resources() {
         <Grid item xs={6} sx={{ bgcolor: null }}>
           <MHeader
             // title={`Recursos da classe ${getPropertyFromURI(selectedClass)}`}
-            title={`Classe "${selectedClassRDF?.label?.value}"`}
+            // title={`Classe "${selectedClassRDF?.label?.value}"`}
+            title={`Classe "${contextClassRDF.label?.value}"`}
             hasButtonBack
+            buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
           />
         </Grid>
 
@@ -191,23 +200,23 @@ export function Resources() {
                 //   ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 //   : resources
                 // ).map((resource, idx) => (
-                resources && resources.map((resource, idx) => (
+                resources.length > 0 && resources.map((resource, idx) => (
                   <TableRow key={idx} >
                     <TableCell>
-                      <Stack direction={'row'} gap={1}>
+                      {/* <Stack direction={'row'} gap={1}> */}
                         {/* {DATASOURCE_TYPES_ICONS[resource?.type?.value]} */}
                         <Typography>{resource.label.value}</Typography>
-                      </Stack>
+                      {/* </Stack> */}
                     </TableCell>
-                    <TableCell sx={{ p: "0 6px 0 0" }}>
+                    <TableCell>
                       <Typography variant="caption" component="div" color="gray">
                         {getContextFromURI(resource?.uri?.value)}
                       </Typography>
                     </TableCell>
-                    <TableCell align='right' sx={{ p: "0 6px 0 0" }}>
+                    <TableCell align='right'>
                       <Tooltip title="Propriedades">
                         <IconButton onClick={(event) => handleListOfResourcesClick(event, idx, resource)} sx={{ p: "4px !important" }}>
-                          <Eye size={22} />
+                          <Eye size={22} color={COLORS.AZUL_04} />
                         </IconButton>
                       </Tooltip>
                     </TableCell>

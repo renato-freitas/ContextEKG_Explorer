@@ -14,6 +14,7 @@ const MENU_ICON_SIZE = 20
 
 export function Sidebar() {
   const { pathname } = useLocation();
+  console.log('PATH NAME', pathname)
   return (
     <Paper elevation={3} sx={{position: 'absolute', ml: 0.3, mt:1}}>
       <SidebarContainer>
@@ -21,7 +22,8 @@ export function Sidebar() {
           {
             menuEvolve.map((item, index) => (
               <ListItem key={item.title} disablePadding>
-                <ListItemButton component={NavLink} to={item.href} selected={pathname === item.href}>
+                {/* <ListItemButton component={NavLink} to={item.href} selected={pathname === item.href}> */}
+                <ListItemButton component={NavLink} to={item.href[0]} selected={item.href.includes(pathname) == true}>
                   <Stack direction={'column'} >
                     <ListItemIcon>
                       <item.icon size={MENU_ICON_SIZE} />

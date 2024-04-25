@@ -1,45 +1,36 @@
-import Box from "@mui/material/Box"
+import { useNavigate } from 'react-router-dom';
 import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Grid"
 import TextField from "@mui/material/TextField"
 import Button from "@mui/material/Button"
-import { useNavigate } from 'react-router-dom';
+import IconButton from "@mui/material/IconButton"
 import { CaretCircleLeft } from "phosphor-react"
-import { Chip, IconButton } from "@mui/material"
-import { MenuContext } from './MenuContext'
-import { getContextFromURI } from "../commons/utils"
 
 interface TitleProps {
   title: string;
   hasButtonBack?: boolean;
+  buttonBackNavigateTo?: string;
   buttonLabel?: string | null | undefined;
   chip?: React.ReactElement;
   openForm?: () => void
 }
 
-export const MHeader = ({ hasButtonBack, title, buttonLabel, chip, openForm }: TitleProps) => {
+/** Esse componente tem como base um Grid.Container.12 */
+export const MHeader = ({ title, hasButtonBack, buttonBackNavigateTo, buttonLabel, chip, openForm }: TitleProps) => {
   const navigate = useNavigate();
   return (
     <Grid container>
       <Grid item sm={12}>
-        {/* <Stack direction="row" alignItems="center" spacing={1} margin={1}> */}
         <Stack direction="row" alignItems="center" spacing={1}>
           {
-            hasButtonBack
+            buttonBackNavigateTo && hasButtonBack
               ?
-              // <Box
-              //   display="flex"
-              //   fontSize={35}
-              //   sx={{ '&:hover': { color: '#ddaa00' }, cursor: "pointer" }}
-              // >
-              <IconButton onClick={() => navigate(-1)} sx={{p:"0.2px 0"}}>
-                <CaretCircleLeft
-                  size={30}
-                  // onClick={() => navigate(-1)}
-                />
+              <IconButton onClick={() => navigate(buttonBackNavigateTo)} sx={{ p: "0.2px 0" }}>
+                <CaretCircleLeft size={30} />
               </IconButton>
-              // </Box>
-              : false
+              : !buttonBackNavigateTo && hasButtonBack ? <IconButton onClick={() => navigate(-1)} sx={{ p: "0.2px 0" }}>
+                <CaretCircleLeft size={30} />
+              </IconButton> : false
           }
           <h4>{title}</h4>
           {

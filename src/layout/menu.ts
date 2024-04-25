@@ -5,37 +5,37 @@ export const menuEvolve = [
   {
     title: `MetaEKG`,
     icon: Graph,
-    href: ROUTES.METAGRAPHS,
+    href: [ROUTES.METAGRAPHS],
     type: [USER_TYPE.ADMIN]
   },
   {
     title: `MetaMashup`,
     icon: Graph,
-    href: ROUTES.META_MASHUP_LIST,
+    href: [ROUTES.META_MASHUP_LIST],
     type: [USER_TYPE.ADMIN]
   },
   {
     title: 'Exploração',
     icon: PaperPlaneTilt,
-    href: ROUTES.NAVIGATION,
+    href: [ROUTES.NAVIGATION, ROUTES.RESOURCES, ROUTES.PROPERTIES],
     type: [USER_TYPE.ADMIN]
   },
   {
     title: 'Fonte de Dados',
     icon: Database,
-    href: ROUTES.DATASOURCE_LIST,
+    href: [ROUTES.DATASOURCE_LIST],
     type: [USER_TYPE.ADMIN]
   },
   {
     title: 'Organizações',
     icon: Storefront,
-    href: ROUTES.ORGANIZATION_LIST,
+    href: [ROUTES.ORGANIZATION_LIST],
     type: [USER_TYPE.ADMIN]
   },
   {
     title: 'Pessoas',
     icon: Person,
-    href: ROUTES.PERSONS,
+    href: [ROUTES.PERSONS],
     type: [USER_TYPE.ADMIN]
   },
   // {

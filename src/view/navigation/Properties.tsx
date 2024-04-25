@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useContext, Key } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import { Box, Chip, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Stack, Typography, getIconButtonUtilityClass } from '@mui/material';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { api } from "../../services/api";
-import { getClassAndIdentifierFromURI, getPropertyFromURI, double_encode_uri, getContextFromURI, getAppHigienizadoFromClasse, getIdentifierFromURI } from "../../commons/utils";
+import { getPropertyFromURI, double_encode_uri, getContextFromURI, getIdentifierFromURI } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
-import { ResourceModel } from '../../models/ResourceModel';
 import { MHeader } from '../../components/MHeader';
-import { FONTE_PRINCIPAL, NUMBERS, ROUTES } from '../../commons/constants';
+import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
 import { LoadingContext } from "../../App";
 import styles from './navigation.module.css';
-import { Link as LinkIcon } from 'phosphor-react';
+import { Asterisk, Link as LinkIcon } from 'phosphor-react';
 import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
 
 export function Properties() {
@@ -142,7 +150,7 @@ export function Properties() {
 
 
   const obtemURICanonica = (uri: string) => {
-    
+
     let uri_separada = uri.split("resource")
     let uri_canonica = uri_separada[0] + "resource/canonical/" + getIdentifierFromURI(uri)
     return uri_canonica
@@ -154,6 +162,7 @@ export function Properties() {
       <MHeader
         title={`Propriedades do recurso`}
         hasButtonBack
+        buttonBackNavigateTo={`${ROUTES.RESOURCES}`}
       />
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
@@ -161,10 +170,10 @@ export function Properties() {
         {
           !isLoading && Object.keys(agroupedProperties).length > 0 && <Grid container spacing={1}>
             <Grid item sm={9.5}>
-              <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
-                <h4>{ agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]?.length == 1 ?
-                agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"] :
-                agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"][0][0]}</h4>
+              <div style={{ background: COLORS.CINZA_01, padding: "0px 10px 0px 10px" }}>
+                <h4>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]?.length == 1 ?
+                  agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"] :
+                  agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"][0][0]}</h4>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   {uriOfselectedResource}
                 </Typography>
@@ -172,7 +181,7 @@ export function Properties() {
 
             </Grid>
             <Grid item sm={2.5}>
-              <div style={{ background: "#aaa", padding: "0px 10px 0px 10px" }}>
+              <div style={{ background: COLORS.CINZA_02, padding: "0px 10px 0px 10px" }}>
                 <h4>Contexto</h4>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   Menu
@@ -203,7 +212,10 @@ export function Properties() {
                             agroupedProperties && agroupedProperties[prop].map((valuesOfPropsArray: any, idx: React.Key) => {
                               if ((prop == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") && !auxLabelOfClasses.includes(valuesOfPropsArray[0])) {
                                 auxLabelOfClasses.push(valuesOfPropsArray[0])
-                                return <Chip key={idx} label={getPropertyFromURI(valuesOfPropsArray[0])} color='primary' />
+                                return <Chip
+                                  key={idx}
+                                  label={getPropertyFromURI(valuesOfPropsArray[0])}
+                                  sx={{ bgcolor: "#1976d2", color: "#fff" }} />
                               }
                             })
                           }
@@ -223,15 +235,15 @@ export function Properties() {
                                     { /** VALORES DAS PROPRIEDADES */
                                       agroupedProperties[prop].map((values: any, i: React.Key) => {
                                         return <Stack key={i} direction={'row'} gap={1} justifyContent="flex-start"
-                                          alignItems="center" padding={"0 50px"}>
-                                          <Typography  variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
+                                          alignItems="center" padding={"0 20px"}>
+                                          <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                             {values[0]}
                                           </Typography>
-                                          {/* <Typography  variant="body2" sx={{ mb: 2, ml: 0 }} color="text.secondary" gutterBottom>
-                                            &rarr;
-                                          </Typography> */}
-                                          <Typography  variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.55rem" }} color="text.secondary" gutterBottom>
+                                          <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.55rem" }} color="text.secondary" gutterBottom>
                                             {values[1]}
+                                          </Typography>
+                                          <Typography variant="caption" sx={{ mb: 2, ml: -0.6, fontSize: "0.55rem" }} color="text.secondary" gutterBottom>
+                                            {values[2] == true ? <Asterisk size={14} color='#f00808ed' /> : false}
                                           </Typography>
                                         </Stack>
                                       })

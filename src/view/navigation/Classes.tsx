@@ -11,11 +11,11 @@ import RadioGroup from '@mui/material/RadioGroup'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-import { ROUTES, NUMBERS } from "../../commons/constants";
+import { ROUTES, NUMBERS, COLORS } from "../../commons/constants";
 import { getPropertyFromURI } from "../../commons/utils";
 import { api } from "../../services/api";
 import { MHeader } from "../../components/MHeader";
-import { LoadingContext } from "../../App";
+import { LoadingContext, ClassRDFContext } from "../../App";
 import { ClassModel } from "../../models/ClassModel";
 import { styled } from '@mui/material/styles';
 import styles from './navigation.module.css';
@@ -24,6 +24,7 @@ const GENERALIZATION = "0"
 export function Classes() {
 	const navigate = useNavigate();
 	const { isLoading, setIsLoading } = useContext(LoadingContext);
+	const { contextClassRDF, setContextClassRDF } = useContext(ClassRDFContext);
 	const [classes, setClasses] = useState<ClassModel[]>([]);
 	const [copyAllclasses, setCopyAllClasses] = useState<ClassModel[]>([]);
 	const [foundClasses, setFoundClasses] = useState<ClassModel[]>([]);
@@ -61,13 +62,19 @@ export function Classes() {
 	}, [typeOfClass])
 
 
+	// const [selectedIndex, setSelectedIndex] = useState<Number>(1);
+	const handleListOfClassesClick = (event: any, classRDF: ClassModel) => {
+		// setContextClassRDF(classRDF.classURI.value)
+		setContextClassRDF(classRDF)
+		navigate(ROUTES.RESOURCES, { state: classRDF })
+	};
 
 	const handleSearchClassName = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setNameOfClassToFind((event.target as HTMLInputElement).value);
 		console.log(event.target.onkeyup)
 	};
 	const handleSearchEscape = (event: KeyboardEvent) => {
-		if(event.key == 'Escape'){
+		if (event.key == 'Escape') {
 			setNameOfClassToFind('')
 		}
 	};
@@ -106,9 +113,9 @@ export function Classes() {
 		<div className={styles.listkg}>
 			<MHeader title={`Seleção de Classe`} />
 
-			<Grid container spacing={1} sx={{ p: '2px 0' }}>
+			<Grid container spacing={0} sx={{ p: '4px 0' }}>
 				{/* RADIO BUTTON */}
-				<Grid item xs={6} sx={{ bgcolor: null }}>
+				<Grid item xs={6} sx={{ bgcolor:null }}>
 					<FormControl>
 						<RadioGroup
 							row
@@ -117,14 +124,22 @@ export function Classes() {
 							value={typeOfClass}
 							onChange={handleChange}
 						>
-							<FormControlLabel value="0" control={<Radio />} label="Generalização" />
-							<FormControlLabel value="1" control={<Radio />} label="Visão Semântica Exportada" />
+							<FormControlLabel value="0" control={<Radio size="small" />} label="Generalização" sx={{
+								'.css-ahj2mt-MuiTypography-root': {
+									fontSize: '0.9rem !important',
+								},
+							}} />
+							<FormControlLabel value="1" control={<Radio size="small" />} label="Visão Semântica Exportada" sx={{
+								'.css-ahj2mt-MuiTypography-root': {
+									fontSize: '0.9rem !important',
+								},
+							}} />
 						</RadioGroup>
 					</FormControl>
 				</Grid>
 				{/* PESQUISAR */}
-				<Grid item xs={6} display='flex' justifyContent='flex-end' sx={{ bgcolor: null }}>
-					<TextField sx={{ width: 300 }}
+				<Grid item xs={6} sx={{ bgcolor:null }} display={'flex'} justifyContent={'flex-end'}>
+					<TextField sx={{ width: document.body.clientWidth * 0.3 }}
 						id="outlined-basic" label="Pesquisar pelo nome da classe" variant="outlined" size="small"
 						value={nameOfClassToFind}
 						onChange={handleSearchClassName}
@@ -137,16 +152,17 @@ export function Classes() {
 			<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 				{
 					!isLoading && <Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
-						<div style={{ background: "#ddd" }}>
+						<div style={{ background: COLORS.CINZA_01 }}>
 							<h4>{`Classes ${typeOfClass == "0" ? "de Generalização" : 'Exportadas'}`}</h4>
 						</div>
 					</Grid>
 				}
 				{
-					!isLoading && classes && classes.map((classRDF, index) =>
+					!isLoading && classes.length > 0 && classes.map((classRDF, index) =>
 						<Grid item xs={12} sm={6} md={3} key={index}>
 							<Item>
-								<Button variant="text" onClick={() => { navigate(ROUTES.RESOURCES, { state: classRDF }) }}>
+								{/* <Button variant="text" onClick={() => { navigate(ROUTES.RESOURCES, { state: classRDF }) }}> */}
+								<Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
 									<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
 										{getPropertyFromURI(classRDF?.label?.value)}
 									</Typography>
@@ -161,107 +177,3 @@ export function Classes() {
 		</div >
 	);
 }
-
-
-{/* <Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-						{
-							!isLoading && classes && classes.map((classRDF, index) =>
-								<Grid xs={12} sm={6} md={3} key={index}>
-									<Item>
-										<Button variant="text" onClick={() => { navigate(ROUTES.RESOURCES, { state: classRDF }) }}>
-											<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
-												{getPropertyFromURI(classRDF?.label?.value)}
-											</Typography>
-										</Button>
-										<Typography variant="caption" component="div" color="ActiveCaption">
-											{classRDF?.comment?.value}
-										</Typography>
-									</Item>
-								</Grid>
-							)}
-					</Grid> */}
-
-
-
-
-
-
-
-
-
-
-
-
-{/* <Box sx={{ flexGrow: 1, padding: 1 }}>
-        <div style={{ background: "#ddd", padding: "0px 10px 0px 10px" }}>
-          <h4>Classes</h4>
-        </div>
-        <Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-          {
-            Object.keys(agroupedClasses).map((row, index) =>
-              <Grid xs={12} sm={6} md={3} key={index}>
-                <Item>
-                  <Button onClick={() => { navigate(ROUTES.RESOURCES, { state: row }) }}>
-                    <Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
-                      {getPropertyFromURI(agroupedClasses[row][0]?.label.value)}
-                    </Typography>
-                  </Button>
-                  <Typography variant="caption" component="div" color="gray" sx={{ wordBreak: "break-word" }}>
-                    {agroupedClasses[row][0]?.class.value}
-                  </Typography>
-                  <Typography variant="caption" component="div" color="ActiveCaption">
-                    {agroupedClasses[row][0]?.comment.value}
-                  </Typography>
-
-                  <Box sx={{ textAlign: "left", mt: 3 }}>
-                    {
-                      agroupedClasses[row][0]?.subclass && <Typography variant="caption" component="div" color="brown" sx={{ fontSize: "1rem" }}>
-                        SubClasses
-                      </Typography>
-                    }
-                    {
-                      agroupedClasses[row][0]?.subclass && [...Array(agroupedClasses[row].length).keys()].map((ele, i) =>
-                        <Button size="small" onClick={() => { navigate(ROUTES.RESOURCES, { state: row }) }}>
-                          <Typography key={i} variant="h6" component="div" sx={{ fontSize: "0.7rem", fontWeight: '500' }}>
-                            {getPropertyFromURI(agroupedClasses[row][ele]?.subclass?.value)}
-                          </Typography>
-                        </Button>
-                      )
-                    }
-                  </Box>
-                </Item>
-              </Grid>
-            )}
-        </Grid>
-      </Box> */}
-
-
-
-
-// async function loadDomainOntologyClasses() {
-//   try {
-//     const response = await api.get("/classes");
-//     response.data.forEach((ele: ClassModel) => {
-//       if (!agroupedClasses[ele.class.value]) {
-//         agroupedClasses[ele.class.value] = [ele]
-//       }
-//       else {
-//         agroupedClasses[ele.class.value].push(ele)
-//       }
-//       if (HIGHLIGHT_CLASSES.includes(ele.class.value)) {
-//         if (!agroupedClassesDestaque[ele.class.value]) {
-//           agroupedClassesDestaque[ele.class.value] = [ele]
-//         }
-//         else {
-//           agroupedClassesDestaque[ele.class.value].push(ele)
-//         }
-//         setClassesDestaque([...classesDestaque, ele])
-//       }
-//     });
-
-//     setClasses(response.data)
-//   } catch (error) {
-//     console.log(`><`, error);
-//   } finally {
-//   }
-// }
