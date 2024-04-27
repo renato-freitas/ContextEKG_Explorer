@@ -218,13 +218,16 @@ export const NUMBERS = {
   TIME_OUT_FROM_REQUEST: 350,
   SIZE_TEXT_MENU_CONTEXT: "0.8rem",
   SIZE_ICONS_MENU_CONTEXT: 19.4,
-  PADDING_ITEMS_MENU_CONTEXT: 0.8
+  PADDING_ITEMS_MENU_CONTEXT: 0.8,
+  SCROOL_WINDOWS_Y: 5
 }
 
+// https://encycolorpedia.pt/1976d2
 export const COLORS = {
   CINZA_01: "#c2cff1",
   CINZA_02: "#a3b7e9",
   CINZA_03: "#c2cff1",
   CINZA_04: "#5a8bda",
   AZUL_04: "#1976d2",
+  AMARELO_01: "e9da02"
 }

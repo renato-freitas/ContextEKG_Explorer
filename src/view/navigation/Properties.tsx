@@ -20,18 +20,15 @@ import { LoadingContext } from "../../App";
 import styles from './navigation.module.css';
 import { Asterisk, Link as LinkIcon } from 'phosphor-react';
 import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
+import { Link } from '@mui/material';
 
 export function Properties() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  // const [selectedResource, setSelectedResource] = useState<ResourceModel>({} as ResourceModel);
   const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
-  // const [selectedContext, setSelectedContext] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
-  const [selectedContext, setSelectedContext] = useState<string>("");
-  // const [contextos, setContextos] = useState<{ origin: RDF_Node, target: RDF_Node }[]>([])
   const [contextos, setContextos] = useState<any>({})
   let auxLabelOfClasses = [] as string[];
 
@@ -132,15 +129,16 @@ export function Properties() {
   async function handleListLinkClick(event: any, uri: string) {
     event.preventDefault();
     try {
-      let _uri = double_encode_uri(uri);
-      const response = await api.get(`/resources/${_uri}`)
-      console.log(`response`, response.data)
-      navigate(ROUTES.PROPERTIES, {
-        state: {
-          label: { type: 'literal', value: 'teste' },
-          uri: { type: 'uri', value: uri },
-        }
-      })
+      // let _uri = double_encode_uri(uri);
+      // const response = await api.get(`/resources/${_uri}`)
+      // console.log(`response`, response.data)
+      // navigate(ROUTES.PROPERTIES, {
+      //   state: {
+      //     label: { type: 'literal', value: 'teste' },
+      //     uri: { type: 'uri', value: uri },
+      //   }
+      // })
+      navigate(ROUTES.PROPERTIES, { state: uri })
     } catch (error) {
       console.log(error)
     } finally {
@@ -150,7 +148,6 @@ export function Properties() {
 
 
   const obtemURICanonica = (uri: string) => {
-
     let uri_separada = uri.split("resource")
     let uri_canonica = uri_separada[0] + "resource/canonical/" + getIdentifierFromURI(uri)
     return uri_canonica
@@ -162,18 +159,18 @@ export function Properties() {
       <MHeader
         title={`Propriedades do recurso`}
         hasButtonBack
-        buttonBackNavigateTo={`${ROUTES.RESOURCES}`}
+        // buttonBackNavigateTo={`${ROUTES.RESOURCES}`}
       />
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
-        {/* LABEL DO RECURSO */}
-        {
+        { /** LABEL DO RECURSO */
           !isLoading && Object.keys(agroupedProperties).length > 0 && <Grid container spacing={1}>
             <Grid item sm={9.5}>
               <div style={{ background: COLORS.CINZA_01, padding: "0px 10px 0px 10px" }}>
-                <h4>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]?.length == 1 ?
+                <h3>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]?.length == 1 ?
                   agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"] :
-                  agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"][0][0]}</h4>
+                  agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"][0][0]}
+                </h3>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   {uriOfselectedResource}
                 </Typography>
@@ -192,10 +189,10 @@ export function Properties() {
         }
 
         {!isLoading && <Grid container spacing={1}>
-          {/* LISTA DAS PROPRIEDADES DO RECURSO */}
+          {/* LISTA DAS PROPRIEDADES DO RECURSO (LADO ESQUERDO) */}
           <Grid item sm={9.5}>
             {
-              agroupedProperties && <Box sx={{ width: "100%" }}>
+              Object.keys(agroupedProperties).length > 0 && <Box sx={{ width: "100%" }}>
                 <Paper sx={{ background: "None" }} elevation={0}>
                   <List sx={{
                     width: '100%',
@@ -204,46 +201,65 @@ export function Properties() {
                     overflow: 'auto',
                     padding: 1
                   }}>
+                    <Stack direction={"row"} spacing={1} key={-1}>
+                      <ListItem key={-1}>
+                        <Grid container spacing={2}>
+                          <Grid item sm={2}>
+                            <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
+                              Tipo(s)
+                            </Typography>
+                          </Grid>
+                          <Grid item sm={10}>
+                            <Stack direction={'row'} spacing={1} padding={"0 20px"}>
+                              { /** CHIP DAS CLASSES DISTINTAS  */
+                                Object.keys(agroupedProperties).length > 0 && agroupedProperties["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].map((arrayOfValues: any, idx: React.Key) => {
+                                  if (!auxLabelOfClasses.includes(arrayOfValues[0])) {
+                                    auxLabelOfClasses.push(arrayOfValues[0])
+                                    return <Chip
+                                      key={idx}
+                                      label={getPropertyFromURI(arrayOfValues[0])}
+                                      sx={{ bgcolor: "#1976d2", color: "#fff" }} />
+                                  }
+                                })
+                              }
+                            </Stack>
+                          </Grid>
+                        </Grid>
+                      </ListItem>
+                    </Stack>
                     {
                       Object.keys(agroupedProperties).map((prop, idx) =>
                         <Stack direction={"row"} spacing={1} key={idx + prop}>
-                          {
-                            // CHIP DAS CLASSES DISTINTAS
-                            agroupedProperties && agroupedProperties[prop].map((valuesOfPropsArray: any, idx: React.Key) => {
-                              if ((prop == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") && !auxLabelOfClasses.includes(valuesOfPropsArray[0])) {
-                                auxLabelOfClasses.push(valuesOfPropsArray[0])
-                                return <Chip
-                                  key={idx}
-                                  label={getPropertyFromURI(valuesOfPropsArray[0])}
-                                  sx={{ bgcolor: "#1976d2", color: "#fff" }} />
-                              }
-                            })
-                          }
-                          {
-                            // LABEL DAS PROPRIEDADES
+                          { // LABEL DAS PROPRIEDADES
                             (prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
                               prop != "http://www.w3.org/2000/01/rdf-schema#label" &&
                               prop != "http://www.bigdatafortaleza.com/ontology#uri") && <ListItem key={idx + prop}>
-                              <Grid container spacing={2}>
-                                <Grid item sm={3}>
-                                  <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
-                                    {getPropertyFromURI(prop)}
+                              <Grid container spacing={0}>
+                                <Grid item sm={2}>
+                                  <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
+                                    {prop.includes("http://") ? getPropertyFromURI(prop) : prop}
                                   </Typography>
                                 </Grid>
-                                <Grid item sm={9}>
+                                <Grid item sm={10}>
                                   <Stack direction={"column"} key={idx}>
                                     { /** VALORES DAS PROPRIEDADES */
                                       agroupedProperties[prop].map((values: any, i: React.Key) => {
                                         return <Stack key={i} direction={'row'} gap={1} justifyContent="flex-start"
                                           alignItems="center" padding={"0 20px"}>
-                                          <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
-                                            {values[0]}
-                                          </Typography>
-                                          <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.55rem" }} color="text.secondary" gutterBottom>
-                                            {values[1]}
-                                          </Typography>
+                                          { /** values[0] contém o valor literal da propriedade */
+                                            values[0].toLowerCase().includes("http://")
+                                              ? <Link underline="none" component="button" variant='caption' onClick={(e) => handleListLinkClick(e, values[0])}>{values[0]}</Link>
+                                              : <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
+                                                {values[0]}
+                                              </Typography>
+                                          }
                                           <Typography variant="caption" sx={{ mb: 2, ml: -0.6, fontSize: "0.55rem" }} color="text.secondary" gutterBottom>
-                                            {values[2] == true ? <Asterisk size={14} color='#f00808ed' /> : false}
+                                            {/* values[2] == true siginifica que há divergência nos valores da propriedade */}
+                                            {values[2] == true ? <Asterisk size={14} color='#ed0215' /> : false}
+                                          </Typography>
+                                          <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
+                                            {/* values[1] contém a proveniência do dados (na visão de unificação) */}
+                                            {values[1]}
                                           </Typography>
                                         </Stack>
                                       })
@@ -262,81 +278,73 @@ export function Properties() {
             }
           </Grid>
 
-          {/* MENU DE CONTEXTOS */}
+          {/* MENU DE CONTEXTOS (LADO DIREITO) */}
           <Grid item sm={2.5}>
-            <List sx={{
-              width: '100%',
-              bgcolor: 'background.paper',
-              position: 'relative',
-              overflow: 'auto',
-              padding: 0
-            }}>
-              {/* VISÃO DE FUSÃO */}
-              <ListItem key={-3} disablePadding>
-                <ListItemButton
-                  selected={selectedIndex === -3}
-                  onClick={() => {
-                    handleSelectedContextClick(-3, "Visão de Fusão")
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: '30px' }}>
-                    <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                  </ListItemIcon>
-                  <ListItemText primary={"Visão de Fusão"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                </ListItemButton>
-              </ListItem>
-              {/* VISÃO DE UNIFICAÇÃO */}
-              <ListItem key={-2} disablePadding>
-                <ListItemButton
-                  selected={selectedIndex === -2}
-                  // onClick={() => handleSelectedContextClick(-2, contextos[Object.keys(contextos)[0]][0])}
-                  onClick={() => handleSelectedContextClick(-2, obtemURICanonica(contextos[Object.keys(contextos)[0]][0].toString()))}
-                >
-                  <ListItemIcon sx={{ minWidth: '30px' }}>
-                    <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                  </ListItemIcon>
-                  <ListItemText primary={"Visão de Unificação"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                </ListItemButton>
-              </ListItem>
-              {/* VISÃO EXPORTADA DO RECURSO ORIGEM */}
-              <ListItem key={-1} disablePadding>
-                <ListItemButton
-                  selected={selectedIndex === -1}
-                  onClick={() => handleSelectedContextClick(-1, Object.keys(contextos)[0])}
-                >
-                  <ListItemIcon sx={{ minWidth: '30px' }}>
-                    <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                  </ListItemIcon>
-                  <ListItemText primary={getContextFromURI(Object.keys(contextos)[0])} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                </ListItemButton>
-              </ListItem>
-              {
-                contextos && Object.keys(contextos).map((item: any, index: any) => {
-                  // console.log('ITEMS DOS LINKS >>> ', contextos[item])
-                  return contextos[item].map((same: string, idx: Key) => {
-                    return (
-                      <ListItem key={idx} disablePadding>
-                        {/* <ListItemButton selected={pathname === item.href}> */}
-                        <ListItemButton
-                          selected={selectedIndex === idx}
-                          // onClick={(event) => handleListItemClick(event, idx, row)}
-                          onClick={() => handleSelectedContextClick(idx as Number, same)}
-                        >
-                          {/* <Stack direction={'column'}> */}
-                          <ListItemIcon sx={{ minWidth: '30px' }}>
-                            <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                          </ListItemIcon>
-                          <ListItemText primary={getContextFromURI(same)} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                          {/* <ListItemText primary={item?.target?.value} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} /> */}
-                          {/* </Stack> */}
-                        </ListItemButton>
-                      </ListItem>
-                    )
+            {
+              Object.keys(contextos).length > 0 ? <List sx={{
+                width: '100%',
+                bgcolor: 'background.paper',
+                position: 'relative',
+                overflow: 'auto',
+                padding: 0
+              }}>
+                <ListItem key={-3} disablePadding>
+                  <ListItemButton
+                    selected={selectedIndex === -3}
+                    onClick={() => {
+                      handleSelectedContextClick(-3, "Visão de Fusão")
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: '30px' }}>
+                      <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                    </ListItemIcon>
+                    <ListItemText primary={"Visão de Fusão"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem key={-2} disablePadding>
+                  <ListItemButton
+                    selected={selectedIndex === -2}
+                    onClick={() => handleSelectedContextClick(-2, obtemURICanonica(contextos[Object.keys(contextos)[0]][0].toString()))}
+                  >
+                    <ListItemIcon sx={{ minWidth: '30px' }}>
+                      <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                    </ListItemIcon>
+                    <ListItemText primary={"Visão de Unificação"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem key={-1} disablePadding>
+                  <ListItemButton
+                    selected={selectedIndex === -1}
+                    onClick={() => handleSelectedContextClick(-1, Object.keys(contextos)[0])}
+                  >
+                    <ListItemIcon sx={{ minWidth: '30px' }}>
+                      <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                    </ListItemIcon>
+                    <ListItemText primary={getContextFromURI(Object.keys(contextos)[0])} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                  </ListItemButton>
+                </ListItem>
+                {
+                  contextos && Object.keys(contextos).map((item: any) => {
+                    return contextos[item].map((same: string, idx: Key) => {
+                      return (
+                        <ListItem key={idx} disablePadding>
+                          <ListItemButton
+                            selected={selectedIndex === idx}
+                            onClick={() => handleSelectedContextClick(idx as Number, same)}
+                          >
+                            <ListItemIcon sx={{ minWidth: '30px' }}>
+                              <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                            </ListItemIcon>
+                            <ListItemText primary={getContextFromURI(same)} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                          </ListItemButton>
+                        </ListItem>
+                      )
+                    })
                   })
-                })
-              }
-
-            </List>
+                }
+              </List>
+                : Object.keys(agroupedProperties).length > 0 && <Chip label='Recurso sem link "same-as"' color='warning' />
+            }
           </Grid>
         </Grid>
         }

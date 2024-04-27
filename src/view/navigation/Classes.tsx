@@ -42,7 +42,7 @@ export function Classes() {
 		} catch (error) {
 			console.log(`><`, error);
 		} finally {
-			window.scrollTo(0, 0)
+			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
 			setTimeout(() => {
 				setIsLoading(false)
 				setClasses(response.data)

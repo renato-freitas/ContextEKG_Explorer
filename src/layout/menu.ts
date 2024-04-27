@@ -1,5 +1,6 @@
 import { ROUTES, USER_TYPE } from '../commons/constants';
 import { Binoculars, Person, Graph, Database, Storefront, PuzzlePiece, NavigationArrow, PaperPlaneTilt } from "phosphor-react";
+import ManageSearchRoundedIcon from '@mui/icons-material/ManageSearchRounded';
 
 export const menuEvolve = [
   {
@@ -16,7 +17,8 @@ export const menuEvolve = [
   },
   {
     title: 'Exploração',
-    icon: PaperPlaneTilt,
+    // icon: PaperPlaneTilt,
+    icon: ManageSearchRoundedIcon,
     href: [ROUTES.NAVIGATION, ROUTES.RESOURCES, ROUTES.PROPERTIES],
     type: [USER_TYPE.ADMIN]
   },
