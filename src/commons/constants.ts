@@ -130,6 +130,9 @@ export const ROUTES = {
   ORGANIZATION_DOC_: "/organization-doc",
   PERSONS: "/persons",
   USERS: "/users",
+  
+  ENDPOINT_CONFIG: "/endpoint-config",
+
   DATASOURCE_LIST: "/datasources",
   DATASOURCE_FORM: "/datasources-form",
 

@@ -20,7 +20,7 @@ import { LoadingContext } from "../../App";
 import styles from './navigation.module.css';
 import { Asterisk, Link as LinkIcon } from 'phosphor-react';
 import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
-import { Link } from '@mui/material';
+import { Divider, Link } from '@mui/material';
 
 export function Properties() {
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ export function Properties() {
 
       // if (resource_uri == "Visão de Unificação") {
       console.log(`RECURSO ESCOLHIDO`, resource_uri)
-      if (selectedIndex == -2) { /**-2 = Visão de Unificação */
+      if (selectedIndex == -2 && resource_uri.includes("/canonical")) { /**-2 = Visão de Unificação */
         loadUnification(contextos)
         setUriOfSelectedResource(resource_uri);
         // loadSameAs(resource_uri); //passar recurso origem
@@ -159,7 +159,7 @@ export function Properties() {
       <MHeader
         title={`Propriedades do recurso`}
         hasButtonBack
-        // buttonBackNavigateTo={`${ROUTES.RESOURCES}`}
+      // buttonBackNavigateTo={`${ROUTES.RESOURCES}`}
       />
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
@@ -206,7 +206,7 @@ export function Properties() {
                         <Grid container spacing={2}>
                           <Grid item sm={2}>
                             <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
-                              Tipo(s)
+                              Tipo
                             </Typography>
                           </Grid>
                           <Grid item sm={10}>
@@ -232,8 +232,9 @@ export function Properties() {
                         <Stack direction={"row"} spacing={1} key={idx + prop}>
                           { // LABEL DAS PROPRIEDADES
                             (prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
-                              prop != "http://www.w3.org/2000/01/rdf-schema#label" &&
-                              prop != "http://www.bigdatafortaleza.com/ontology#uri") && <ListItem key={idx + prop}>
+                              prop != "http://www.w3.org/2000/01/rdf-schema#label" && prop != "label" &&
+                              prop != "http://www.bigdatafortaleza.com/ontology#uri" &&
+                              prop != "http://purl.org/dc/elements/1.1/identifier" && prop != "ID") && <ListItem key={idx + prop}>
                               <Grid container spacing={0}>
                                 <Grid item sm={2}>
                                   <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
@@ -244,23 +245,32 @@ export function Properties() {
                                   <Stack direction={"column"} key={idx}>
                                     { /** VALORES DAS PROPRIEDADES */
                                       agroupedProperties[prop].map((values: any, i: React.Key) => {
+                                        // console.log('*****------****', prop)
                                         return <Stack key={i} direction={'row'} gap={1} justifyContent="flex-start"
                                           alignItems="center" padding={"0 20px"}>
                                           { /** values[0] contém o valor literal da propriedade */
                                             values[0].toLowerCase().includes("http://")
-                                              ? <Link underline="none" component="button" variant='caption' onClick={(e) => handleListLinkClick(e, values[0])}>{values[0]}</Link>
-                                              : <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
-                                                {values[0]}
+                                              ? <Link
+                                                align='left'
+                                                underline="none"
+                                                component="button"
+                                                variant='caption'
+                                                onClick={(e) => handleListLinkClick(e, values[0])}>
+                                                . {values[0]}
+                                              </Link>
+                                              : <><Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
+                                                . {values[0]}
                                               </Typography>
+                                                <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
+                                                  {/* values[1] contém a proveniência do dados (na visão de unificação) */}
+                                                  {values[1]}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.40rem" }} color="text.secondary" gutterBottom>
+                                                  {/* values[2] == true siginifica que há divergência nos valores da propriedade */}
+                                                  {values[2] == true && <Chip label="divergência" size="small" icon={<Asterisk size={12} color='#ed0215' />} style={{ backgroundColor: '#d7c84b22', fontSize: "0.60rem" }} />}
+                                                </Typography>
+                                              </>
                                           }
-                                          <Typography variant="caption" sx={{ mb: 2, ml: -0.6, fontSize: "0.55rem" }} color="text.secondary" gutterBottom>
-                                            {/* values[2] == true siginifica que há divergência nos valores da propriedade */}
-                                            {values[2] == true ? <Asterisk size={14} color='#ed0215' /> : false}
-                                          </Typography>
-                                          <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
-                                            {/* values[1] contém a proveniência do dados (na visão de unificação) */}
-                                            {values[1]}
-                                          </Typography>
                                         </Stack>
                                       })
                                     }
@@ -352,45 +362,3 @@ export function Properties() {
     </div >
   )
 }
-
-
-
-
-
-// const handleListItemClick = (event: any, idx: Number, row: MetaMashupModel) => {
-//   setSelectedIndex(idx);
-//   // setSelectedMashup(row)
-// };
-
-// const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#edf4fc" : "None";
-// const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#f5f5fd" : "None";
-
-
-// useEffect(() => {
-// if (selectedContext?.o?.value) {
-/** LIMPAR A LISTA DAS PROPRIEDADES AGRUPADAS */
-// Object.keys(agroupedProperties).forEach(ele => {
-//   delete agroupedProperties[ele]
-// })
-// const _uri_context = selectedContext?.o?.value
-// let expandSameAs = selectedContext?.label?.value == "Visão Unificada" ? true : false
-
-/**Ao selecionar um contexto, buscas as propriedades desse contexto */
-
-
-// loadPropertiesOfSelectedResource(_uri_context, expandSameAs);
-//   }
-// }, [])
-
-
-
-// useEffect(() => {
-//   Object.keys(agroupedProperties).filter((row: any) => {
-//     agroupedProperties[row].filter((el: any) => {
-//       if (el.p.value == "http://www.w3.org/2002/07/owl#sameAs") {
-//         console.log(el)
-//         setContextos(oldState => [...oldState, el])
-//       }
-//     })
-//   })
-// }, [])

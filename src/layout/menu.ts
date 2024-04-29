@@ -73,7 +73,7 @@ export const menuConfig = [
   {
     title: 'Configuração',
     icon: PuzzlePiece,
-    href: ROUTES.HOME,
+    href: ROUTES.ENDPOINT_CONFIG,
     type: [USER_TYPE.ADMIN]
   }
 ]

@@ -24,6 +24,8 @@ import { Classes } from './view/navigation/Classes';
 import { Resources } from './view/navigation/Resources';
 import { Properties } from './view/navigation/Properties';
 
+import { EndpointConfig } from './view/config/EndpointConfig';
+
 import { ManageMetagraph } from './view/ekg/manage/ManageMetagraph';
 import { MetaDataSources } from './view/ekg/manage/datasources/MetaDataSources';
 
@@ -62,6 +64,8 @@ export default function Router() {
         <Route path={ROUTES.ORGANIZATION_DOC} element={<OrganizationDoc />} />
 
         <Route path={ROUTES.PERSONS} element={<Persons />} />
+        
+        <Route path={ROUTES.ENDPOINT_CONFIG} element={<EndpointConfig />} />
         
         <Route path={ROUTES.DATASOURCE_LIST} element={<DataSources />} />
         {/* <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} /> */}
