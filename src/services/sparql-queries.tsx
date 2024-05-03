@@ -26,7 +26,7 @@ export async function loadCountries() {
 
     const response = await axios({
       method: 'GET',
-      url: ENDPOINTS.WIKIDATA,
+      url: ENDPOINTS.DEV.WIKIDATA,
       params: { query }
     })
 
@@ -38,32 +38,6 @@ export async function loadCountries() {
   }
 }
 
-// export async function findOrganizations(name: string) {
-//   try {
-//     let query = PREFIXIES_SPARQL.RDFS +
-//       PREFIXIES_SPARQL.WIKIBASE +
-//       PREFIXIES_SPARQL.BLAZEGRAPH_BD +
-//       `SELECT DISTINCT ?s ?l WHERE { 
-//         ?item ${WIKIDATA.INSTANCIA_DE} ${WIKIDATA.ORGANIZATION} ;
-//           rdfs:label ?l .
-//           FILTER regex(?l, "${name}", "i")
-//           SERVICE wikibase:label { bd:serviceParam wikibase:language "pt, en". } 
-//       }
-//       `;
-//     // console.log(query)
-
-//     const response = await axios({
-//       method: 'GET',
-//       url: "https://query.wikidata.org/sparql",
-//       params: { query }
-//     })
-
-//     console.log(response.data.results.bindings)
-//     return response.data.results.bindings;
-//   } catch (error) {
-//     console.error(error)
-//   }
-// }
 
 export async function findOrganisationFromDBPedia(name: string) {
   try {
@@ -79,7 +53,7 @@ export async function findOrganisationFromDBPedia(name: string) {
 
     const response = await axios({
       method: 'GET',
-      url: ENDPOINTS.DBPEDIA,
+      url: ENDPOINTS.DEV.DBPEDIA,
       params: { query }
     })
 
@@ -105,7 +79,7 @@ export async function getComment(label: String) {
 
     const response = await axios({
       method: 'GET',
-      url: ENDPOINTS.DBPEDIA,
+      url: ENDPOINTS.DEV.DBPEDIA,
       params: { query }
     })
 

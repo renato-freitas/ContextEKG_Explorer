@@ -1,3 +1,4 @@
+import { Repositories } from "../view/config/Repositories";
 
 export function printt(text: string, value?: any): void {
   console.log(`*** ${text.toUpperCase()} ***`, value ? value : "")
@@ -18,7 +19,7 @@ export function getPropertyFromURI(uri: string | undefined): string {
     let lastToken1 = splitOne[quantityOfTokens_1 - 1]
     // console.log(`1º split >>>`, lastToken1)
     let lastToken2 = lastToken1
-    if(lastToken1.includes("#")){
+    if (lastToken1.includes("#")) {
       let split2 = lastToken1.split("#")
       let quantityOfTokens_2 = split2?.length
       lastToken2 = split2[quantityOfTokens_2 - 1].toString()
@@ -58,7 +59,7 @@ export function getClassAndIdentifierFromURI(uri: string): string {
     let quantityOfTokens_1 = splitOne?.length
     let lastToken1 = splitOne[quantityOfTokens_1 - 2]
     let lastToken2 = splitOne[quantityOfTokens_1 - 1]
-    
+
     return `${lastToken1}/${lastToken2}`;
   }
   return "";
@@ -69,19 +70,19 @@ export function getIdentifierFromURI(uri: string): string {
     let splitOne = uri?.split("/")
     let quantityOfTokens_1 = splitOne?.length
     let lastToken2 = splitOne[quantityOfTokens_1 - 1]
-    
+
     return `${lastToken2}`;
   }
   return "";
 }
 
-export function getAppHigienizadoFromClasse(uri: string): string{
+export function getAppHigienizadoFromClasse(uri: string): string {
   const classe = getClassFromURI(uri)
   const id = getIdentifierFromURI(uri)
   switch (classe) {
     case 'Estabelecimento':
       return `http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento/${id}`
-    case 'Empresa': 
+    case 'Empresa':
       return `http://www.sefaz.ma.gov.br/resource/AppEndereco/Empresa${id}`
     default:
       return "";
@@ -94,4 +95,21 @@ export function setContextLocalStorage(context: string): void {
 
 export function getContextLocalStorage(): string {
   return localStorage.getItem('context') || ""
+}
+
+
+export function setRepositoryLocalStorage(repository: string): void {
+  localStorage.setItem('repository', repository)
+}
+
+export function getsetRepositoryLocalStorage(): string {
+  return localStorage.getItem('repository') || ""
+}
+
+export function setTypeClassLocalStorage(typeClass: string): void {
+  localStorage.setItem('typeClass', typeClass)
+}
+
+export function getsetTypeClassLocalStorage(): string {
+  return localStorage.getItem('typeClass') || ""
 }

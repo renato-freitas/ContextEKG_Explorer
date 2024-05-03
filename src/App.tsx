@@ -1,11 +1,12 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import React, { createContext } from 'react';
-import { Link } from 'react-router-dom';
 import { Loading } from './components/Loading';
 import Router from './Router';
 import { GlobalStyle } from './styles/global';
 import { ClassModel } from './models/ClassModel';
 
+{/* <a href="https://www.flaticon.com/free-icons/pyramid" title="pyramid icons">Pyramid icons created by bearicons - Flaticon</a> */}
+{/* <a href="https://www.flaticon.com/free-icons/pyramid" title="pyramid icons">Pyramid icons created by bearicons - Flaticon</a> */}
 
 interface LoadingContextData {
   isLoading: boolean;
@@ -14,16 +15,12 @@ interface LoadingContextData {
 }
 export const LoadingContext = createContext({} as LoadingContextData);
 
-// interface ClassRDFContextData {
-//   contextClassRDF: string;
-//   setContextClassRDF: React.Dispatch<React.SetStateAction<string>>
-// }
+
 interface ClassRDFContextData {
   contextClassRDF: ClassModel;
   setContextClassRDF: React.Dispatch<React.SetStateAction<ClassModel>>
 }
 export const ClassRDFContext = createContext({} as ClassRDFContextData);
-
 
 function App() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -41,6 +38,5 @@ function App() {
     </>
   )
 }
-
 
 export default App

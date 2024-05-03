@@ -2,3 +2,10 @@
   margin: auto 4rem;
   /* align-self: center; */
 }
+
+.img_responsive {
+  width: 100%;
+  height: 'auto';
+  border-radius: 5%;
+}
+

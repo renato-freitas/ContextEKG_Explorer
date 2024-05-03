@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Key, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Divider, Grid, IconButton, List, ListItem, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import { CaretCircleLeft, Columns, Database, Equalizer, Eye, FileCsv, Graph, Table, Trash } from 'phosphor-react';
@@ -341,7 +341,7 @@ export function TablesOrFiles() {
                     )
                   } */}
                   {
-                    properties.map((row, idx) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
+                    properties.map((row:any, idx:Key) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
                       <Grid container>
                         <Grid item sm={12}>
                           <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>

@@ -9,5 +9,6 @@ export interface ClassModel {
   deleted?: RDF_Node;
   classURI: RDF_Node;
   subclassURI?: RDF_Node;
+  image?: RDF_Node;
 }
 

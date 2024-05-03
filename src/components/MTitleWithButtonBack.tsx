@@ -56,11 +56,11 @@ export const TitleWithButtonBack = ({ hasButtonBack, title, buttonLabel, chip, c
       </Grid>
 
       {/* BOTÕES E MENU CONTEXTO */}
-      <Grid item sm={6} sx={{ bg: '#523f23', flex: 1, justifyContent: 'flex-end', alignContent: 'flex-end' }}>
+      {/* <Grid item sm={6} sx={{ bg: '#523f23', flex: 1, justifyContent: 'flex-end', alignContent: 'flex-end' }}>
         {
           context && <MenuContext {...context} />
         }
-      </Grid>
+      </Grid> */}
     </Grid>
 
   )

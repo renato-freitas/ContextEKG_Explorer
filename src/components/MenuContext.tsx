@@ -32,7 +32,7 @@ export const MenuContext = (props: ContextProps): JSX.Element => {
   const [selectedContext, setSelectedContext] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
   const [open, setOpen] = useState(false);
   const emails = ['username@gmail.com', 'user02@gmail.com'];
-  const [selectedValue, setSelectedValue] = useState<PropertyObjectEntity>();
+  const [selectedValue, setSelectedValue] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
 
   useEffect(() => {
     // Na primeira vez, o contexto vem do recurso selecionando
@@ -55,7 +55,7 @@ export const MenuContext = (props: ContextProps): JSX.Element => {
     // if (props.selectedResource) {
       setSelectedValue({
         p: { type: 'uri', value: 'http://www.w3.org/2002/07/owl#sameAs' },
-        o: { type: 'uri', value: selectedValue?.o?.value },
+        o: { type: 'uri', value: selectedValue.o.value.toString() },
         label: { type: '', value: '' }
       })
     // }

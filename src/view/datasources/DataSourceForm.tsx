@@ -1,8 +1,6 @@
-import { useEffect } from "react";
-import React, { useState } from "react";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useContext, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as zod from 'zod';
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
@@ -14,24 +12,16 @@ import TextField from "@mui/material/TextField";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
-import LinearProgress from "@mui/material/LinearProgress";
 import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
+import Autocomplete  from "@mui/material/Autocomplete";
 
-import { DataSourceDescriptionTab } from './DataSourceDescriptionTab'
-import { DataSourceColumnsTab } from "./DataSourceColumnsTab";
 
-import { insertDataSource } from "../../services/sparql-datasource";
-import { DataSourceTablesTab } from "./DataSourceTablesTab";
-import { DataSourceCredentialsTab } from "./DataSourceCredentialsTab";
-import { TableEntity } from "../../models/TableEntity";
 import { RDF_Node } from "../../models/RDF_Node";
 import { api } from "../../services/api";
-import PhoneMissedIcon from '@mui/icons-material/PhoneMissed';
-import { NAMESPACES, VSKG_TBOX, DATASOURCE_TYPES } from "../../commons/constants";
-import { double_encode_uri, printt } from "../../commons/utils";
-import { Autocomplete, MenuItem, Select } from "@mui/material";
+import { LoadingContext } from "../../App";
+import { double_encode_uri } from "../../commons/utils";
+import { VSKG_TBOX, DATASOURCE_TYPES } from "../../commons/constants";
+
 
 interface IDataSource {
   uri: RDF_Node;
@@ -103,14 +93,15 @@ const options = ['Option 1', 'Option 2'];
 export function DataSourceForm() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { isLoading, setIsLoading } = useContext(LoadingContext);
+
   const [selectecDataSourceType, setSelectecDataSourceType] = useState<DataSourceTypeEnum>();
 
   const [tables, setTables] = useState([]);
   const [tableNames, setTableNames] = useState<string[]>([]);
 
-  const [value, setValuei] = React.useState<string | null>(null);
-  const [inputValuei, setInputValue] = React.useState('');
+  const [value, setValuei] = useState<string | null>(null);
+  const [inputValuei, setInputValue] = useState('');
 
 
   const { register, control, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<IDataSourceForm>({
@@ -131,7 +122,7 @@ export function DataSourceForm() {
     console.log(data);
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       // if (location?.state) {
       let uri = location?.state as IDataSource
 
@@ -149,7 +140,7 @@ export function DataSourceForm() {
     } catch (error) {
       console.error(error)
     } finally {
-      setLoading(false);
+      setIsLoading(false);
       navigate(-1)
     }
   };
@@ -159,6 +150,7 @@ export function DataSourceForm() {
     async function onEdit() {
       try {
         if (location.state) {
+          setIsLoading(true);
           let state = location.state as IDataSource;
           console.log("*** Colocando a Fonte de Dados Selecionada no Formulário ***")
           console.log(location, state)
@@ -166,19 +158,20 @@ export function DataSourceForm() {
 
           console.log('onEdite(), uri', state.uri.value)
           try {
-            let encoded_uri = double_encode_uri(state.uri.value)
+            // let encoded_uri = double_encode_uri(state.uri.value)
             // const response = await api.get(`/properties/${encoded_uri}`);
-            const response = await api.get(`/datasources/${encoded_uri}/properties/`);
+            // const response = await api.get(`/datasources/${encoded_uri}/properties/`);
+            const response = await api.get(`/datasources/properties/?resourceURI=${state.uri.value}`);
             console.log(`response: ${JSON.stringify(response.data)}`)
 
             // Object.keys(response.data).map((p, idx) => {
-            response.data.map((row, idx) => {
+            response.data.map((row:any) => {
               row?.p?.value
               let _p: any = row?.p,
                 _o: any = row?.o
               console.log(`props: ${_p.value}`)
               if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.NAME}`)) { setValue("name", _o?.value); }
-              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DC_DESCRIPTION}`)) { setValue("description", _o?.value); }
+              if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DCTERMS_DESCRIPTION}`)) { setValue("description", _o?.value); }
               if (_p?.value.includes(`${VSKG_TBOX.PROPERTY.DATASOURCE_TYPE}`)) {
                 if (_o?.value == `${VSKG_TBOX.CLASS.RELATIONAL_DATABASE}`) {
                   setValue("type", `${VSKG_TBOX.CLASS.RELATIONAL_DATABASE}`);
@@ -197,6 +190,8 @@ export function DataSourceForm() {
             })
           } catch (error) {
             console.error("load properties", error)
+          } finally {
+            setIsLoading(false);
           }
 
         }
@@ -242,7 +237,7 @@ export function DataSourceForm() {
     };
   }
 
-  const [valueTab, setValueTab] = React.useState(0);
+  const [valueTab, setValueTab] = useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValueTab(newValue);
   };

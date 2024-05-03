@@ -1,20 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useForm, Controller, SubmitHandler, UseFormProps } from "react-hook-form";
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as zod from 'zod';
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Controller } from "react-hook-form";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
-import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
-import { InputLabel, MenuItem, Select } from "@mui/material";
-import { DATASOURCE_TYPES, VSKG } from "../../commons/constants";
+import { MenuItem, Select } from "@mui/material";
+import { DATASOURCE_TYPES } from "../../commons/constants";
 
 interface DataSourceDescriptionProps {
   schema: any;

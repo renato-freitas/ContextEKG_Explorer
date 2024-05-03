@@ -71,10 +71,13 @@ export function TableForm() {
   // const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity|undefined>(undefined);
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceEntity>({
     identifier: { type: '', value: '' },
+    label: { type: '', value: '' },
     title: { type: '', value: '' },
+    comment: { type: '', value: '' },
     created: { type: '', value: '' },
     modified: { type: '', value: '' },
-    uri: { type: '', value: '' }
+    uri: { type: '', value: '' },
+    type: { type: '', value: '' },
   });
   const location = useLocation();
   const navigate = useNavigate();

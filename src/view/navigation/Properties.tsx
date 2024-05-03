@@ -10,17 +10,19 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
+import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import { api } from "../../services/api";
-import { getPropertyFromURI, double_encode_uri, getContextFromURI, getIdentifierFromURI } from "../../commons/utils";
-import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
-import { MHeader } from '../../components/MHeader';
-import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
-import { LoadingContext } from "../../App";
-import styles from './navigation.module.css';
 import { Asterisk, Link as LinkIcon } from 'phosphor-react';
 import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
-import { Divider, Link } from '@mui/material';
+
+import { MHeader } from '../../components/MHeader';
+import { api } from "../../services/api";
+import { LoadingContext } from "../../App";
+import { getPropertyFromURI, double_encode_uri, getContextFromURI, getIdentifierFromURI } from "../../commons/utils";
+import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
+import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
+
+import styles from './navigation.module.css';
 
 export function Properties() {
   const navigate = useNavigate();

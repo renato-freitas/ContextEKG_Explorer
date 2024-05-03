@@ -7,7 +7,7 @@ export const NAMESPACES = {
   RDFS: "http://www.w3.org/2000/01/rdf-schema#",
   OWL: "http://www.w3.org/2002/07/owl#",
   DC: "http://purl.org/dc/elements/1.1/",
-  DCT: "http://purl.org/dc/terms/",
+  DCTERMS: "http://purl.org/dc/terms/",
   FOAF: "http://xmlns.com/foaf/0.1/",
   D2RQ: "http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#",
   DBO: "http://dbpedia.org/ontology/",
@@ -29,7 +29,7 @@ export const PREFIXIES = {
   RDFS: `PREFIX rdfs: <${NAMESPACES.RDFS}>\n`,
   OWL: `PREFIX owl: <${NAMESPACES.OWL}>\n`,
   D2RQ: `PREFIX d2rq: <${NAMESPACES.D2RQ}>\n`,
-  DCT: `PREFIX dcterms: <${NAMESPACES.DCT}>\n`,
+  DCT: `PREFIX dcterms: <${NAMESPACES.DCTERMS}>\n`,
   FOAF: `PREFIX foaf: <${NAMESPACES.FOAF}>\n`,
   DBO: `PREFIX dbo: <${NAMESPACES.DBO}>\n`,
   VANN: `PREFIX vann: <${NAMESPACES.VANN}>`,
@@ -63,11 +63,18 @@ export const ENDPOINTS = {
 
 }
 
+const REPOSITORY_ID = "EKG_CONTEXT"
+const IP = "localhost"
+const PORT = "7200"
 export const NAMED_GRAPHS = {
   DATA: "",
-  KG_METADATA: "http://www.arida.ufc.br/metakg/named-graph/KG-METADATA",
-  KG_MASHUP: "http://www.arida.ufc.br/metakg/named-graph/KG-MASHUP",
-  T_BOX: "http://www.arida.ufc.br/metakg/named-graph/T-BOX",
+  // KG_METADATA: "http://www.arida.ufc.br/metakg/named-graph/KG-METADATA",
+  KG_MASHUP: `http://${IP}:${PORT}/repositories/${REPOSITORY_ID}/rdf-graphs/KG-MASHUP`,
+  T_BOX: `http://${IP}:${PORT}/repositories/${REPOSITORY_ID}/rdf-graphs/KG_METADATA`,
+  KG_METADATA_TBOX: `http://${IP}:${PORT}/repositories/${REPOSITORY_ID}/rdf-graphs/KG_METADATA_TBOX`,
+  KG_METADATA_ABOX: `http://${IP}:${PORT}/repositories/${REPOSITORY_ID}/rdf-graphs/KG_METADATA_ABOX`,
+  KG_TBOX: `http://${IP}:${PORT}/repositories/${REPOSITORY_ID}/rdf-graphs/KG_TBOX`
+
 }
 
 export const MAIN_PREFIXIES = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -130,8 +137,10 @@ export const ROUTES = {
   ORGANIZATION_DOC_: "/organization-doc",
   PERSONS: "/persons",
   USERS: "/users",
-  
+
   ENDPOINT_CONFIG: "/endpoint-config",
+  REPOSITORY_LIST: "/repositories",
+  QUERY_SAVED: "/query-saved",
 
   DATASOURCE_LIST: "/datasources",
   DATASOURCE_FORM: "/datasources-form",
@@ -191,6 +200,7 @@ export const VSKG_TBOX = {
     RANGE: `${NAMESPACES.RDFS}range`,
     DC_IDENTIFIER: `${NAMESPACES.DC}identifier`,
     DC_DESCRIPTION: `${NAMESPACES.DC}description`,
+    DCTERMS_DESCRIPTION: `${NAMESPACES.DCTERMS}description`,
     HAS_APPLICATION: `${NAMESPACES.VSKG}hasApplication`,
     // FONTE DE DADOS
     DATASOURCE_TYPE: `${NAMESPACES.VSKG}datasourceType`,
@@ -232,5 +242,5 @@ export const COLORS = {
   CINZA_03: "#c2cff1",
   CINZA_04: "#5a8bda",
   AZUL_04: "#1976d2",
-  AMARELO_01: "e9da02"
+  AMARELO_01: "#e9da02"
 }

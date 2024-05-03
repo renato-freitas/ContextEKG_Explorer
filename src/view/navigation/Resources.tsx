@@ -1,18 +1,27 @@
 import { useState, useEffect, useContext, ChangeEvent, KeyboardEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { IconButton, Stack, TableCell, TableRow, TextField, Tooltip, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import Grid from '@mui/material/Grid'
+import IconButton from '@mui/material/IconButton'
+import TableCell from '@mui/material/TableCell'
+import TableRow from '@mui/material/TableRow'
+import Tooltip from '@mui/material/Tooltip'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import { Eye } from "phosphor-react";
 
-import { LoadingContext, ClassRDFContext } from "../../App";
-import { double_encode_uri, getContextFromURI, getIdentifierFromURI, printt } from "../../commons/utils";
-import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
+import { MHeader } from "../../components/MHeader";
+import { MTable } from "../../components/MTable";
+
 import { api } from "../../services/api";
 import { ResourceModel } from "../../models/ResourceModel";
-import { MHeader } from "../../components/MHeader";
 import { ClassModel } from "../../models/ClassModel";
+
+import { LoadingContext, ClassRDFContext } from "../../App";
+import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
+import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
+
 import styles from './navigation.module.css';
-import { MTable } from "../../components/MTable";
-import { Eye, Info } from "phosphor-react";
+
 
 
 export function Resources() {

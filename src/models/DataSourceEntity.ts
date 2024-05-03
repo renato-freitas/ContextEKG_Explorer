@@ -10,5 +10,4 @@ export interface DataSourceEntity {
   modified: RDF_Node;
   uri: RDF_Node;
   type: RDF_Node;
-  // tables: TableEntity[];
 }

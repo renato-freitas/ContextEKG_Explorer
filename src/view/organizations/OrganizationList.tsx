@@ -111,7 +111,7 @@ export function OrganizationList() {
               (rowsPerPage > 0
                 ? organizations.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 : organizations
-              ).map(row => (
+              ).map((row:any) => (
                 <TableRow key={row.identifier.value}>
                   <TableCell>
                     <Typography>{row.title.value}</Typography>

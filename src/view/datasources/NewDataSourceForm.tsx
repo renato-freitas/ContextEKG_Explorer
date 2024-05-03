@@ -70,7 +70,7 @@ export function NewDataSourceForm() {
         await updateDataSource(data)
       } else {
         console.log("*** Criando Fonte de Dados ***")
-        await insertDataSource(data)
+        await insertDataSource(data, "")
       }
     } catch (error) {
       console.error(error)

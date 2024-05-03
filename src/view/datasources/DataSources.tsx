@@ -1,54 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, Key } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Grid from '@mui/material/Grid';
-import { CircularProgress, IconButton, Stack, TableCell, TableRow, Tooltip } from '@mui/material';
-import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-
-import { ROUTES, VSKG_TBOX } from '../../commons/constants';
-import { DataSourceModel } from '../../models/DataSourceModel';
-import styles from './DataSource.module.css';
-import { api } from '../../services/api';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { ListItem, Paper, Typography } from '@mui/material';
-
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import Grid from '@mui/material/Grid';
+import CircularProgress from '@mui/material/CircularProgress';
+import ListItem from '@mui/material/ListItem';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton'
+import TableCell from '@mui/material/TableCell'
+import TableRow from '@mui/material/TableRow'
+import Tooltip from '@mui/material/Tooltip'
 import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table, Star } from 'phosphor-react';
 
+import { DataSourceModel } from '../../models/DataSourceModel';
+import { api } from '../../services/api';
+import { LoadingContext } from "../../App";
 
-import { double_encode_uri, getPropertyFromURI } from "../../commons/utils";
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 import { MTable } from '../../components/MTable';
+import { MHeader } from '../../components/MHeader';
+import { double_encode_uri, getPropertyFromURI, getsetRepositoryLocalStorage } from "../../commons/utils";
+import { ROUTES, VSKG_TBOX } from '../../commons/constants';
+
+import stylesGlobal from '../../styles/global.module.css'
 
 const PAINEL_LEFT_SIZE = window.screen.width * 0.356
 const PAINEL_RIGHT_SIZE = window.screen.width * 0.5
 const DATASOURCE_TYPES_ICONS_SIZE = 20
 const PAPER_ELEVATION = 2
-const DATASOURCE_TYPES_ICONS = {
+const DATASOURCE_TYPES_ICONS: any = {
   "http://rdbs-o#Relational_Database": <Database size={DATASOURCE_TYPES_ICONS_SIZE} />,
   "https://www.ntnu.no/ub/ontologies/csv#CsvDocument": <FileCsv size={DATASOURCE_TYPES_ICONS_SIZE} />
 }
 
 export function DataSources() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState<boolean>(false);
+  // const [loading, setLoading] = useState<boolean>(false);
+  const { isLoading, setIsLoading } = useContext(LoadingContext);
   const [dataSources, setDataSources] = useState<DataSourceModel[]>([]);
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceModel>({} as DataSourceModel);
 
 
   async function loadDataSources() {
-    console.log("*** Lista das fontes de dados")
-    setLoading(true);
+    // console.log("*** Lista das fontes de dados")
     try {
+      setIsLoading(true);
       const response = await api.get("/datasources/");
       console.log(response.data)
-      setLoading(false);
+
       setDataSources(response.data);
       setSelectedDataSource(response.data[0])
     } catch (error) {
       console.error("loadDataSources", error)
     } finally {
       loadDataSourceProperties()
+      setIsLoading(false);
     }
   }
 
@@ -57,34 +67,26 @@ export function DataSources() {
   }, [])
 
 
-  // const [properties, serProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
-  // const [properties, serProperties] = useState<PropertyObjectEntity>({} as PropertyObjectEntity);
-  // const [properties, serProperties] = useState<any>({});
   const [properties, serProperties] = useState<any>([]);
   async function loadDataSourceProperties() {
     try {
-      setLoading(true);
       if (selectedDataSource?.uri) {
-        console.log(`*** /datasources/${encodeURIComponent(selectedDataSource?.uri?.value)}/properties/`)
         let decode_uri = encodeURIComponent(selectedDataSource?.uri?.value)
-        const response = await api.get(`/datasources/${encodeURIComponent(decode_uri)}/properties/`);
-        console.log(`*** properties/`, response.data)
+        const response = await api.get(`/datasources/properties/?resourceURI=${decode_uri}`);
         serProperties(response.data)
       }
-      // setMetaEKG(response.data)
     } catch (error) {
       alert(error)
     } finally {
-      setTimeout(() => setLoading(false), 500)
     }
   }
-  useEffect(() => {
-    loadDataSourceProperties()
-  }, [selectedDataSource])
+  // useEffect(() => {
+    // loadDataSourceProperties()
+  // }, [selectedDataSource])
 
 
   const openForm = () => {
-    console.log("*** call: Abrir formulário de Fonte de Dados ***")
+    // console.log("*** call: Abrir formulário de Fonte de Dados ***")
     navigate(ROUTES.DATASOURCE_FORM);
   }
 
@@ -96,7 +98,7 @@ export function DataSources() {
     setPage(newPage);
   };
 
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -142,16 +144,16 @@ export function DataSources() {
   }
 
   return (
-    <div className={styles.listkg}>
+    <div className={stylesGlobal.container}>
+      <MHeader title={`Fontes de Dados`} />
 
       {/* HEADER */}
       <Grid container spacing={1} sx={{ p: '10px 0' }}>
         <Grid item xs={4}>
-          <h4>Fontes de Dados</h4>
         </Grid>
         <Grid item xs={8} gap={1} display='flex' justifyContent='flex-end'
           sx={{ pt: '0px !important' }}>
-          <TextField id="outlined-basic" label="Pesquisar" variant="outlined" size="small" sx={{ width: 400 }} />
+          <TextField id="outlined-basic" label="Pesquisar pelo nome" variant="outlined" size="small" sx={{ width: 400 }} />
           <Button variant="contained" onClick={openForm}>+ Nova Fonte de Dados</Button>
         </Grid>
       </Grid>
@@ -179,7 +181,9 @@ export function DataSources() {
                 <TableRow key={idx} >
                   <TableCell>
                     <Stack direction={'row'} gap={1}>
-                      {DATASOURCE_TYPES_ICONS[resource?.type?.value]}
+                      {/* {resource?.type?.value == VSKG_TBOX.CLASS.RELATIONAL_DATABASE
+                        ? <Database size={DATASOURCE_TYPES_ICONS_SIZE} color='#F45489' />
+                        : <FileCsv size={DATASOURCE_TYPES_ICONS_SIZE} />} */}
                       <Typography>{resource.label.value}</Typography>
                     </Stack>
                   </TableCell>
@@ -197,14 +201,16 @@ export function DataSources() {
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Esquemas">
-                      <IconButton onClick={() => {navigate(ROUTES.TABLE_LIST, { state: resource })}} 
+                      {/* <IconButton onClick={() => {navigate(ROUTES.TABLE_LIST, { state: resource })}}  */}
+                      <IconButton disabled
                         sx={{ p: "4px !important" }}>
                         <Table size={22} />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Qualidade">
-                      <IconButton onClick={() => {handleClickDatasourceQuality(resource)}} 
-                          sx={{ p: "4px !important" }}>
+                      {/* <IconButton onClick={() => {handleClickDatasourceQuality(resource)}}  */}
+                      <IconButton disabled
+                        sx={{ p: "4px !important" }}>
                         <Star size={22} />
                       </IconButton>
                     </Tooltip>
@@ -222,7 +228,7 @@ export function DataSources() {
         {/* PROPERTIES */}
         <Grid item sm={6}>
           {
-            properties && <Box sx={{ width: "100%", maxWidth: PAINEL_RIGHT_SIZE }}>
+            selectedDataSource && properties && <Box sx={{ width: "100%", maxWidth: PAINEL_RIGHT_SIZE }}>
               <Paper elevation={PAPER_ELEVATION}>
                 <div style={{ background: "#1976d214", padding: "0px 10px 0px 10px" }}>
 
@@ -233,10 +239,10 @@ export function DataSources() {
                     spacing={2}
                   >
                     <Stack direction='row' gap={1}>
-                      {DATASOURCE_TYPES_ICONS[selectedDataSource?.type?.value]}
+                      {/* {DATASOURCE_TYPES_ICONS[selectedDataSource?.type?.value]} */}
                       <h4>{selectedDataSource?.label?.value}</h4>
                     </Stack>
-                    {loading && <CircularProgress size={20} />}
+                    {isLoading && <CircularProgress size={20} />}
                   </Stack>
 
                 </div>
@@ -262,7 +268,7 @@ export function DataSources() {
                     )
                   } */}
                   {
-                    properties.map((row, idx) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
+                    properties.map((row: any, idx: Key) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
                       <Grid container>
                         <Grid item sm={12}>
                           <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>

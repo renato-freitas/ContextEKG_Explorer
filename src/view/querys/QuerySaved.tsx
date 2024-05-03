@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import { MHeader } from "../../components/MHeader";
 import styles from '../../styles/global.module.css'
 
-export function Home() {
+export function QuerySaved() {
   return (
     <div className={styles.container}>
-      <MHeader title={`Home`} />
+      <MHeader title={`Consultas`} />
       <nav>
-        <Link to="/about">About</Link>
+        <Link to="/">Home</Link>
       </nav>
     </div>
   );
