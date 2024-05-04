@@ -214,7 +214,7 @@ export function Properties() {
                           <Grid item sm={10}>
                             <Stack direction={'row'} spacing={1} padding={"0 20px"}>
                               { /** CHIP DAS CLASSES DISTINTAS  */
-                                Object.keys(agroupedProperties).length > 0 && agroupedProperties["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].map((arrayOfValues: any, idx: React.Key) => {
+                                Object.keys(agroupedProperties).length > 0 ? agroupedProperties["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"].map((arrayOfValues: any, idx: React.Key) => {
                                   if (!auxLabelOfClasses.includes(arrayOfValues[0])) {
                                     auxLabelOfClasses.push(arrayOfValues[0])
                                     return <Chip
@@ -223,6 +223,7 @@ export function Properties() {
                                       sx={{ bgcolor: "#1976d2", color: "#fff" }} />
                                   }
                                 })
+                                  : false
                               }
                             </Stack>
                           </Grid>
@@ -252,7 +253,7 @@ export function Properties() {
                                           alignItems="center" padding={"0 20px"}>
                                           { /** values[0] contém o valor literal da propriedade */
                                             values[0].toLowerCase().includes("http://")
-                                              ? <Link
+                                              ? <><Link
                                                 align='left'
                                                 underline="none"
                                                 component="button"
@@ -260,6 +261,11 @@ export function Properties() {
                                                 onClick={(e) => handleListLinkClick(e, values[0])}>
                                                 . {values[0]}
                                               </Link>
+                                                <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
+                                                  {/* values[1] contém a proveniência do dados (na visão de unificação) */}
+                                                  {values[1]}
+                                                </Typography>
+                                              </>
                                               : <><Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                                 . {values[0]}
                                               </Typography>

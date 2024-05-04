@@ -125,7 +125,6 @@ export function Repositories() {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
     setRuningSearch(!runingSearch)
-    // setPage(0);
   };
 
 
@@ -152,6 +151,7 @@ export function Repositories() {
   const handleChangeRepository = (event: React.ChangeEvent<HTMLInputElement>, repository:string) => {
     setChecked(repository);
     setRepositoryLocalStorage(repository)
+    api.defaults.headers.common['repo'] = repository
   };
   return (
     <div className={styles.container}>

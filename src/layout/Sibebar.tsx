@@ -14,7 +14,6 @@ const MENU_ICON_SIZE = 20
 
 export function Sidebar() {
   const { pathname } = useLocation();
-  console.log('PATH NAME', pathname)
   return (
     <Paper elevation={3} sx={{position: 'absolute', ml: 0.3, mt:1}}>
       <SidebarContainer>

@@ -6,13 +6,14 @@ import { getsetRepositoryLocalStorage, printt } from "../commons/utils";
 export const api = axios.create({
   // withCredentials: true,
   baseURL: "http://localhost:8000",
-  headers: {
-    "repo": getsetRepositoryLocalStorage()
-  }
+  // headers: {
+  //   "repo": localStorage.getItem("repository") as string
+  // }
 });
-api.defaults.headers.common["repo"] = localStorage.getItem("repository") as string;
+// api.defaults.headers.common["repo"] =  localStorage.getItem("repository") as string;
 api.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
 api.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
+
 api.interceptors.response.use(
   function (response) {
     if (response.data.status_code === 409) {
@@ -47,4 +48,10 @@ api.interceptors.response.use(
   }
 );
 
-api;
+// api.interceptors.request.use((config) => {
+//   config.headers = Object.assign({
+//     'repo': localStorage.getItem("repository") as string
+//   }, config.headers)
+// })
+
+api ;

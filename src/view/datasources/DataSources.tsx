@@ -73,6 +73,7 @@ export function DataSources() {
       if (selectedDataSource?.uri) {
         let decode_uri = encodeURIComponent(selectedDataSource?.uri?.value)
         const response = await api.get(`/datasources/properties/?resourceURI=${decode_uri}`);
+        console.log(response.data)
         serProperties(response.data)
       }
     } catch (error) {
@@ -80,9 +81,9 @@ export function DataSources() {
     } finally {
     }
   }
-  // useEffect(() => {
-    // loadDataSourceProperties()
-  // }, [selectedDataSource])
+  useEffect(() => {
+    loadDataSourceProperties()
+  }, [selectedDataSource])
 
 
   const openForm = () => {
@@ -268,7 +269,7 @@ export function DataSources() {
                     )
                   } */}
                   {
-                    properties.map((row: any, idx: Key) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
+                    properties.length > 0 ? properties.map((row: any, idx: Key) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
                       <Grid container>
                         <Grid item sm={12}>
                           <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
@@ -281,6 +282,7 @@ export function DataSources() {
                       </Grid>
                     </ListItem>
                     )
+                    : false
                   }
                 </List>
               </Paper>

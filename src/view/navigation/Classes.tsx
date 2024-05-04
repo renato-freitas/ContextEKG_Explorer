@@ -42,7 +42,11 @@ export function Classes() {
 		let response: any
 		try {
 			setIsLoading(true)
-			response = await api.get(`/classes/?type=${typeOfClass}&repo=${getsetRepositoryLocalStorage()}`);
+			// response = await api.get(`/classes/?type=${typeOfClass}&repo=${getsetRepositoryLocalStorage()}`);
+			response = await api.get(`/classes/?type=${typeOfClass}`);
+			console.log('*** CLASSES: ', response.data)
+			setClasses(response.data)
+			setCopyAllClasses(response.data)
 		} catch (error) {
 			console.log(`><`, error);
 		} finally {
@@ -63,6 +67,7 @@ export function Classes() {
 	};
 
 	useEffect(() => {
+		console.log('api.get',api.defaults.headers.common['repo'])
 		loadClasses()
 	}, [typeOfClass])
 
