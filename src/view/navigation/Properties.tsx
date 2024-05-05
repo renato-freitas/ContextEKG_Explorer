@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import { Asterisk, Link as LinkIcon } from 'phosphor-react';
+import { Asterisk, ClockCounterClockwise, Link as LinkIcon } from 'phosphor-react';
 import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
 
 import { MHeader } from '../../components/MHeader';
@@ -23,6 +23,7 @@ import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
 
 import styles from './navigation.module.css';
+import { TimelineView } from './Timeline';
 
 export function Properties() {
   const navigate = useNavigate();
@@ -30,8 +31,10 @@ export function Properties() {
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
+  const [instants, setInstants] = useState<any[]>([] as any[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
   const [contextos, setContextos] = useState<any>({})
+  const [selectedIndex, setSelectedIndex] = useState<Number>(-1);
   let auxLabelOfClasses = [] as string[];
 
 
@@ -42,6 +45,7 @@ export function Properties() {
       setProperties([])
       let _uri = double_encode_uri(uri);
       response = await api.get(`/properties/?resourceURI=${_uri}`)
+      console.log('props',response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
@@ -84,9 +88,34 @@ export function Properties() {
     }
   }
 
+  // const [timelineURI, setTimelineURI] = useState<string>(agroupedProperties["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]);
+  async function loadTimeline() {
+    let response: any
+    try {
+      const timelineURI = agroupedProperties["http://www.arida.ufc.br/ontologies/timeline#has_timeline"][0][0]
+      console.log('-----', timelineURI)
+      setIsLoading(true)
+      // console.log(`label to search: ${labelToSearch}`)
+      // console.log(`página atual: ${newPage}`)
+      // let uri = double_encode_uri(contextClassRDF.classURI.value)
+      // let uri = props.agroupedProperties["http://www.arida.ufc.br/ontologies/timeline#has_timeline"] || ""
+      response = await api.get(`/timeline/?resourceURI=${timelineURI}`)
+      console.log('*** TIMELINE -', response.data)
+    } catch (error) {
+      console.log(`><`, error);
+    } finally {
+      window.scrollTo(0, 0)
+      setTimeout(() => {
+        setIsLoading(false)
+        setInstants(response.data)
+        // setPage(0)
+      }, NUMBERS.TIME_OUT_FROM_REQUEST)
+    }
+  }
 
   useEffect(() => {
     if (location?.state) {
+      console.log('QUAL ÍNDICE', selectedIndex)
       let resource_uri = location.state as string;
 
       // if (resource_uri == "Visão de Unificação") {
@@ -97,7 +126,11 @@ export function Properties() {
         // loadSameAs(resource_uri); //passar recurso origem
         loadSameAs(Object.keys(contextos)[0]); //passar recurso origem
         setSelectedIndex(-2)
-      } else {
+      } else if (selectedIndex == -4) {
+        loadTimeline()
+        setSelectedIndex(-4)
+      }
+      else {
         setUriOfSelectedResource(resource_uri);
         loadPropertiesOfSelectedResource(resource_uri)
         loadSameAs(resource_uri);
@@ -107,7 +140,7 @@ export function Properties() {
 
     window.scrollTo(0, 0)
 
-  }, [location?.state])
+  }, [location?.state, selectedIndex])
 
 
 
@@ -115,9 +148,9 @@ export function Properties() {
 
 
 
-  const [selectedIndex, setSelectedIndex] = useState<Number>(-1);
+  
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
-    // console.log(`*** ÍNDICE DO CONTEXTO: `, index)
+    console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
     setSelectedIndex(index);
     // setSelectedContext(contextoSelecionado)
     navigate(ROUTES.PROPERTIES, { state: contextoSelecionado })
@@ -169,10 +202,11 @@ export function Properties() {
           !isLoading && Object.keys(agroupedProperties).length > 0 && <Grid container spacing={1}>
             <Grid item sm={9.5}>
               <div style={{ background: COLORS.CINZA_01, padding: "0px 10px 0px 10px" }}>
-                <h3>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]?.length == 1 ?
+                {/* <h3>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]?.length == 1 ?
                   agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"] :
                   agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"][0][0]}
-                </h3>
+                </h3> */}
+                <h3>{agroupedProperties["http://www.w3.org/2000/01/rdf-schema#label"]}</h3>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   {uriOfselectedResource}
                 </Typography>
@@ -193,8 +227,8 @@ export function Properties() {
         {!isLoading && <Grid container spacing={1}>
           {/* LISTA DAS PROPRIEDADES DO RECURSO (LADO ESQUERDO) */}
           <Grid item sm={9.5}>
-            {
-              Object.keys(agroupedProperties).length > 0 && <Box sx={{ width: "100%" }}>
+           { selectedIndex != -4
+              ? Object.keys(agroupedProperties).length > 0 && <Box sx={{ width: "100%" }}>
                 <Paper sx={{ background: "None" }} elevation={0}>
                   <List sx={{
                     width: '100%',
@@ -237,7 +271,8 @@ export function Properties() {
                             (prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
                               prop != "http://www.w3.org/2000/01/rdf-schema#label" && prop != "label" &&
                               prop != "http://www.bigdatafortaleza.com/ontology#uri" &&
-                              prop != "http://purl.org/dc/elements/1.1/identifier" && prop != "ID") && <ListItem key={idx + prop}>
+                              prop != "http://purl.org/dc/elements/1.1/identifier" && prop != "ID" &&
+                              prop != "http://www.arida.ufc.br/ontologies/timeline#has_timeline") && <ListItem key={idx + prop}>
                               <Grid container spacing={0}>
                                 <Grid item sm={2}>
                                   <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
@@ -293,6 +328,7 @@ export function Properties() {
                   </List >
                 </Paper>
               </Box>
+              : <TimelineView instants={instants}/>
             }
           </Grid>
 
@@ -306,6 +342,20 @@ export function Properties() {
                 overflow: 'auto',
                 padding: 0
               }}>
+
+                <ListItem key={-4} disablePadding>
+                  <ListItemButton
+                    selected={selectedIndex === -4}
+                    onClick={() => handleSelectedContextClick(-4, Object.keys(contextos)[0])}
+                  >
+                    <ListItemIcon sx={{ minWidth: '30px' }}>
+                      {/* <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} /> */}
+                      <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                    </ListItemIcon>
+                    <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                  </ListItemButton>
+                </ListItem>
+
                 <ListItem key={-3} disablePadding>
                   <ListItemButton
                     selected={selectedIndex === -3}

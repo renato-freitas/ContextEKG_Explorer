@@ -147,7 +147,7 @@ export function Classes() {
 									fontSize: '0.9rem !important',
 								},
 							}} />
-							<FormControlLabel value="2" control={<Radio size="small" />} label="KG Metadados" sx={{
+							<FormControlLabel value="2" control={<Radio size="small" />} label="Metadados" sx={{
 								'.css-ahj2mt-MuiTypography-root': {
 									fontSize: '0.9rem !important',
 								},

@@ -23,6 +23,7 @@ import { ColumnForm } from './view/datasources/columns/ColumnForm';
 import { Classes } from './view/navigation/Classes';
 import { Resources } from './view/navigation/Resources';
 import { Properties } from './view/navigation/Properties';
+import { TimelineView } from './view/navigation/Timeline';
 
 import { EndpointConfig } from './view/config/EndpointConfig';
 import { Repositories } from './view/config/Repositories';
@@ -59,6 +60,8 @@ export default function Router() {
         <Route path={ROUTES.NAVIGATION} element={<Classes />} />
         <Route path={ROUTES.RESOURCES} element={<Resources />} />
         <Route path={ROUTES.PROPERTIES} element={<Properties />} />
+        {/* <Route path={ROUTES.TIMELINE} element={<Timeline: />} /> */}
+
         <Route path={ROUTES.ORGANIZATION_LIST} element={<OrganizationList />} />
         <Route path={ROUTES.ORGANIZATION_FORM} element={<OrganizationForm />} />
         <Route path={ROUTES.ORGANIZATION_DOC} element={<OrganizationDoc />} />

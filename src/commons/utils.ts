@@ -113,3 +113,18 @@ export function setTypeClassLocalStorage(typeClass: string): void {
 export function getsetTypeClassLocalStorage(): string {
   return localStorage.getItem('typeClass') || ""
 }
+
+
+export function getDateFromInstantTimelin(instantURI: string): string {
+  if (instantURI) {
+    let splitOne = instantURI?.split("/Instant/")
+    let lastToken1 = splitOne[1]
+
+    let split2 = lastToken1.split("-")
+    console.log('DATA DO INSTANTE', split2)
+    let lastToken2: string
+    lastToken2 = decodeURIComponent(`${split2[1]}-${split2[2]}-${split2[3]}`)
+    return lastToken2
+  }
+  return "";
+}

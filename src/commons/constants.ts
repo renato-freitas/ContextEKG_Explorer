@@ -153,9 +153,11 @@ export const ROUTES = {
   COLUMN_LIST: "/columns",
   COLUMN_FORM: "/column-form",
   TOPICS: "/topics",
+  // NAVIGATION
   NAVIGATION: "/classes",
   RESOURCES: "/resources",
   PROPERTIES: "/properties",
+  TIMELINE: "/timeline",
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
 
