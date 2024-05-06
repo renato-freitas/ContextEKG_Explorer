@@ -24,6 +24,9 @@ import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
 
 import styles from './navigation.module.css';
 import { TimelineView } from './Timeline';
+const HAS_LABEL = 1
+const HAS_PROVENANCE = 2
+const HAS_DIVERGENCY = 3
 
 export function Properties() {
   const navigate = useNavigate();
@@ -45,7 +48,7 @@ export function Properties() {
       setProperties([])
       let _uri = double_encode_uri(uri);
       response = await api.get(`/properties/?resourceURI=${_uri}`)
-      console.log('props',response.data)
+      console.log('props', response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
@@ -148,7 +151,7 @@ export function Properties() {
 
 
 
-  
+
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
     setSelectedIndex(index);
@@ -227,7 +230,7 @@ export function Properties() {
         {!isLoading && <Grid container spacing={1}>
           {/* LISTA DAS PROPRIEDADES DO RECURSO (LADO ESQUERDO) */}
           <Grid item sm={9.5}>
-           { selectedIndex != -4
+            {selectedIndex != -4
               ? Object.keys(agroupedProperties).length > 0 && <Box sx={{ width: "100%" }}>
                 <Paper sx={{ background: "None" }} elevation={0}>
                   <List sx={{
@@ -265,25 +268,27 @@ export function Properties() {
                       </ListItem>
                     </Stack>
                     {
-                      Object.keys(agroupedProperties).map((prop, idx) =>
-                        <Stack direction={"row"} spacing={1} key={idx + prop}>
+                      Object.keys(agroupedProperties).map((prop, idx) => {
+                        // console.log('**** PROP *** ', prop)
+                        // return <Stack direction={"row"} spacing={1} key={idx + prop} bgcolor={`${idx%2!=0 ? "#f5f5f5" : false}`}>
+                        return <Stack direction={"row"} spacing={1} key={idx + prop}>
                           { // LABEL DAS PROPRIEDADES
                             (prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
-                              prop != "http://www.w3.org/2000/01/rdf-schema#label" && prop != "label" &&
+                              prop != "http://www.w3.org/2000/01/rdf-schema#label" &&
                               prop != "http://www.bigdatafortaleza.com/ontology#uri" &&
-                              prop != "http://purl.org/dc/elements/1.1/identifier" && prop != "ID" &&
+                              prop != "http://purl.org/dc/elements/1.1/identifier" &&
                               prop != "http://www.arida.ufc.br/ontologies/timeline#has_timeline") && <ListItem key={idx + prop}>
                               <Grid container spacing={0}>
                                 <Grid item sm={2}>
                                   <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
-                                    {prop.includes("http://") ? getPropertyFromURI(prop) : prop}
+                                    {agroupedProperties[prop][0][HAS_LABEL] == "" ? getPropertyFromURI(prop) : agroupedProperties[prop][0][HAS_LABEL]}
                                   </Typography>
                                 </Grid>
                                 <Grid item sm={10}>
                                   <Stack direction={"column"} key={idx}>
                                     { /** VALORES DAS PROPRIEDADES */
                                       agroupedProperties[prop].map((values: any, i: React.Key) => {
-                                        // console.log('*****------****', prop)
+                                        // console.log('*****------****', values)
                                         return <Stack key={i} direction={'row'} gap={1} justifyContent="flex-start"
                                           alignItems="center" padding={"0 20px"}>
                                           { /** values[0] contém o valor literal da propriedade */
@@ -298,7 +303,7 @@ export function Properties() {
                                               </Link>
                                                 <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
                                                   {/* values[1] contém a proveniência do dados (na visão de unificação) */}
-                                                  {values[1]}
+                                                  {values[HAS_PROVENANCE]}
                                                 </Typography>
                                               </>
                                               : <><Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
@@ -306,11 +311,11 @@ export function Properties() {
                                               </Typography>
                                                 <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
                                                   {/* values[1] contém a proveniência do dados (na visão de unificação) */}
-                                                  {values[1]}
+                                                  {values[HAS_PROVENANCE]}
                                                 </Typography>
                                                 <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.40rem" }} color="text.secondary" gutterBottom>
                                                   {/* values[2] == true siginifica que há divergência nos valores da propriedade */}
-                                                  {values[2] == true && <Chip label="divergência" size="small" icon={<Asterisk size={12} color='#ed0215' />} style={{ backgroundColor: '#d7c84b22', fontSize: "0.60rem" }} />}
+                                                  {values[HAS_DIVERGENCY] == true && <Chip label="divergência" size="small" icon={<Asterisk size={12} color='#ed0215' />} style={{ backgroundColor: '#d7c84b22', fontSize: "0.60rem" }} />}
                                                 </Typography>
                                               </>
                                           }
@@ -323,12 +328,12 @@ export function Properties() {
                             </ListItem>
                           }
                         </Stack>
-                      )
+                      })
                     }
                   </List >
                 </Paper>
               </Box>
-              : <TimelineView instants={instants}/>
+              : <TimelineView instants={instants} />
             }
           </Grid>
 
