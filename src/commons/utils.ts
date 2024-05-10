@@ -99,11 +99,11 @@ export function getContextLocalStorage(): string {
 
 
 export function setRepositoryLocalStorage(repository: string): void {
-  localStorage.setItem('repository', repository)
+  window.localStorage.setItem('repository', repository)
 }
 
 export function getsetRepositoryLocalStorage(): string {
-  return localStorage.getItem('repository') || ""
+  return window.localStorage.getItem('repository') || ""
 }
 
 export function setTypeClassLocalStorage(typeClass: string): void {
@@ -121,10 +121,15 @@ export function getDateFromInstantTimelin(instantURI: string): string {
     let lastToken1 = splitOne[1]
 
     let split2 = lastToken1.split("-")
-    console.log('DATA DO INSTANTE', split2)
-    let lastToken2: string
-    lastToken2 = decodeURIComponent(`${split2[1]}-${split2[2]}-${split2[3]}`)
-    return lastToken2
+    // console.log('DATA DO INSTANTE', split2)
+    let data: string
+    const day = split2[3].split('T')[0]
+    data = `${split2[1]}-${split2[2]}-${day}`
+    // data = decodeURIComponent(`${split2[1]}-${split2[2]}-${day}`)
+    const hora = decodeURIComponent("T" + split2[3].split('T')[1])
+    const asDate = new Date(data+hora)
+    // console.log(asDate.toLocaleDateString("pt-BR"), asDate.toLocaleTimeString())
+    return asDate.toLocaleDateString("pt-BR") +" "+asDate.toLocaleTimeString()
   }
   return "";
 }

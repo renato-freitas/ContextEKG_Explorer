@@ -35,7 +35,7 @@ export function TopBar() {
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {/* EKG Context Explorer | EKG Explorer | ContestoGraph | ConGraphex | GraphConex */}
-            Contesto Graph
+            ContestoGraph | ExpGraph
           </Typography>
           <Chip 
             size="small"

@@ -60,7 +60,7 @@ export default function Router() {
         <Route path={ROUTES.NAVIGATION} element={<Classes />} />
         <Route path={ROUTES.RESOURCES} element={<Resources />} />
         <Route path={ROUTES.PROPERTIES} element={<Properties />} />
-        {/* <Route path={ROUTES.TIMELINE} element={<Timeline: />} /> */}
+        <Route path={ROUTES.TIMELINE} element={<TimelineView />} />
 
         <Route path={ROUTES.ORGANIZATION_LIST} element={<OrganizationList />} />
         <Route path={ROUTES.ORGANIZATION_FORM} element={<OrganizationForm />} />

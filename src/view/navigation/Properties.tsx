@@ -22,12 +22,15 @@ import { getPropertyFromURI, double_encode_uri, getContextFromURI, getIdentifier
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
 
-import styles from './navigation.module.css';
-import { TimelineView } from './Timeline';
+import stylesGlobal from '../../styles/global.module.css';
 const HAS_LABEL = 1
 const HAS_PROVENANCE = 2
 const HAS_DIVERGENCY = 3
 
+export interface stateProps {
+  resourceURI: string;
+  contextos: {}
+}
 export function Properties() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,32 +120,37 @@ export function Properties() {
   }
 
   useEffect(() => {
-    if (location?.state) {
-      console.log('QUAL ÍNDICE', selectedIndex)
-      let resource_uri = location.state as string;
+    const _repo_in_api_header = api.defaults.headers.common['repo']
+    console.log('repositório no api.header:', _repo_in_api_header)
+    if (_repo_in_api_header) {
+      if (location?.state) {
+        console.log('índice:', selectedIndex)
+        let resource_uri = location.state as string;
 
-      // if (resource_uri == "Visão de Unificação") {
-      console.log(`RECURSO ESCOLHIDO`, resource_uri)
-      if (selectedIndex == -2 && resource_uri.includes("/canonical")) { /**-2 = Visão de Unificação */
-        loadUnification(contextos)
-        setUriOfSelectedResource(resource_uri);
-        // loadSameAs(resource_uri); //passar recurso origem
-        loadSameAs(Object.keys(contextos)[0]); //passar recurso origem
-        setSelectedIndex(-2)
-      } else if (selectedIndex == -4) {
-        loadTimeline()
-        setSelectedIndex(-4)
-      }
-      else {
-        setUriOfSelectedResource(resource_uri);
-        loadPropertiesOfSelectedResource(resource_uri)
-        loadSameAs(resource_uri);
-        setSelectedIndex(-1)
+        // if (resource_uri == "Visão de Unificação") {
+        console.log(`recurso escolhido:`, resource_uri)
+        if (selectedIndex == -2 && resource_uri.includes("/canonical")) { /**-2 = Visão de Unificação */
+          loadUnification(contextos)
+          setUriOfSelectedResource(resource_uri);
+          // loadSameAs(resource_uri); //passar recurso origem
+          loadSameAs(Object.keys(contextos)[0]); //passar recurso origem
+          setSelectedIndex(-2)
+        } else if (selectedIndex == -4) {
+          loadTimeline()
+          setSelectedIndex(-4)
+        }
+        else {
+          setUriOfSelectedResource(resource_uri);
+          loadPropertiesOfSelectedResource(resource_uri)
+          loadSameAs(resource_uri);
+          setSelectedIndex(-1)
+        }
+        window.scrollTo(0, 0)
       }
     }
-
-    window.scrollTo(0, 0)
-
+    else {
+      navigate(ROUTES.REPOSITORY_LIST)
+    }
   }, [location?.state, selectedIndex])
 
 
@@ -193,15 +201,15 @@ export function Properties() {
 
 
   return (
-    <div className={styles.listkg}>
+    <div className={stylesGlobal.container}>
       <MHeader
         title={`Propriedades do recurso`}
         hasButtonBack
-      // buttonBackNavigateTo={`${ROUTES.RESOURCES}`}
       />
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
-        { /** LABEL DO RECURSO */
+        {
+          /** LABEL DO RECURSO */
           !isLoading && Object.keys(agroupedProperties).length > 0 && <Grid container spacing={1}>
             <Grid item sm={9.5}>
               <div style={{ background: COLORS.CINZA_01, padding: "0px 10px 0px 10px" }}>
@@ -238,7 +246,7 @@ export function Properties() {
                     bgcolor: 'background.paper',
                     position: 'relative',
                     overflow: 'auto',
-                    padding: 1
+                    // padding: 1
                   }}>
                     <Stack direction={"row"} spacing={1} key={-1}>
                       <ListItem key={-1}>
@@ -268,26 +276,26 @@ export function Properties() {
                       </ListItem>
                     </Stack>
                     {
-                      Object.keys(agroupedProperties).map((prop, idx) => {
+                      Object.keys(agroupedProperties).map((propOfResource, idx) => {
                         // console.log('**** PROP *** ', prop)
                         // return <Stack direction={"row"} spacing={1} key={idx + prop} bgcolor={`${idx%2!=0 ? "#f5f5f5" : false}`}>
-                        return <Stack direction={"row"} spacing={1} key={idx + prop}>
+                        return <Stack direction={"row"} spacing={1} key={idx + propOfResource}>
                           { // LABEL DAS PROPRIEDADES
-                            (prop != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
-                              prop != "http://www.w3.org/2000/01/rdf-schema#label" &&
-                              prop != "http://www.bigdatafortaleza.com/ontology#uri" &&
-                              prop != "http://purl.org/dc/elements/1.1/identifier" &&
-                              prop != "http://www.arida.ufc.br/ontologies/timeline#has_timeline") && <ListItem key={idx + prop}>
+                            (propOfResource != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
+                              propOfResource != "http://www.w3.org/2000/01/rdf-schema#label" &&
+                              propOfResource != "http://www.bigdatafortaleza.com/ontology#uri" &&
+                              propOfResource != "http://purl.org/dc/elements/1.1/identifier" &&
+                              propOfResource != "http://www.arida.ufc.br/ontologies/timeline#has_timeline") && <ListItem key={idx + propOfResource}>
                               <Grid container spacing={0}>
                                 <Grid item sm={2}>
                                   <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
-                                    {agroupedProperties[prop][0][HAS_LABEL] == "" ? getPropertyFromURI(prop) : agroupedProperties[prop][0][HAS_LABEL]}
+                                    {agroupedProperties[propOfResource][0][HAS_LABEL] == "" ? getPropertyFromURI(propOfResource) : agroupedProperties[propOfResource][0][HAS_LABEL]}
                                   </Typography>
                                 </Grid>
                                 <Grid item sm={10}>
                                   <Stack direction={"column"} key={idx}>
                                     { /** VALORES DAS PROPRIEDADES */
-                                      agroupedProperties[prop].map((values: any, i: React.Key) => {
+                                      agroupedProperties[propOfResource].map((values: any, i: React.Key) => {
                                         // console.log('*****------****', values)
                                         return <Stack key={i} direction={'row'} gap={1} justifyContent="flex-start"
                                           alignItems="center" padding={"0 20px"}>
@@ -333,7 +341,8 @@ export function Properties() {
                   </List >
                 </Paper>
               </Box>
-              : <TimelineView instants={instants} />
+              : false
+              // <TimelineView instants={instants} />
             }
           </Grid>
 
@@ -347,22 +356,30 @@ export function Properties() {
                 overflow: 'auto',
                 padding: 0
               }}>
+                {
+                  agroupedProperties["http://www.arida.ufc.br/ontologies/timeline#has_timeline"] && <ListItem key={-4} disablePadding>
+                    <ListItemButton
+                      selected={selectedIndex === -4}
+                      // onClick={() => handleSelectedContextClick(-4, Object.keys(contextos)[0])}
+                      onClick={() => navigate(ROUTES.TIMELINE, {
+                        state: {
+                          resourceURI: Object.keys(contextos)[0],
+                          contextos: contextos
+                        } as stateProps
+                      })}
+                    >
+                      <ListItemIcon sx={{ minWidth: '30px' }}>
+                        <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                      </ListItemIcon>
+                      <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                    </ListItemButton>
+                  </ListItem>
+                }
 
-                <ListItem key={-4} disablePadding>
-                  <ListItemButton
-                    selected={selectedIndex === -4}
-                    onClick={() => handleSelectedContextClick(-4, Object.keys(contextos)[0])}
-                  >
-                    <ListItemIcon sx={{ minWidth: '30px' }}>
-                      {/* <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} /> */}
-                      <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                    </ListItemIcon>
-                    <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                  </ListItemButton>
-                </ListItem>
 
                 <ListItem key={-3} disablePadding>
                   <ListItemButton
+                    disabled={true}
                     selected={selectedIndex === -3}
                     onClick={() => {
                       handleSelectedContextClick(-3, "Visão de Fusão")
@@ -388,6 +405,7 @@ export function Properties() {
                 <ListItem key={-1} disablePadding>
                   <ListItemButton
                     selected={selectedIndex === -1}
+                    /** Object.keys(contextos)[0] o 1ª elemento é o recurso selecionado*/
                     onClick={() => handleSelectedContextClick(-1, Object.keys(contextos)[0])}
                   >
                     <ListItemIcon sx={{ minWidth: '30px' }}>

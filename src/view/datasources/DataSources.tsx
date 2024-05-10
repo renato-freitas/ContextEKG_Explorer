@@ -27,6 +27,7 @@ import { double_encode_uri, getPropertyFromURI, getsetRepositoryLocalStorage } f
 import { ROUTES, VSKG_TBOX } from '../../commons/constants';
 
 import stylesGlobal from '../../styles/global.module.css'
+import style from '../navigation/navigation.module.css'
 
 const PAINEL_LEFT_SIZE = window.screen.width * 0.356
 const PAINEL_RIGHT_SIZE = window.screen.width * 0.5
@@ -202,18 +203,22 @@ export function DataSources() {
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Esquemas">
-                      {/* <IconButton onClick={() => {navigate(ROUTES.TABLE_LIST, { state: resource })}}  */}
-                      <IconButton disabled
-                        sx={{ p: "4px !important" }}>
-                        <Table size={22} />
-                      </IconButton>
+                      <span>
+                        {/* <IconButton onClick={() => {navigate(ROUTES.TABLE_LIST, { state: resource })}}  */}
+                        <IconButton disabled
+                          sx={{ p: "4px !important" }}>
+                          <Table size={22} />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                     <Tooltip title="Qualidade">
-                      {/* <IconButton onClick={() => {handleClickDatasourceQuality(resource)}}  */}
-                      <IconButton disabled
-                        sx={{ p: "4px !important" }}>
-                        <Star size={22} />
-                      </IconButton>
+                      <span>
+                        {/* <IconButton onClick={() => {handleClickDatasourceQuality(resource)}}  */}
+                        <IconButton disabled
+                          sx={{ p: "4px !important" }}>
+                          <Star size={22} />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                     <Tooltip title="Excluir">
                       <IconButton onClick={() => handleClickOpenDialogToConfirmDelete(resource)} sx={{ p: "4px !important" }}>
@@ -233,18 +238,18 @@ export function DataSources() {
               <Paper elevation={PAPER_ELEVATION}>
                 <div style={{ background: "#1976d214", padding: "0px 10px 0px 10px" }}>
 
-                  <Stack
+                  {/* <Stack
                     direction="row"
                     justifyContent="space-between"
                     alignItems="center"
                     spacing={2}
                   >
-                    <Stack direction='row' gap={1}>
-                      {/* {DATASOURCE_TYPES_ICONS[selectedDataSource?.type?.value]} */}
-                      <h4>{selectedDataSource?.label?.value}</h4>
-                    </Stack>
-                    {isLoading && <CircularProgress size={20} />}
-                  </Stack>
+                    <Stack direction='row' gap={1}> */}
+                  {/* {DATASOURCE_TYPES_ICONS[selectedDataSource?.type?.value]} */}
+                  <h4>{selectedDataSource?.label?.value}</h4>
+                  {/* </Stack> */}
+                  {/* {isLoading && <CircularProgress size={20} />} */}
+                  {/* </Stack> */}
 
                 </div>
                 <List sx={{
@@ -269,20 +274,28 @@ export function DataSources() {
                     )
                   } */}
                   {
-                    properties.length > 0 ? properties.map((row: any, idx: Key) => (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE && row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) && <ListItem key={idx} sx={{ pb: 0 }}>
-                      <Grid container>
-                        <Grid item sm={12}>
-                          <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
-                            {getPropertyFromURI(row?.p?.value)}
-                          </Typography>
-                          <Typography key={idx} variant="body2" sx={{ m: "10px 0px 0x 1px" }} color="text.secondary" gutterBottom>
-                            {row?.o?.value}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </ListItem>
-                    )
-                    : false
+                    properties.length > 0
+                      ? properties.map((row: any, idx: Key) => {
+                        return (row?.p?.value != VSKG_TBOX.PROPERTY.RDF_TYPE &&
+                          row?.p?.value != VSKG_TBOX.PROPERTY.LABEL) &&
+                          <ListItem key={idx} sx={{ pb: 0 }}>
+                            <Grid container>
+                              <Grid item sm={12}>
+                                <Typography sx={{ fontSize: 14, fontWeight: 600, textAlign: "start" }} color="text.primary" gutterBottom>
+                                  {getPropertyFromURI(row?.p?.value)}
+                                </Typography>
+                                {
+                                  row?.p?.value == VSKG_TBOX.PROPERTY.THUMBNAIL
+                                    ? <img src={row?.o?.value} alt={getPropertyFromURI(row?.o?.value)} className={style.img_responsive} />
+                                    : <Typography key={idx} variant="body2" sx={{ m: "10px 0px 0x 1px" }} color="text.secondary" gutterBottom>
+                                      {row?.o?.value}
+                                    </Typography>
+                                }
+                              </Grid>
+                            </Grid>
+                          </ListItem>
+                      })
+                      : false
                   }
                 </List>
               </Paper>

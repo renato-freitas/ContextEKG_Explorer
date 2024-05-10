@@ -19,7 +19,7 @@ import { ClassModel } from "../../models/ClassModel";
 import { LoadingContext, ClassRDFContext } from "../../App";
 import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
 import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
-
+import stylesGlobal from '../../styles/global.module.css';
 import styles from './navigation.module.css';
 
 
@@ -43,12 +43,12 @@ export function Resources() {
     let response: any
     try {
       setIsLoading(true)
-      console.log(`label to search: ${labelToSearch}`)
-      console.log(`página atual: ${newPage}`)
+      console.log('nome procurado:', labelToSearch)
+      // console.log(`página atual: ${newPage}`)
       // let uri = double_encode_uri(ClassURI)
       let uri = double_encode_uri(contextClassRDF.classURI.value)
       response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
-      console.log(`2. RECURSOS DA CLASSE`, response.data)
+      console.log('recursos da classe:', response.data)
     } catch (error) {
       console.log(`><`, error);
     } finally {
@@ -72,8 +72,9 @@ export function Resources() {
     } finally {
       setTimeout(() => {
         setTotalOfResources(response.data)
-        console.log(`total: `, response.data)
-        console.log(`total: `, typeof response.data)
+        console.log(`total:`, response.data)
+        // console.log(`total: `, typeof response.data)
+        // setPage(0);
       }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
@@ -82,19 +83,27 @@ export function Resources() {
 
   useEffect(() => {
     function onEdit() {
-      console.log('CLASS RDF CONTEXTO', contextClassRDF)
       try {
-        if (location.state) {
-          let classRDF = location.state as ClassModel;
-          let classURI = classRDF.classURI?.value as string
-          console.log("1. CLASSE ESCOLHIDA", classRDF.classURI?.value)
-          setSelectedClass(classURI)
-          setSelectedClassRDF(classRDF)
-          loadResourcesOfSelectedClass(classURI, page)
-          getTotalResources(classURI)
-        }else{
-          loadResourcesOfSelectedClass(contextClassRDF.classURI.value, page)
-          getTotalResources(contextClassRDF.classURI.value)
+        const _repo_in_api_header = api.defaults.headers.common['repo']
+        console.log('repositório no api.header:', _repo_in_api_header)
+        if (_repo_in_api_header) {
+          if (location.state) {
+            let classRDF = location.state as ClassModel;
+            let classURI = classRDF.classURI?.value as string
+            console.log('classe escolhida:', classRDF.classURI?.value)
+            setSelectedClass(classURI)
+            setSelectedClassRDF(classRDF)
+            loadResourcesOfSelectedClass(classURI, page)
+            getTotalResources(classURI)
+          }
+          else {
+            console.log('react.context class rdf:', contextClassRDF)
+            loadResourcesOfSelectedClass(contextClassRDF.classURI.value, page)
+            getTotalResources(contextClassRDF.classURI.value)
+          }
+        }
+        else {
+          navigate(ROUTES.REPOSITORY_LIST)
         }
       } catch (err) {
         printt("Erro", err)
@@ -106,16 +115,11 @@ export function Resources() {
   }, [location.state, runingSearch]);
 
 
-  // useEffect(() => {
-  //   loadResourcesOfSelectedClass(selectedClassRDF?.class?.value as string, page)
-  // }, [runingSearch]);
-
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
     setSelectedIndex(idx);
     setSelectedResource(resource)
-    // navigate(ROUTES.PROPERTIES, { state: resource })
     navigate(ROUTES.PROPERTIES, { state: resource.uri.value })
   };
 
@@ -146,11 +150,10 @@ export function Resources() {
     if (event.key == 'Escape') {
       setLabelToSearch("")
       setPage(0)
-      if (labelToSearch != "") {
-        setRuningSearch(!runingSearch)
-      }
+      if (labelToSearch != "") setRuningSearch(!runingSearch)
     }
     if (event.key == "Enter") {
+      if (labelToSearch != "") setPage(0)
       setRuningSearch(!runingSearch)
     }
   };
@@ -158,7 +161,7 @@ export function Resources() {
 
 
   return (
-    <div className={styles.listkg}>
+    <div className={stylesGlobal.container}>
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={6} sx={{ bgcolor: null }}>
           <MHeader
@@ -213,8 +216,8 @@ export function Resources() {
                   <TableRow key={idx} >
                     <TableCell>
                       {/* <Stack direction={'row'} gap={1}> */}
-                        {/* {DATASOURCE_TYPES_ICONS[resource?.type?.value]} */}
-                        <Typography>{resource.label.value}</Typography>
+                      {/* {DATASOURCE_TYPES_ICONS[resource?.type?.value]} */}
+                      <Typography>{resource.label.value}</Typography>
                       {/* </Stack> */}
                     </TableCell>
                     <TableCell>

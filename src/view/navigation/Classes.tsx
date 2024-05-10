@@ -6,7 +6,6 @@ import Stack from "@mui/material/Stack";
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Radio from '@mui/material/Radio'
@@ -15,8 +14,8 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { styled } from '@mui/material/styles';
 
-import { ROUTES, NUMBERS, COLORS } from "../../commons/constants";
-import { getPropertyFromURI, getsetRepositoryLocalStorage, getsetTypeClassLocalStorage, setTypeClassLocalStorage } from "../../commons/utils";
+import { ROUTES, NUMBERS, COLORS, LOCAL_STORAGE } from "../../commons/constants";
+import { getPropertyFromURI, getsetTypeClassLocalStorage, setTypeClassLocalStorage } from "../../commons/utils";
 import { api } from "../../services/api";
 import { MHeader } from "../../components/MHeader";
 import { LoadingContext, ClassRDFContext } from "../../App";
@@ -25,7 +24,7 @@ import stylesGlobal from '../../styles/global.module.css';
 import style from './navigation.module.css'
 
 
-const GENERALIZATION = "0"
+const NUMBER_OF_GENERALIZATION_CLASS = "0"
 export function Classes() {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -34,7 +33,7 @@ export function Classes() {
 	const [classes, setClasses] = useState<ClassModel[]>([]);
 	const [copyAllclasses, setCopyAllClasses] = useState<ClassModel[]>([]);
 	const [foundClasses, setFoundClasses] = useState<ClassModel[]>([]);
-	const [typeOfClass, setTypeOfClass] = useState<String>(GENERALIZATION);
+	const [typeOfClass, setTypeOfClass] = useState<String>(NUMBER_OF_GENERALIZATION_CLASS);
 	const [nameOfClassToFind, setNameOfClassToFind] = useState('');
 
 
@@ -44,7 +43,7 @@ export function Classes() {
 			setIsLoading(true)
 			// response = await api.get(`/classes/?type=${typeOfClass}&repo=${getsetRepositoryLocalStorage()}`);
 			response = await api.get(`/classes/?type=${typeOfClass}`);
-			console.log('*** CLASSES: ', response.data)
+			console.log('*** CLASSES ***', response.data)
 			setClasses(response.data)
 			setCopyAllClasses(response.data)
 		} catch (error) {
@@ -67,13 +66,17 @@ export function Classes() {
 	};
 
 	useEffect(() => {
-		console.log('api.get',api.defaults.headers.common['repo'])
-		loadClasses()
+		console.log('** REPOSITÓRIO NO API.HEADER **', api.defaults.headers.common['repo'])
+		const _repo_in_api_header = api.defaults.headers.common['repo']
+		if (_repo_in_api_header) loadClasses()
+		else navigate(ROUTES.REPOSITORY_LIST)
 	}, [typeOfClass])
 
 	useEffect(() => {
-		console.log('**** CLASSE', getsetTypeClassLocalStorage())
-		setTypeOfClass(getsetTypeClassLocalStorage())
+		console.log('*** CLASSE NO LOCAL STORAGE ***', window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS))
+		const _class_in_local_storage = window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS)
+		if (_class_in_local_storage) setTypeOfClass(_class_in_local_storage)
+		else setTypeOfClass(NUMBER_OF_GENERALIZATION_CLASS)
 	}, [])
 
 	// const [selectedIndex, setSelectedIndex] = useState<Number>(1);
@@ -112,14 +115,14 @@ export function Classes() {
 	}, [nameOfClassToFind])
 
 
-	const Item = styled(Paper)(({ theme }) => ({
-		backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-		...theme.typography.body2,
-		padding: theme.spacing(1),
-		textAlign: 'center',
-		color: theme.palette.text.secondary,
-		minHeight: 300
-	}));
+	// const Item = styled(Paper)(({ theme }) => ({
+	// 	backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+	// 	...theme.typography.body2,
+	// 	padding: theme.spacing(1),
+	// 	textAlign: 'center',
+	// 	color: theme.palette.text.secondary,
+	// 	minHeight: 300
+	// }));
 
 
 	return (
@@ -167,15 +170,20 @@ export function Classes() {
 					/>
 				</Grid>
 			</Grid>
+
 			<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 				{
+					/** CABEÇALHO */
 					!isLoading && <Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
 						<div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
-							<h4>{`Classes ${typeOfClass == "0" ? "de Generalização" : typeOfClass == "1" ? 'Exportadas' : 'Metadados'}`}</h4>
+							<h4>{`Classes ${typeOfClass == "0" ? "de Generalização" : typeOfClass == "1" ? 'Exportadas' : 'Metadados'}`}
+								{` (${classes.length > 0 ? classes.length : ""})`}
+							</h4>
 						</div>
 					</Grid>
 				}
 				{
+					/** LISTA DAS CLASSES */
 					!isLoading && classes.length > 0 && classes.map((classRDF, index) =>
 						<Grid item xs={12} sm={6} md={3} key={index}>
 							<Paper elevation={3} sx={{ minHeight: 300, justifyContent: "space-between" }} >

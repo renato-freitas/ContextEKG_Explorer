@@ -17,6 +17,7 @@ export const NAMESPACES = {
   WIKIBASE: "http://wikiba.se/ontology#",
   BLAZEGRAPH_BD: "http://www.bigdata.com/rdf#",
   SEFAZMA: "http://www.sefaz.ma.gov.br/ontology/",
+  SCHEMA: "http://schema.org/",
   BASE: "http://www.sefaz.ma.gov.br/resource/",
   VSKG: "http://www.arida.ufc.br/VSKG#",
   VSKGR: "http://www.arida.ufc.br/VSKG/resource/",
@@ -204,6 +205,8 @@ export const VSKG_TBOX = {
     DC_DESCRIPTION: `${NAMESPACES.DC}description`,
     DCTERMS_DESCRIPTION: `${NAMESPACES.DCTERMS}description`,
     HAS_APPLICATION: `${NAMESPACES.VSKG}hasApplication`,
+    // METADADOS GENÉRICOS
+    THUMBNAIL: `${NAMESPACES.SCHEMA}thumbnail`,
     // FONTE DE DADOS
     DATASOURCE_TYPE: `${NAMESPACES.VSKG}datasourceType`,
     DB_USERNAME: `${NAMESPACES.D2RQ}username`,
@@ -234,7 +237,12 @@ export const NUMBERS = {
   SIZE_TEXT_MENU_CONTEXT: "0.8rem",
   SIZE_ICONS_MENU_CONTEXT: 19.4,
   PADDING_ITEMS_MENU_CONTEXT: 0.8,
-  SCROOL_WINDOWS_Y: 5
+  SCROOL_WINDOWS_Y: 5,
+  IDX_TIMELINE: -4,
+  IDX_FUSION_VIEW: -3,
+  IDX_UNIFICATION_VIEW: -2,
+  IDX_SELECTED_VIEW: -1,
+
 }
 
 // https://encycolorpedia.pt/1976d2
@@ -244,5 +252,13 @@ export const COLORS = {
   CINZA_03: "#c2cff1",
   CINZA_04: "#5a8bda",
   AZUL_04: "#1976d2",
-  AMARELO_01: "#e9da02"
+  AMARELO_01: "#e9da02",
+  TO_DATA_SOURCES_IN_UNIFICATION_VIEW: ['#aca589','#c2cff1','#81a1e2','','','','','','','','','','','','']
+}
+
+
+export const LOCAL_STORAGE = {
+  REPOSITORY: "repository",
+  CONTEXT: "context",
+  TYPE_OF_CLASS: "typeClass"
 }
