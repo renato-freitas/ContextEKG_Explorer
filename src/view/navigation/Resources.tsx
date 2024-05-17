@@ -38,6 +38,7 @@ export function Resources() {
   const [typeOfSelectedClass, setTypeOfSelectedClass] = useState<string>("");
   const [runingSearch, setRuningSearch] = useState<boolean>(false);
   const [totalOfResources, setTotalOfResources] = useState<number>(0);
+  const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
 
 
   async function loadResourcesOfSelectedClass(typeOfClass: string, newPage: number) {
@@ -173,7 +174,7 @@ export function Resources() {
           <MHeader
             // title={`Recursos da classe ${getPropertyFromURI(selectedClass)}`}
             // title={`Classe "${selectedClassRDF?.label?.value}"`}
-            title={`Classe "${contextClassRDF.label?.value}"`}
+            title={selectedLanguage == 'pt' ? `Classe "${contextClassRDF.label?.value}"` : `"${contextClassRDF.label?.value}" Class`}
             hasButtonBack
             buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
           />
@@ -185,7 +186,7 @@ export function Resources() {
               <Info size={32}></Info>
             </Tooltip> */}
           <TextField sx={{ width: 450 }}
-            id="outlined-basic" label="Pesquisar somente pelo nome do recurso" variant="outlined" size="small"
+            id="outlined-basic" label={selectedLanguage == 'pt' ? "Pesquisar somente pelo nome do recurso" : "Search by name"} variant="outlined" size="small"
             value={labelToSearch}
             onChange={handleSearchResourceLabel}
             // error={labelToSearch.length > 1 && foundClasses.length == 0}
@@ -202,7 +203,7 @@ export function Resources() {
           {/* DATA SOURCES */}
           <Grid item sm={12} justifyContent={'center'}>
             <MTable
-              header={[["Recursos", "left"], ["Proveniência", "left"]]}
+              header={[[selectedLanguage == 'pt' ? "Recursos" : "Resources", "left"], [selectedLanguage == 'pt' ? "Proveniência" : "Provenance", "left"]]}
               size={totalOfResources}
               // size={ ((page +1) * rowsPerPage) < totalOfResources ? totalOfResources : resources.length}
               rowsPerPage={rowsPerPage}
@@ -232,11 +233,11 @@ export function Resources() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" component="div" color="gray">
-                        {typeOfSelectedClass == NUMBERS.GENERALIZATION_CLASS_NUMBER ? "Visão de Unificação": getContextFromURI(resource?.uri?.value)}
+                        {typeOfSelectedClass == NUMBERS.GENERALIZATION_CLASS_NUMBER ? selectedLanguage == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
                       </Typography>
                     </TableCell>
                     <TableCell align='right'>
-                      <Tooltip title="Propriedades">
+                      <Tooltip title={selectedLanguage == 'pt' ? "Propriedades" : "Properties"}>
                         <IconButton onClick={(event) => handleListOfResourcesClick(event, idx, resource)} sx={{ p: "4px !important" }}>
                           <Eye size={22} color={COLORS.AZUL_04} />
                         </IconButton>

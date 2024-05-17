@@ -18,7 +18,7 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import { Asterisk, ClockCounterClockwise, Link as LinkIcon } from 'phosphor-react';
-import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
+import { LinkSimpleBreak, Graph, ArrowRight } from '@phosphor-icons/react';
 
 import { MHeader } from "../../components/MHeader";
 
@@ -47,6 +47,8 @@ export function TimelineView() {
   const [contextos, setContextos] = useState<any>({})
   const [selectedIndex, setSelectedIndex] = useState<Number>(NUMBERS.IDX_SELECTED_VIEW);
   const [colorsToDataSources, setColorsToDataSources] = useState<any>({})
+  // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
+  const estaEmPortugues = window.localStorage.getItem('LANGUAGE') == 'pt'
 
 
   function getLabelOfResource(instants: any) {
@@ -143,7 +145,7 @@ export function TimelineView() {
     <div className={stylesGlobal.container}>
 
       <MHeader
-        title={`Linha do Tempo do recurso`}
+        title={estaEmPortugues ? "Linha do Tempo do recurso" : "Timeline of Resource"}
         hasButtonBack
       />
 
@@ -162,7 +164,7 @@ export function TimelineView() {
             </Grid>
             <Grid item sm={2.5}>
               <div style={{ background: COLORS.CINZA_02, padding: "0px 10px 0px 10px" }}>
-                <h3>Contexto</h3>
+                <h3>{estaEmPortugues ? "Contexto" : "Context"}</h3>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   Menu
                 </Typography>
@@ -204,7 +206,8 @@ export function TimelineView() {
                                 <Typography variant="caption" component="div" color="gray">{update.property.value}:</Typography>
                                 {/* <Stack direction={"row"} alignItems={'center'} spacing={1}> */}
                                 <Typography color={'secondary'} variant="caption">{update.va.value}</Typography>
-                                <Typography color={'GrayText'} variant="caption"><span>&rarr;</span></Typography>
+                                {/* <Typography color={'GrayText'} variant="caption"><span>&rarr;</span></Typography> */}
+                                <ArrowRight size={12} />
                                 <Typography color="primary" variant="caption">{update.vn.value}</Typography>
                                 {/* </Stack> */}
                               </Stack>
@@ -219,7 +222,7 @@ export function TimelineView() {
               </Timeline>
             </Grid>
 
-            {/* MENU DE CONTEXTOS (LADO DIREITO) */}
+            {/* MENU DE CONTEXTOS (PAINEL DIREITO) */}
             <Grid item sm={2.5}>
               {
                 Object.keys(contextos).length > 0
@@ -230,6 +233,30 @@ export function TimelineView() {
                     overflow: 'auto',
                     padding: 0
                   }}>
+                    {
+                  contextos && Object.keys(contextos).map((item: any) => {
+                    return contextos[item].map((same: string, idx: Key) => {
+                      // console.log('===target===', same)
+                      return same.includes('resource/canonical') && (
+                        <ListItem key={idx} disablePadding>
+                          <ListItemButton
+                            sx={{ bgcolor: selectedIndex === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                            selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
+                            onClick={() => {
+                              // handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, estaEmPortugues ? "Visão de Fusão" : "Fusion View")
+                              handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, same)
+                            }}
+                          >
+                            <ListItemIcon sx={{ minWidth: '30px' }}>
+                              <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                            </ListItemIcon>
+                            <ListItemText primary={estaEmPortugues ? "Visão de Fusão" : "Fusion View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                          </ListItemButton>
+                        </ListItem>
+                      )
+                    })
+                  })
+                }
                     <ListItem key={NUMBERS.IDX_UNIFICATION_VIEW} disablePadding>
                       <ListItemButton
                         selected={selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW}

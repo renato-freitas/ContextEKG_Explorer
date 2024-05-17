@@ -204,6 +204,7 @@ export function Classes() {
 							{
 								exportedViews.map((e, i) => <Grid key={i} item xs={12} sm={6} md={3}>
 									<Button
+										sx={{textTransform: 'none'}}
 										disabled={selectedExportedView == e.datasource.value}
 										variant="contained"
 										onClick={() => setSelectedExportedView(e.datasource.value)}

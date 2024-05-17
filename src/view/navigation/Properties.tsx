@@ -120,9 +120,12 @@ export function Properties() {
 
           // NÃO CARREGAR NOVAMENTE A LISTA DE CONTEXTOS (EXPORTED VIEW)
           if (Object.keys(contextos).length == 0) loadSameAs(resource_uri, typeOfClass);
-        } else {
+        } else if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER) {
+          setSelectedIndex(selectedIndex)
+        }
+        else {
           /** QUANDO CLICAR EM UM LINK HREF */
-          setSelectedIndex(-1)
+          // setSelectedIndex(-1)
           // setUriOfSelectedResource(resource_uri);
           // loadPropertiesOfSelectedResource(resource_uri)
           // loadSameAs(resource_uri, typeOfClass)
@@ -183,12 +186,13 @@ export function Properties() {
           loadSameAs(link, NUMBERS.EXPORTED_CLASS_NUMBER)
         }
       }
-      // alert(JSON.stringify(linkedData))
     }
+    /**linkedata é para o objectProperties */
   }, [linkedData])
 
-
-  const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW && index != NUMBERS.IDX_FUSION_VIEW
+  const estaEmPortugues = selectedLanguage == 'pt'
+  // const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW && index != NUMBERS.IDX_FUSION_VIEW
+  const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW
 
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
@@ -230,7 +234,7 @@ export function Properties() {
   return (
     <div className={stylesGlobal.container}>
       <MHeader
-        title={`Propriedades do recurso`}
+        title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
         hasButtonBack
       />
 
@@ -255,7 +259,7 @@ export function Properties() {
             </Grid>
             <Grid item sm={2.5}>
               <div style={{ background: COLORS.CINZA_02, padding: "0px 10px 0px 10px" }}>
-                <h3>Contexto</h3>
+                <h3>{estaEmPortugues ? "Contexto" : "Context"}</h3>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   Menu
                 </Typography>
@@ -432,21 +436,44 @@ export function Properties() {
                 overflow: 'auto',
                 padding: 0
               }}>
-                <ListItem key={-3} disablePadding>
+                {
+                  contextos && Object.keys(contextos).map((item: any) => {
+                    return contextos[item].map((same: string, idx: Key) => {
+                      // console.log('===target===', same)
+                      return same.includes('resource/canonical') && (
+                        <ListItem key={idx} disablePadding>
+                          <ListItemButton
+                            sx={{ bgcolor: selectedIndex === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                            selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
+                            onClick={() => {
+                              // handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, estaEmPortugues ? "Visão de Fusão" : "Fusion View")
+                              handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, same)
+                            }}
+                          >
+                            <ListItemIcon sx={{ minWidth: '30px' }}>
+                              <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                            </ListItemIcon>
+                            <ListItemText primary={estaEmPortugues ? "Visão de Fusão" : "Fusion View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                          </ListItemButton>
+                        </ListItem>
+                      )
+                    })
+                  })
+                }
+                {/* <ListItem key={-3} disablePadding>
                   <ListItemButton
-                    // disabled={true}
                     sx={{ bgcolor: selectedIndex === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                     selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
                     onClick={() => {
-                      handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, selectedLanguage == 'pt' ? "Visão de Fusão" : "Fusion View")
+                      handleSelectedContextClick(NUMBERS.IDX_UNIFICATION_VIEW, contextos[Object.keys(contextos)[0]][0].toString())
                     }}
                   >
                     <ListItemIcon sx={{ minWidth: '30px' }}>
                       <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
                     </ListItemIcon>
-                    <ListItemText primary={"Visão de Fusão"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                    <ListItemText primary={estaEmPortugues ? "Visão de Fusão" : "Fusion View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                   </ListItemButton>
-                </ListItem>
+                </ListItem> */}
                 <ListItem key={-2} disablePadding>
                   <ListItemButton
                     selected={selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW}
@@ -457,7 +484,7 @@ export function Properties() {
                     <ListItemIcon sx={{ minWidth: '30px' }}>
                       <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
                     </ListItemIcon>
-                    <ListItemText primary={"Visão de Unificação"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                    <ListItemText primary={estaEmPortugues ? "Visão de Unificação" : "Unification View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                   </ListItemButton>
                 </ListItem>
                 <ListItem key={-1} disablePadding>
@@ -470,13 +497,13 @@ export function Properties() {
                     <ListItemIcon sx={{ minWidth: '30px' }}>
                       <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
                     </ListItemIcon>
-                    <ListItemText primary={'ESV ' + getContextFromURI(Object.keys(contextos)[0])} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                    <ListItemText primary={estaEmPortugues ? "VSE" : 'ESV ' + getContextFromURI(Object.keys(contextos)[0])} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                   </ListItemButton>
                 </ListItem>
                 {
                   contextos && Object.keys(contextos).map((item: any) => {
                     return contextos[item].map((same: string, idx: Key) => {
-                      return (
+                      return !same.includes('resource/canonical') && (
                         <ListItem key={idx} disablePadding>
                           <ListItemButton
                             selected={selectedIndex === idx}

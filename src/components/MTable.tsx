@@ -35,6 +35,8 @@ const PAINEL_LEFT_SIZE = widthOfBody * 0.2
 export function MTable(props: MTable) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
+  const estaEmPortugues = selectedLanguage == 'pt'
   // const [page, setPage] = React.useState(1);
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value); console.log(value)
@@ -57,7 +59,7 @@ export function MTable(props: MTable) {
             {
               props.hasActions &&
               <TableCell key={'Ações'} align={props.alignActions ? props.alignActions : 'center'}>
-                <Typography component={'p'} variant="caption" fontWeight="800">Ações</Typography>
+                <Typography component={'p'} variant="caption" fontWeight="800">{selectedLanguage == 'pt' ? "Ações" : "Actions"}</Typography>
               </TableCell>
             }
           </TableRow>
@@ -67,7 +69,7 @@ export function MTable(props: MTable) {
           {props.size ? props.children :
             <TableRow>
               <TableCell align="center" colSpan={(props.header.length + 1)}>
-                Nenhum dado para mostrar
+                {estaEmPortugues ? "Nenhum dado para mostrar" : "No data to show"}
               </TableCell>
             </TableRow>
           }
@@ -76,23 +78,23 @@ export function MTable(props: MTable) {
           <TableRow>
             {/* <TableCell align="ri" colSpan={(props.header.length + 1)}> */}
             {/* <TableCell align='right'> */}
-              <TablePagination
-                rowsPerPageOptions={[6, 12, 24, 48, { label: 'Todas', value: -1 }]}
-                colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
-                count={props.size}
-                rowsPerPage={props.rowsPerPage}
-                page={props.page ? props.page : page}
-                SelectProps={{
-                  inputProps: {
-                    "aria-label": "oxi"
-                  },
-                  native: false,
-                }}
-                labelRowsPerPage="Linhas por Página"
-                onPageChange={props.handleChangePage}
-                onRowsPerPageChange={props.handleChangeRowsPerPage}
-                ActionsComponent={TablePaginationActions}
-              />
+            <TablePagination
+              rowsPerPageOptions={[6, 12, 24, 48, { label: 'Todas', value: -1 }]}
+              colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
+              count={props.size}
+              rowsPerPage={props.rowsPerPage}
+              page={props.page ? props.page : page}
+              SelectProps={{
+                inputProps: {
+                  "aria-label": "oxi"
+                },
+                native: false,
+              }}
+              labelRowsPerPage={selectedLanguage == 'pt' ? "Linhas por Página" : "Rows per Page"}
+              onPageChange={props.handleChangePage}
+              onRowsPerPageChange={props.handleChangeRowsPerPage}
+              ActionsComponent={TablePaginationActions}
+            />
             {/* </TableCell> */}
           </TableRow>
         </TableFooter>
