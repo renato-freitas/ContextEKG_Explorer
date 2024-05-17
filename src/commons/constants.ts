@@ -218,6 +218,38 @@ export const VSKG_TBOX = {
   P_META_MASHUP_HAS_EXPORTED_VIEW: "http://www.arida.ufc.br/VSKG#hasExportedView"
 }
 
+
+/** EKG Context Explorer Vocabulary */
+export const EKG_CONTEXT_VOCABULARY = {
+  CLASS: {
+    RELATIONAL_DATABASE: "http://rdbs-o#Relational_Database",
+    CSV_FILE: "https://www.ntnu.no/ub/ontologies/csv#CsvDocument"
+  },
+  PROPERTY: {
+    RDF_TYPE: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+    IS_A: `${NAMESPACES.RDF}type`,
+    LABEL: `${NAMESPACES.RDFS}label`,
+    COMMENT: `${NAMESPACES.RDFS}comment`,
+    NAME: `${NAMESPACES.FOAF}name`,
+    DOMAIN: `${NAMESPACES.RDFS}domain`,
+    RANGE: `${NAMESPACES.RDFS}range`,
+    DC_IDENTIFIER: `${NAMESPACES.DC}identifier`,
+    DC_DESCRIPTION: `${NAMESPACES.DC}description`,
+    DCTERMS_DESCRIPTION: `${NAMESPACES.DCTERMS}description`,
+    HAS_APPLICATION: `${NAMESPACES.VSKG}hasApplication`,
+    // METADADOS GENÉRICOS
+    THUMBNAIL: `${NAMESPACES.SCHEMA}thumbnail`,
+    // FONTE DE DADOS
+    DATASOURCE_TYPE: `${NAMESPACES.VSKG}datasourceType`,
+    DB_USERNAME: `${NAMESPACES.D2RQ}username`,
+    DB_PASSWORD: `${NAMESPACES.D2RQ}password`,
+    DB_JDBC_DRIVER: `${NAMESPACES.D2RQ}jdbcDriver`,
+    DB_CONNECTION_URL: `${NAMESPACES.D2RQ}jdbcDSN`,
+    CSV_FILE_PATH: `${NAMESPACES.VSKG}csvFilePath`
+  },
+  P_META_MASHUP_HAS_EXPORTED_VIEW: "http://www.arida.ufc.br/VSKG#hasExportedView"
+}
+
 export const DATASOURCE_TYPES = {
   // "Banco de Dados Relacional": `${VSKG}RelationalDataBase_DataSource`,
   "Banco de Dados Relacional": VSKG_TBOX.CLASS.RELATIONAL_DATABASE,
@@ -242,7 +274,8 @@ export const NUMBERS = {
   IDX_FUSION_VIEW: -3,
   IDX_UNIFICATION_VIEW: -2,
   IDX_SELECTED_VIEW: -1,
-
+  GENERALIZATION_CLASS_NUMBER: "0",
+  EXPORTED_CLASS_NUMBER: "1"
 }
 
 // https://encycolorpedia.pt/1976d2

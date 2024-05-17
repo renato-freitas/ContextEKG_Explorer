@@ -35,19 +35,23 @@ export function Resources() {
   const [selectedResource, setSelectedResource] = useState<ResourceModel>();
   const [resources, setResources] = useState<ResourceModel[]>([]);
   const [labelToSearch, setLabelToSearch] = useState<string>("");
+  const [typeOfSelectedClass, setTypeOfSelectedClass] = useState<string>("");
   const [runingSearch, setRuningSearch] = useState<boolean>(false);
   const [totalOfResources, setTotalOfResources] = useState<number>(0);
 
 
-  async function loadResourcesOfSelectedClass(ClassURI: string, newPage: number) {
+  async function loadResourcesOfSelectedClass(typeOfClass: string, newPage: number) {
     let response: any
     try {
       setIsLoading(true)
       console.log('nome procurado:', labelToSearch)
-      // console.log(`página atual: ${newPage}`)
-      // let uri = double_encode_uri(ClassURI)
       let uri = double_encode_uri(contextClassRDF.classURI.value)
-      response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
+      if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
+        response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
+      }
+      else {
+        response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
+      }
       console.log('recursos da classe:', response.data)
     } catch (error) {
       console.log(`><`, error);
@@ -88,12 +92,14 @@ export function Resources() {
         console.log('repositório no api.header:', _repo_in_api_header)
         if (_repo_in_api_header) {
           if (location.state) {
-            let classRDF = location.state as ClassModel;
-            let classURI = classRDF.classURI?.value as string
-            console.log('classe escolhida:', classRDF.classURI?.value)
+            let _state = location.state as any;
+            console.log('^^', _state)
+            let classURI = _state.classRDF.classURI?.value as string
+            // console.log('classe escolhida:', classRDF.classURI?.value)
             setSelectedClass(classURI)
-            setSelectedClassRDF(classRDF)
-            loadResourcesOfSelectedClass(classURI, page)
+            setSelectedClassRDF(_state.classRDF)
+            setTypeOfSelectedClass(_state.typeOfClass)
+            loadResourcesOfSelectedClass(_state.typeOfClass, page)
             getTotalResources(classURI)
           }
           else {
@@ -120,7 +126,7 @@ export function Resources() {
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
     setSelectedIndex(idx);
     setSelectedResource(resource)
-    navigate(ROUTES.PROPERTIES, { state: resource.uri.value })
+    navigate(ROUTES.PROPERTIES, { state: {resource_uri:resource.uri.value, typeOfClass: typeOfSelectedClass} })
   };
 
   const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#edf4fc" : "None";
@@ -132,7 +138,7 @@ export function Resources() {
     loadResourcesOfSelectedClass(selectedClassRDF?.classURI?.value as string, newPage)
   };
 
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -212,7 +218,11 @@ export function Resources() {
                 //   ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 //   : resources
                 // ).map((resource, idx) => (
-                resources.length > 0 && resources.map((resource, idx) => (
+                // resources.length > 0 && resources.map((resource, idx) => (
+                resources.length > 0 && (rowsPerPage > 0
+                  ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  : resources
+                ).map((resource, idx) => (
                   <TableRow key={idx} >
                     <TableCell>
                       {/* <Stack direction={'row'} gap={1}> */}
@@ -222,7 +232,7 @@ export function Resources() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" component="div" color="gray">
-                        {getContextFromURI(resource?.uri?.value)}
+                        {typeOfSelectedClass == NUMBERS.GENERALIZATION_CLASS_NUMBER ? "Visão de Unificação": getContextFromURI(resource?.uri?.value)}
                       </Typography>
                     </TableCell>
                     <TableCell align='right'>

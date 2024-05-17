@@ -162,7 +162,7 @@ export function TimelineView() {
             </Grid>
             <Grid item sm={2.5}>
               <div style={{ background: COLORS.CINZA_02, padding: "0px 10px 0px 10px" }}>
-                <h4>Contexto</h4>
+                <h3>Contexto</h3>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   Menu
                 </Typography>

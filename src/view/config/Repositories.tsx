@@ -158,9 +158,8 @@ export function Repositories() {
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={6} sx={{ bgcolor: null }}>
           <MHeader
-            title={`Repositórios`}
+            title={`Seleção de Repositório`}
             hasButtonBack
-            // buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
           />
         </Grid>
 

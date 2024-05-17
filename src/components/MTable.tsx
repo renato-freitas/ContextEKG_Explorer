@@ -77,7 +77,7 @@ export function MTable(props: MTable) {
             {/* <TableCell align="ri" colSpan={(props.header.length + 1)}> */}
             {/* <TableCell align='right'> */}
               <TablePagination
-                rowsPerPageOptions={[10, 25, 50, { label: 'Todas', value: -1 }]}
+                rowsPerPageOptions={[6, 12, 24, 48, { label: 'Todas', value: -1 }]}
                 colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
                 count={props.size}
                 rowsPerPage={props.rowsPerPage}

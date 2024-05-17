@@ -176,10 +176,11 @@ export function DataSources() {
             loading={false}
           >
             {
-              (rowsPerPage > 0
-                ? dataSources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : dataSources
-              ).map((resource, idx) => (
+              // (rowsPerPage > 0
+              //   ? dataSources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              //   : dataSources
+              // ).map((resource, idx) => (
+                dataSources.length > 0 && dataSources.map((resource, idx) => (
                 <TableRow key={idx} >
                   <TableCell>
                     <Stack direction={'row'} gap={1}>

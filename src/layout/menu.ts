@@ -1,6 +1,14 @@
 import { ROUTES, USER_TYPE } from '../commons/constants';
 import { Binoculars, Person, Graph, Database, Storefront, PuzzlePiece, NavigationArrow, PaperPlaneTilt, Sparkle, BracketsCurly, GearSix } from "phosphor-react";
 import ManageSearchRoundedIcon from '@mui/icons-material/ManageSearchRounded';
+import { Component } from 'react';
+
+interface itemProps {
+  title: {},
+  icon: Component,
+  href: string[],
+  type: string[]
+}
 
 export const menuEvolve = [
   // {
@@ -16,14 +24,16 @@ export const menuEvolve = [
   //   type: [USER_TYPE.ADMIN]
   // },
   {
-    title: 'Exploração',
+    // title: 'Exploration',
+    title: { 'pt': 'Exploração', 'en': 'Exploration' },
     // icon: PaperPlaneTilt,
     icon: ManageSearchRoundedIcon,
     href: [ROUTES.NAVIGATION, ROUTES.RESOURCES, ROUTES.PROPERTIES],
     type: [USER_TYPE.ADMIN]
   },
   {
-    title: 'Fonte de Dados',
+    // title: 'Data Sources',
+    title: { 'pt': 'Fonte de Dados', 'en': 'Data Sources' },
     icon: Database,
     href: [ROUTES.DATASOURCE_LIST],
     type: [USER_TYPE.ADMIN]
@@ -50,7 +60,8 @@ export const menuEvolve = [
 
 export const menuConsuming = [
   {
-    title: 'Consultas',
+    // title: 'Saved Queries',
+    title: { 'pt': 'Consultas', 'en': 'Saved Queries' },
     icon: Sparkle,
     href: ROUTES.QUERY_SAVED,
     type: [USER_TYPE.ADMIN]
@@ -71,7 +82,8 @@ export const menuConfig = [
   //   type: [USER_TYPE.ADMIN]
   // },
   {
-    title: 'Configurações',
+    // title: 'Configurations',
+    title: { 'pt': 'Configurações', 'en': 'Configurations' },
     icon: GearSix,
     href: ROUTES.ENDPOINT_CONFIG,
     type: [USER_TYPE.ADMIN]

@@ -27,7 +27,7 @@ import { TimelineView } from './view/navigation/Timeline';
 
 import { EndpointConfig } from './view/config/EndpointConfig';
 import { Repositories } from './view/config/Repositories';
-import { QuerySaved } from './view/querys/QuerySaved';
+import { SavedQueries } from './view/queries/SavedQueries';
 
 // import { ManageMetagraph } from './view/ekg/manage/ManageMetagraph';
 
@@ -70,7 +70,7 @@ export default function Router() {
         
         <Route path={ROUTES.ENDPOINT_CONFIG} element={<EndpointConfig />} />
         <Route path={ROUTES.REPOSITORY_LIST} element={<Repositories />} />
-        <Route path={ROUTES.QUERY_SAVED} element={<QuerySaved />} />
+        <Route path={ROUTES.QUERY_SAVED} element={<SavedQueries />} />
         
         <Route path={ROUTES.DATASOURCE_LIST} element={<DataSources />} />
         {/* <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} /> */}
