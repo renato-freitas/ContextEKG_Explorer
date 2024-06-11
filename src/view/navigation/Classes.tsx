@@ -152,8 +152,10 @@ export function Classes() {
 
 	return (
 		<div className={stylesGlobal.container}>
-			<MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Class Selection'}`} />
-
+			{/* <div style={{paddingLeft:60}}> */}
+			{/* <MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Class Selection'}`} /> */}
+			<MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Context Selection'}`} />
+			{/* </div> */}
 			<Grid container spacing={0} sx={{ p: '4px 0' }}>
 				{/* RADIO BUTTON */}
 				<Grid item xs={6} sx={{ bgcolor: null }}>
@@ -165,7 +167,7 @@ export function Classes() {
 							value={typeOfClass}
 							onChange={handleChange}
 						>
-							<FormControlLabel value="0" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Generalização" : 'Generalization'}`} sx={{
+							<FormControlLabel value="0" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Visão de Unificação" : 'Unification View'}`} sx={{
 								'.css-ahj2mt-MuiTypography-root': {
 									fontSize: '0.9rem !important',
 								},
@@ -175,11 +177,11 @@ export function Classes() {
 									fontSize: '0.9rem !important',
 								},
 							}} />
-							{/* <FormControlLabel value="2" control={<Radio size="small" />} label="Metadados" sx={{
+							<FormControlLabel value="2" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Visão de Fusão" : 'Fusion View'}`} sx={{
 								'.css-ahj2mt-MuiTypography-root': {
 									fontSize: '0.9rem !important',
 								},
-							}} /> */}
+							}} />
 						</RadioGroup>
 					</FormControl>
 				</Grid>
@@ -266,13 +268,13 @@ export function Classes() {
 						</Grid>
 						{
 							classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
-								<Paper elevation={3} sx={{ minHeight: 300, justifyContent: "space-between" }} >
+								<Paper elevation={3} sx={{ minHeight: 100, justifyContent: "space-between" }} >
 									<Stack
 										direction="column"
 										justifyContent="space-between"
 										alignItems="center"
 										spacing={2}
-										sx={{ minHeight: 300 }}
+										sx={{ minHeight: 100 }}
 									>
 										<Box display='flex' flexDirection="column" p={1}>
 											<Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
@@ -287,7 +289,8 @@ export function Classes() {
 												{classRDF?.comment?.value}
 											</Typography>
 										</Box>
-										<Box p={1} width={200} height={120} display="flex" alignItems="flex-end" justifyContent="flex-end">
+										{/* <Box p={1} width={200} height={120} display="flex" alignItems="flex-end" justifyContent="flex-end"> */}
+										<Box p={1} width={200} height={50} display="flex" alignItems="flex-end" justifyContent="flex-end">
 											{classRDF?.image?.value && <img src={classRDF?.image?.value} alt={getPropertyFromURI(classRDF?.label?.value)} className={style.img_responsive}></img>}
 										</Box>
 									</Stack>

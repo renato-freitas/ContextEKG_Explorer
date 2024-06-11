@@ -18,6 +18,8 @@ export function EndpointConfig() {
   const navigate = useNavigate()
   const [language, setLanguage] = useState<string | null>(window.localStorage.getItem('LANGUAGE'));
 
+  
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setLanguage((event.target as HTMLInputElement).value);
     window.localStorage.setItem('LANGUAGE', (event.target as HTMLInputElement).value)

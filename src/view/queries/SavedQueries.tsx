@@ -24,7 +24,10 @@ import { api } from '../../services/api';
 import { LoadingContext } from "../../App";
 import styles from '../../styles/global.module.css'
 import { MTable } from '../../components/MTable';
-import { ROUTES } from '../../commons/constants';
+import { COLORS, ROUTES } from '../../commons/constants';
+import { MDialogToConfirmDelete } from '../../components/MDialog';
+import { double_encode_uri } from '../../commons/utils';
+import { Divider } from '@mui/material';
 
 // import spfmt from 'sparql-formatter';
 
@@ -37,34 +40,51 @@ const PAPER_ELEVATION = 2
 
 export function SavedQueries() {
   const navigate = useNavigate();
-  // const [loading, setLoading] = useState<boolean>(false);
+  const [wasDeleted, setWasDeleted] = useState<boolean>(false);
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   const [savedQueries, setSavedQueries] = useState<SavedQueryModel[]>([]);
+  const [savedQueriesResult, setSavedQueriesResult] = useState([]);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState<SavedQueryModel>({} as SavedQueryModel);
 
 
   async function loadSavedQueries() {
-    // console.log("*** Lista das fontes de dados")
     try {
       setIsLoading(true);
       const response = await api.get("/queries/");
-      console.log(response.data)
-
       setSavedQueries(response.data);
       setSelectedSavedQuery(response.data[0])
     } catch (error) {
-      console.error("loadDataSources", error)
+      console.error("load saved queries", error)
     } finally {
-      // loadDataSourceProperties()
       setIsLoading(false);
+      setWasDeleted(false)
     }
   }
 
+  async function executeSavedQuery(uri: string, sparql: string) {
+    try {
+      setIsLoading(true);
+      let _sparql = double_encode_uri(sparql)
+      console.log(_sparql)
+      const response = await api.get(`/queries/execute/?uri=${uri}`)
+      setSavedQueriesResult(response.data);
+      console.log('excute result', response.data)
+    } catch (error) {
+      console.error("load saved queries", error)
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     loadSavedQueries();
   }, [])
 
+
+  const openForm = () => {
+    // console.log("*** call: Abrir formulário de Fonte de Dados ***")
+    navigate(ROUTES.SAVED_QUERY_FORM);
+  }
 
   /**Pagination */
   const [page, setPage] = useState(0);
@@ -72,7 +92,7 @@ export function SavedQueries() {
     setPage(newPage);
   };
 
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -88,6 +108,7 @@ export function SavedQueries() {
     window.scrollTo(0, 0)
   };
 
+
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
   const handleClickOpenDialogToConfirmDelete = (row: SavedQueryModel) => {
@@ -95,6 +116,17 @@ export function SavedQueries() {
     setSelectedSavedQuery(row)
     setOpenDialogToConfirmDelete(true);
   };
+  const handleRemove = async (normal_uri: string) => {
+    try {
+      let encoded_uri = double_encode_uri(normal_uri)
+      await api.delete(`/queries/?uri=${encoded_uri}`)
+      setWasDeleted(true)
+    } catch (error) {
+      alert(error)
+    }
+
+    // await loadSavedQueries();
+  }
 
 
 
@@ -109,13 +141,13 @@ export function SavedQueries() {
         <Grid item xs={8} gap={1} display='flex' justifyContent='flex-end'
           sx={{ pt: '0px !important' }}>
           <TextField id="outlined-basic" label="Pesquisar pelo nome" variant="outlined" size="small" sx={{ width: 400 }} />
-          {/* <Button variant="contained" onClick={openForm}>+ Nova Fonte de Dados</Button> */}
+          <Button variant="contained" onClick={openForm}>+ Nova Consulta</Button>
         </Grid>
       </Grid>
 
 
-      <Grid container spacing={4} sx={{ mb: 1 }}>
-        {/* DATA SOURCES */}
+      <Grid container spacing={2} sx={{ mb: 1 }}>
+        {/* CONSULTAS SALVAS */}
         <Grid item sm={6} justifyContent={'center'}>
           <MTable
             header={[["Recursos", "left"]]}
@@ -130,10 +162,10 @@ export function SavedQueries() {
           >
             {
               savedQueries.length > 0 && savedQueries.map((query, idx) => (
-                <TableRow key={idx} >
+                <TableRow key={idx} sx={{ background: `${selectedIndex == idx ? "#1976d214" : false}` }}>
                   <TableCell>
                     <Stack direction={'row'} gap={1}>
-                      <Typography>{query.name}</Typography>
+                      <Typography>{query.name.value}</Typography>
                     </Stack>
                   </TableCell>
                   <TableCell align='right' sx={{ p: "0 6px 0 0" }}>
@@ -144,7 +176,7 @@ export function SavedQueries() {
                     </Tooltip>
                     <Tooltip title="Editar">
                       <IconButton
-                        onClick={() => navigate(ROUTES.DATASOURCE_FORM, { state: query })}
+                        onClick={() => navigate(ROUTES.SAVED_QUERY_FORM, { state: query })}
                         sx={{ p: "4px !important" }}>
                         <PencilSimpleLine size={22} />
                       </IconButton>
@@ -166,8 +198,12 @@ export function SavedQueries() {
             selectedSavedQuery && <Box sx={{ width: "100%", maxWidth: PAINEL_RIGHT_SIZE }}>
               <Paper elevation={PAPER_ELEVATION}>
                 <div style={{ background: "#1976d214", padding: "0px 10px 0px 10px" }}>
-                  <h4>{selectedSavedQuery.name}</h4>
+                  <h4>{selectedSavedQuery?.name?.value}</h4>
                 </div>
+                <Divider />
+                <Typography variant="body1" sx={{ padding: "10px 10px 10px 12px" }} color="text.primary" gutterBottom>
+                  "{selectedSavedQuery?.description?.value}"
+                </Typography>
                 <List sx={{
                   width: '100%',
                   position: 'relative',
@@ -177,23 +213,54 @@ export function SavedQueries() {
                   <ListItem key={0} sx={{ pb: 0 }}>
                     <Grid container>
                       <Grid item sm={12}>
-                      <Typography variant="body2" sx={{ m: "10px 0px 0x 1px" }} color="text.secondary" gutterBottom>
-                          {/* {spfmt(selectedSavedQuery.body, indentDepth = 2)} */}
-                          {selectedSavedQuery.owner}
-                        </Typography>
+
                         <Typography variant="body2" sx={{ m: "10px 0px 0x 1px" }} color="text.secondary" gutterBottom>
-                          {/* {spfmt(selectedSavedQuery.body, indentDepth = 2)} */}
-                          {selectedSavedQuery.body}
+                          {selectedSavedQuery?.sparql?.value}
                         </Typography>
                       </Grid>
                     </Grid>
                   </ListItem>
                 </List>
+
+                {/* Botões */}
+
+                <Box display="flex" justifyContent="flex-end" padding={1}>
+                  <Button type="submit" color="primary" variant="contained"
+                    onClick={() => executeSavedQuery(selectedSavedQuery.uri.value, selectedSavedQuery?.sparql?.value)}>
+                    Excutar
+                  </Button>
+                </Box>
               </Paper>
             </Box>
           }
         </Grid>
       </Grid>
+
+      {
+        savedQueriesResult.length > 0
+          ? <Grid container>
+            <Grid item sm={12}>
+              {
+                savedQueriesResult.map((row, idx) => <><Typography variant='body1'>
+                  {JSON.stringify(row)}
+                </Typography>
+                  <br />
+                </>
+                )
+              }
+
+            </Grid>
+          </Grid>
+          : false
+      }
+
+
+      <MDialogToConfirmDelete
+        openConfirmDeleteDialog={openDialogToConfirmDelete}
+        setOpenConfirmDeleteDialog={setOpenDialogToConfirmDelete}
+        deleteInstance={handleRemove}
+        instance={selectedSavedQuery}
+      />
     </div>
   );
 }

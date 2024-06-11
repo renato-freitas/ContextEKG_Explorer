@@ -31,16 +31,15 @@ export function getPropertyFromURI(uri: string | undefined): string {
 }
 
 export function getContextFromURI(uri: string): string {
+  let lastToken2: string = ""
   if (uri) {
-    let splitOne = uri?.split("/resource/")
+    let splitOne = uri.split("/resource/")
     let lastToken1 = splitOne[1]
 
     let split2 = lastToken1.split("/")
-    let lastToken2: string
     lastToken2 = split2[0]
-    return lastToken2
   }
-  return "";
+  return lastToken2
 }
 
 export function getClassFromURI(uri: string): string {
@@ -127,9 +126,9 @@ export function getDateFromInstantTimelin(instantURI: string): string {
     data = `${split2[1]}-${split2[2]}-${day}`
     // data = decodeURIComponent(`${split2[1]}-${split2[2]}-${day}`)
     const hora = decodeURIComponent("T" + split2[3].split('T')[1])
-    const asDate = new Date(data+hora)
+    const asDate = new Date(data + hora)
     // console.log(asDate.toLocaleDateString("pt-BR"), asDate.toLocaleTimeString())
-    return asDate.toLocaleDateString("pt-BR") +" "+asDate.toLocaleTimeString()
+    return asDate.toLocaleDateString("pt-BR") + " " + asDate.toLocaleTimeString()
   }
   return "";
 }

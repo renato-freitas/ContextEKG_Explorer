@@ -141,7 +141,8 @@ export const ROUTES = {
 
   ENDPOINT_CONFIG: "/endpoint-config",
   REPOSITORY_LIST: "/repositories",
-  QUERY_SAVED: "/query-saved",
+  SAVED_QUERY: "/saved-queries",
+  SAVED_QUERY_FORM: "/saved-query-form",
 
   DATASOURCE_LIST: "/datasources",
   DATASOURCE_FORM: "/datasources-form",
@@ -226,6 +227,7 @@ export const EKG_CONTEXT_VOCABULARY = {
     CSV_FILE: "https://www.ntnu.no/ub/ontologies/csv#CsvDocument"
   },
   PROPERTY: {
+    SAMEAS: `${NAMESPACES.OWL}sameAs`,
     RDF_TYPE: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
     IS_A: `${NAMESPACES.RDF}type`,
     LABEL: `${NAMESPACES.RDFS}label`,
@@ -275,7 +277,9 @@ export const NUMBERS = {
   IDX_UNIFICATION_VIEW: -2,
   IDX_SELECTED_VIEW: -1,
   GENERALIZATION_CLASS_NUMBER: "0",
-  EXPORTED_CLASS_NUMBER: "1"
+  EXPORTED_CLASS_NUMBER: "1",
+  GRAPHDB_BROWSER_CONFIG: "&config=636bec7f4b2446018b09e14ad8bd9117"
+  
 }
 
 // https://encycolorpedia.pt/1976d2

@@ -29,14 +29,14 @@ export function TopBar() {
             edge="start"
             color="inherit"
             aria-label="menu"
-            sx={{ mr: 2 }}
+            sx={{ pl: 30 }}
           >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {/* EKG Context Explorer | EKG Explorer | ContestoGraph | ConGraphex | GraphConex */}
-            {/* ContestoGraph | ExpGraph |  */}
-            EKG Context Explorer
+            {/* EKG Context Explorer | EKG Explorer | ContestoGraph | ConGraphex | GraphConex | ExpGraph | 
+            ContextEKG Navigator | ContextEKG Explorer*/}
+            ContextEKG Explorer
           </Typography>
           <Chip 
             size="small"
@@ -44,7 +44,7 @@ export function TopBar() {
             sx={{ bgcolor: `${COLORS.AMARELO_01}` }}
             onClick={() => navigate(ROUTES.REPOSITORY_LIST)}
           />
-          <Button color="inherit">Login</Button>
+          <Button color="inherit" sx={{ mr: 15}}>Login</Button>
         </Toolbar>
       </AppBar>
       <Offset />

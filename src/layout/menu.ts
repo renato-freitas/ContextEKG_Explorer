@@ -63,7 +63,7 @@ export const menuConsuming = [
     // title: 'Saved Queries',
     title: { 'pt': 'Consultas', 'en': 'Saved Queries' },
     icon: Sparkle,
-    href: ROUTES.QUERY_SAVED,
+    href: ROUTES.SAVED_QUERY,
     type: [USER_TYPE.ADMIN]
   },
   // {

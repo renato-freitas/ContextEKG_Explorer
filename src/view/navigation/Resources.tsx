@@ -28,9 +28,9 @@ export function Resources() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const { contextClassRDF, setContextClassRDF } = useContext(ClassRDFContext);
+  const { contextClassRDF } = useContext(ClassRDFContext);
   const [page, setPage] = useState(0);
-  const [selectedClass, setSelectedClass] = useState<string>("");
+  // const [, setSelectedClass] = useState<string>("");
   const [selectedClassRDF, setSelectedClassRDF] = useState<ClassModel>();
   const [selectedResource, setSelectedResource] = useState<ResourceModel>();
   const [resources, setResources] = useState<ResourceModel[]>([]);
@@ -41,17 +41,18 @@ export function Resources() {
   const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
 
 
-  async function loadResourcesOfSelectedClass(typeOfClass: string, newPage: number) {
+  async function loadResourcesOfSelectedClass(classURI: string, typeOfClass: string, newPage: number) {
     let response: any
     try {
       setIsLoading(true)
       console.log('nome procurado:', labelToSearch)
-      let uri = double_encode_uri(contextClassRDF.classURI.value)
+      // let uri = double_encode_uri(contextClassRDF.classURI.value)
+      let uri = double_encode_uri(classURI)
       if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
-        response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
+        response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${selectedLanguage}`)
       }
       else {
-        response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}`)
+        response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${selectedLanguage}`)
       }
       console.log('recursos da classe:', response.data)
     } catch (error) {
@@ -66,17 +67,19 @@ export function Resources() {
     }
   }
 
-  async function getTotalResources(RDFClass: string) {
+  /**Esse total de recursos é para saber até onde paginar */
+  async function getTotalResources(classURI: string, typeOfClass: string) {
     let response: any
     try {
-      // let uri = double_encode_uri(RDFClass)
-      let uri = double_encode_uri(contextClassRDF.classURI.value)
-      response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}`)
+      let uri = double_encode_uri(classURI)
+      // let uri = double_encode_uri(contextClassRDF.classURI.value)
+      let if_sameas = typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER ? true : false
+      response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}&sameas=${if_sameas}`)
+      setTotalOfResources(response.data)
     } catch (error) {
       console.log(`><`, error);
     } finally {
       setTimeout(() => {
-        setTotalOfResources(response.data)
         console.log(`total:`, response.data)
         // console.log(`total: `, typeof response.data)
         // setPage(0);
@@ -97,16 +100,16 @@ export function Resources() {
             console.log('^^', _state)
             let classURI = _state.classRDF.classURI?.value as string
             // console.log('classe escolhida:', classRDF.classURI?.value)
-            setSelectedClass(classURI)
+            // setSelectedClass(classURI)
             setSelectedClassRDF(_state.classRDF)
             setTypeOfSelectedClass(_state.typeOfClass)
-            loadResourcesOfSelectedClass(_state.typeOfClass, page)
-            getTotalResources(classURI)
+            loadResourcesOfSelectedClass(classURI, _state.typeOfClass, page)
+            getTotalResources(classURI, _state.typeOfClass)
           }
           else {
             console.log('react.context class rdf:', contextClassRDF)
-            loadResourcesOfSelectedClass(contextClassRDF.classURI.value, page)
-            getTotalResources(contextClassRDF.classURI.value)
+            loadResourcesOfSelectedClass(contextClassRDF.classURI.value, typeOfSelectedClass, page)
+            getTotalResources(contextClassRDF.classURI.value, typeOfSelectedClass)
           }
         }
         else {
@@ -130,13 +133,12 @@ export function Resources() {
     navigate(ROUTES.PROPERTIES, { state: {resource_uri:resource.uri.value, typeOfClass: typeOfSelectedClass} })
   };
 
-  const changeBgColorCard = (idx: Number) => selectedIndex == idx ? "#edf4fc" : "None";
 
 
   /**Pagination */
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
-    loadResourcesOfSelectedClass(selectedClassRDF?.classURI?.value as string, newPage)
+    loadResourcesOfSelectedClass(selectedClassRDF?.classURI?.value as string, typeOfSelectedClass, newPage)
   };
 
   const [rowsPerPage, setRowsPerPage] = useState(6);
@@ -215,20 +217,12 @@ export function Resources() {
               loading={false}
             >
               {
-                // (rowsPerPage > 0
-                //   ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                //   : resources
-                // ).map((resource, idx) => (
-                // resources.length > 0 && resources.map((resource, idx) => (
-                resources.length > 0 && (rowsPerPage > 0
-                  ? resources.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  : resources
-                ).map((resource, idx) => (
+                resources.length > 0 && resources.map((resource, idx) => (
                   <TableRow key={idx} >
                     <TableCell>
                       {/* <Stack direction={'row'} gap={1}> */}
                       {/* {DATASOURCE_TYPES_ICONS[resource?.type?.value]} */}
-                      <Typography>{resource.label.value}</Typography>
+                      <Typography sx={{ whiteSpace: 'pre-line'}}>{resource.label.value}</Typography>
                       {/* </Stack> */}
                     </TableCell>
                     <TableCell>
