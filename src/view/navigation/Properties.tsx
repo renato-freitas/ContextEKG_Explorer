@@ -25,6 +25,7 @@ import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES } from '../../commons/c
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from './navigation.module.css'
 import { Divider } from '@mui/material';
+import { LocalConvenienceStoreOutlined } from '@mui/icons-material';
 const HAS_LABEL = 1
 const HAS_PROVENANCE = 2
 const HAS_DIVERGENCY = 3
@@ -51,6 +52,7 @@ export function Properties() {
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
   const [linkedData, setLinkedData] = useState<any>({});
   const [contextos, setContextos] = useState<any>({})
+  const [linksSameAs, setLinksSameAs] = useState<any[]>([])
   const [selectedIndex, setSelectedIndex] = useState<Number | undefined>(undefined);
   const [typeOfSelectedClass, setTypeOfSelectedClass] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
@@ -77,20 +79,40 @@ export function Properties() {
     }
   }
 
-  // useEffect(() => {
-  //   let n1 = 'Gilberto Passos Gil'
-  //   let n2 = ''
-  //   let n3 = 'Gilberto Gil'
-  //   const aname = fusionOfName(n1,n2,n3,"")
-  //   console.log('-----fusion name-----\n', aname)
-  // },[])
+  /** Carrega os links sameas do recurso selecionado*/
+  async function loadSameAs(uri: string) {
+    try {
+      if (uri) {
+        let _uri = double_encode_uri(uri);
+        const response = await api.get(`/sameas/?resourceURI=${_uri}`)
+        console.log('-------links sameas-----\n', response.data)
+        setLinksSameAs(response.data)
+      }
+    } catch (error) {
+      alert(JSON.stringify(error));
+    } finally {
+    }
+  }
 
   useEffect(() => {
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       if (location?.state) {
-
         let { resource_uri, typeOfClass } = location.state as any;
+        loadSameAs(resource_uri)
+      }
+    }
+    else {
+      navigate(ROUTES.REPOSITORY_LIST)
+    }
+  }, [])
+
+  useEffect(() => {
+    const _repo_in_api_header = api.defaults.headers.common['repo']
+    if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
+      if (location?.state) {
+        let { resource_uri, typeOfClass } = location.state as any;
+
         console.log('contexto selecionado: ', resource_uri, typeOfClass)
         loadPropertiesOfSelectedResource(resource_uri, typeOfClass)
         setUriOfSelectedResource(resource_uri)
@@ -120,6 +142,7 @@ export function Properties() {
       navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: "0" } })
     }
     else {
+      console.log('-------chamando visão de fusão---------\n')
       navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: "2" } })
     }
   };
@@ -157,7 +180,7 @@ export function Properties() {
   return (
     <div className={stylesGlobal.container}>
       {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */}
-      <div style={{ paddingLeft: 60 }}> 
+      <div style={{ paddingLeft: 60 }}>
         <MHeader
           title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
           hasButtonBack
@@ -204,14 +227,14 @@ export function Properties() {
                   ? Object.keys(agroupedProperties).length > 0 && <Box sx={{ width: "100%" }}>
                     <Paper sx={{ background: "None" }} elevation={0}>
                       <List
-                      sx={{
-                        width: '100%',
-                        bgcolor: 'background.paper',
-                        position: 'relative',
-                        overflow: 'auto'
-                      }}>
+                        sx={{
+                          width: '100%',
+                          bgcolor: 'background.paper',
+                          position: 'relative',
+                          overflow: 'auto'
+                        }}>
                         {/* CLASSES DISTINTAS */}
-                        <ListItem key={-3} sx={{pl:0}}>
+                        <ListItem key={-3} sx={{ pl: 0 }}>
                           <Grid container spacing={2}>
                             <Grid item sm={WIDTH_OF_P}>
                               <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
@@ -242,7 +265,7 @@ export function Properties() {
                         {/* IMAGENS */}
                         {
                           agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL] != undefined
-                          && <ListItem key={-2} sx={{pt:"2px"}}>
+                          && <ListItem key={-2} sx={{ pt: "2px" }}>
                             <Grid container spacing={2}>
                               <Grid item sm={WIDTH_OF_P}>
                                 <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
@@ -318,7 +341,7 @@ export function Properties() {
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT &&
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL &&
                               propOfResource != "http://www.arida.ufc.br/ontologies/timeline#has_timeline") &&
-                              <ListItem key={idx + propOfResource} sx={{pt:"2px", pb:"1px"}}>
+                              <ListItem key={idx + propOfResource} sx={{ pt: "2px", pb: "1px" }}>
                                 <Grid container spacing={2}>
 
                                   <Grid item sm={WIDTH_OF_P}>
@@ -339,7 +362,7 @@ export function Properties() {
                                             textAlign={'justify'}>
                                             { /** values[0] contém o valor literal da propriedade */
                                               values[0].toLowerCase().includes("http") &&
-                                              agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.every((ele:string[]) => values[0].includes(getContextFromURI(ele[0])))
+                                                agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.every((ele: string[]) => values[0].includes(getContextFromURI(ele[0])))
                                                 ? <><Link
                                                   align='left'
                                                   underline="none"
@@ -400,6 +423,94 @@ export function Properties() {
 
             {/* MENU DE CONTEXTOS (LADO DIREITO) */}
             <Grid item sm={2.5}>
+              {
+                linksSameAs.length > 1 ? <List sx={{
+                  width: '100%',
+                  bgcolor: 'background.paper',
+                  position: 'relative',
+                  overflow: 'auto',
+                  padding: 0
+                }}>
+                  {console.log('_::_', agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))}
+                  {
+                    agroupedProperties && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
+                    && <ListItem key={-4} disablePadding>
+                      <ListItemButton
+                        selected={selectedIndex === -4}
+                        sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                        onClick={() => navigate(ROUTES.TIMELINE, {
+                          state: {
+                            resourceURI: Object.keys(agroupedProperties)[0],
+                            contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))
+                          } as stateProps
+                        })}
+                      >
+                        <ListItemIcon sx={{ minWidth: '30px' }}>
+                          <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                        </ListItemIcon>
+                        <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                      </ListItemButton>
+                    </ListItem>
+                  }
+
+                  <ListItem key={NUMBERS.IDX_FUSION_VIEW} disablePadding>
+                    <ListItemButton
+                      selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
+                      onClick={() => handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, linksSameAs[0].sameas.value)}
+                      sx={{ bgcolor: selectedIndex === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                    >
+                      <ListItemIcon sx={{ minWidth: '30px' }}>
+                        <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                      </ListItemIcon>
+                      <ListItemText primary={estaEmPortugues ? "Visão de Fusão" : "Fusion View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                    </ListItemButton>
+                  </ListItem>
+
+
+
+                  <ListItem key={NUMBERS.IDX_UNIFICATION_VIEW} disablePadding>
+                    <ListItemButton
+                      selected={selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW}
+                      onClick={() => handleSelectedContextClick(NUMBERS.IDX_UNIFICATION_VIEW, linksSameAs[0].sameas.value)}
+                      sx={{ bgcolor: selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                    >
+                      <ListItemIcon sx={{ minWidth: '30px' }}>
+                        <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                      </ListItemIcon>
+                      <ListItemText primary={estaEmPortugues ? "Visão de Unificação" : "Unification View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                    </ListItemButton>
+                  </ListItem>
+
+
+                  {
+                    linksSameAs.map((row: any, idx: Key) => {
+                      console.log('--', row)
+                      const _sameas_context = getContextFromURI(row.sameas.value)
+                      return (
+                        <ListItem key={idx} disablePadding>
+                          <ListItemButton
+                            selected={selectedIndex === idx}
+                            onClick={() => handleSelectedContextClick(idx as Number, row.sameas.value)}
+                            sx={{ bgcolor: selectedIndex === idx ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                          >
+                            <ListItemIcon sx={{ minWidth: '30px' }}>
+                              <Database size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                            </ListItemIcon>
+                            <ListItemText primary={estaEmPortugues ? 'VSE ' + _sameas_context : 'ESV ' + _sameas_context} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                          </ListItemButton>
+                        </ListItem>
+                      )
+                    })
+                  }
+
+
+
+                </List>
+                  : Object.keys(agroupedProperties).length > 0 && <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
+              }
+            </Grid>
+
+            {/* <Grid item sm={2.5}>
               {
                 Object.keys(agroupedProperties).length > 0 ? <List sx={{
                   width: '100%',
@@ -471,7 +582,6 @@ export function Properties() {
                   }
 
 
-                  {/* ÁREA PARA O TIMELINE */}
                   { console.log('_::_',agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))}
                   {
                     agroupedProperties && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
@@ -482,10 +592,7 @@ export function Properties() {
                         onClick={() => navigate(ROUTES.TIMELINE, {
                           state: {
                             resourceURI: Object.keys(agroupedProperties)[0],
-                            // contextos: contextos
-                            // contextos: [].push(Object.keys(agroupedProperties)[0]) concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[], idx: Key) => same[0]))
                             contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0])) 
-                            // + agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[], idx: Key) => same[0])
                           } as stateProps
                         })}
                       >
@@ -499,7 +606,7 @@ export function Properties() {
                 </List>
                   : Object.keys(agroupedProperties).length > 0 && <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
               }
-            </Grid>
+            </Grid> */}
 
           </Grid> /**container 2 */
         }
@@ -609,39 +716,39 @@ export function Properties() {
 
 
 /** Carrega os links semas e as propriedade unificadas se for uma classe de Generealização */
-  // async function loadSameAs(uri: string, typeOfClass: string) {
-  //   try {
-  //     if (uri) {
-  //       setProperties([])
-  //       let _uri = double_encode_uri(uri);
-  //       const response = await api.get(`/links/?sameas=${_uri}`)
-  //       console.log('===LOAD SAMEAS===\n', response.data)
+// async function loadSameAs(uri: string, typeOfClass: string) {
+//   try {
+//     if (uri) {
+//       setProperties([])
+//       let _uri = double_encode_uri(uri);
+//       const response = await api.get(`/links/?sameas=${_uri}`)
+//       console.log('===LOAD SAMEAS===\n', response.data)
 
-  //       if (Object.keys(contextos).length == 0) setContextos(response.data)
+//       if (Object.keys(contextos).length == 0) setContextos(response.data)
 
-  //       if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
-  //         loadUnification(response.data)
-  //       }
-  //     }
-  //   } catch (error) {
-  //     alert(JSON.stringify(error));
-  //   } finally {
-  //   }
-  // }
+//       if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
+//         loadUnification(response.data)
+//       }
+//     }
+//   } catch (error) {
+//     alert(JSON.stringify(error));
+//   } finally {
+//   }
+// }
 
-  // async function loadUnification(object: any) {
-  //   let response: any
-  //   try {
-  //     setIsLoading(true)
-  //     setProperties([])
-  //     response = await api.post(`/properties/unification/`, { resources: object })
-  //     console.log('====PROPRIEDADES UNIFICADAS===', response.data)
-  //   } catch (error) {
-  //     alert(JSON.stringify(error));
-  //   } finally {
-  //     setTimeout(() => {
-  //       setAgroupedProperties(response.data)
-  //       setIsLoading(false)
-  //     }, NUMBERS.TIME_OUT_FROM_REQUEST)
-  //   }
-  // }
+// async function loadUnification(object: any) {
+//   let response: any
+//   try {
+//     setIsLoading(true)
+//     setProperties([])
+//     response = await api.post(`/properties/unification/`, { resources: object })
+//     console.log('====PROPRIEDADES UNIFICADAS===', response.data)
+//   } catch (error) {
+//     alert(JSON.stringify(error));
+//   } finally {
+//     setTimeout(() => {
+//       setAgroupedProperties(response.data)
+//       setIsLoading(false)
+//     }, NUMBERS.TIME_OUT_FROM_REQUEST)
+//   }
+// }
