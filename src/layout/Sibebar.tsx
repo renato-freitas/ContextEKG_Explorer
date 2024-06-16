@@ -13,6 +13,7 @@ import { Component, Key, useState } from 'react';
 import { string } from 'zod';
 const MENU_FONTE_SIZE = "0.7rem"
 const MENU_ICON_SIZE = 20
+const PADDING_LEFT_ITEMS = 1.3
 
 interface itemProps {
   title: {},
@@ -25,7 +26,8 @@ export function Sidebar() {
   const { pathname } = useLocation();
   const [selectedLanguage, setSelectecLanguage] = useState<string>(window.localStorage.getItem('LANGUAGE') as any)
   return (
-    <Paper elevation={3} sx={{position: 'absolute', ml: 0.3, mt:1}}>
+    // <Paper elevation={3} sx={{position: 'absolute', ml: 0.3, mt:1}}>
+    <Paper elevation={3} sx={{position: 'absolute', ml: 18, mt:1, width:90}}>
       <SidebarContainer>
         <List>
           {
@@ -34,7 +36,11 @@ export function Sidebar() {
               // <ListItem key={item.title['pt']} disablePadding>
               <ListItem key={index} disablePadding>
                 {/* <ListItemButton component={NavLink} to={item.href} selected={pathname === item.href}> */}
-                <ListItemButton component={NavLink} to={item.href[0]} selected={item.href.includes(pathname) == true}>
+                <ListItemButton 
+									sx={{pl:PADDING_LEFT_ITEMS}}
+									component={NavLink} 
+									to={item.href[0]} 
+									selected={item.href.includes(pathname) == true}>
                   <Stack direction={'column'} >
                     <ListItemIcon>
                       <item.icon size={MENU_ICON_SIZE} />
@@ -51,7 +57,10 @@ export function Sidebar() {
         <List>
           {menuConsuming.map((item:any, index) => (
             <ListItem key={item.title[selectedLanguage]} disablePadding>
-              <ListItemButton component={NavLink} to={item.href}>
+              <ListItemButton 
+								sx={{pl:PADDING_LEFT_ITEMS}}
+								component={NavLink} 
+								to={item.href}>
                 <Stack direction={'column'}>
                   <ListItemIcon>
                     <item.icon size={MENU_ICON_SIZE} />
@@ -66,7 +75,9 @@ export function Sidebar() {
         <List sx={{pb:15, height:10}}>
           {menuConfig.map((item:any, index) => (
             <ListItem key={item.title['pt']} disablePadding>
-              <ListItemButton component={NavLink} to={item.href}>
+              <ListItemButton 
+								sx={{pl:PADDING_LEFT_ITEMS}}
+								component={NavLink} to={item.href}>
                 <Stack direction={'column'}>
                   <ListItemIcon>
                     <item.icon size={MENU_ICON_SIZE} />

@@ -211,7 +211,7 @@ export function SavedQueryForm() {
 
                   <Grid item sm={5} gap={1}>
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="name">Nome</FormLabel>
+                      <FormLabel htmlFor="name">Nome*</FormLabel>
                       <TextField
                         variant="outlined"
                         placeholder="Ex: artistas-nordestinos"
@@ -222,7 +222,7 @@ export function SavedQueryForm() {
                     </FormControl>
 
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="description">Descrição</FormLabel>
+                      <FormLabel htmlFor="description">Descrição*</FormLabel>
                       <TextField
                         multiline
                         rows={6}
@@ -251,7 +251,7 @@ export function SavedQueryForm() {
 
                   <Grid item sm={7}>
                     <FormControl fullWidth>
-                      <FormLabel htmlFor="title">Consulta SPARQL</FormLabel>
+                      <FormLabel htmlFor="title">Consulta SPARQL*</FormLabel>
                       <TextField
                         multiline
                         rows={10}

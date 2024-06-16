@@ -12,11 +12,12 @@ interface TitleProps {
   buttonBackNavigateTo?: string;
   buttonLabel?: string | null | undefined;
   chip?: React.ReactElement;
+  state?: object;
   openForm?: () => void
 }
 
 /** Esse componente tem como base um Grid.Container.12 */
-export const MHeader = ({ title, hasButtonBack, buttonBackNavigateTo, buttonLabel, chip, openForm }: TitleProps) => {
+export const MHeader = ({ title, hasButtonBack, buttonBackNavigateTo, state, buttonLabel, chip, openForm }: TitleProps) => {
   const navigate = useNavigate();
   return (
     <Grid container>
@@ -25,7 +26,7 @@ export const MHeader = ({ title, hasButtonBack, buttonBackNavigateTo, buttonLabe
           {
             buttonBackNavigateTo && hasButtonBack
               ?
-              <IconButton onClick={() => navigate(buttonBackNavigateTo)} sx={{ p: "0.2px 0" }}>
+              <IconButton onClick={() => navigate(buttonBackNavigateTo, state)} sx={{ p: "0.2px 0" }}>
                 <CaretCircleLeft size={30} />
               </IconButton>
               : !buttonBackNavigateTo && hasButtonBack ? <IconButton onClick={() => navigate(-1)} sx={{ p: "0.2px 0" }}>

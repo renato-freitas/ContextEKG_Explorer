@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Key } from 'react';
+import React, { useState, useEffect, useContext, Key, useDebugValue } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -29,6 +29,11 @@ const HAS_LABEL = 1
 const HAS_PROVENANCE = 2
 const HAS_DIVERGENCY = 3
 const BULLET_SIZE = 4
+const FONTSIZE_PROPERTY = 15
+const FONTWEIGHT_PROPERTY = 450
+const FONTSEZE_VALUE_PROPERTY = "0.69rem"
+const WIDTH_OF_P = 2.5
+const WIDTH_OF_O = 9.5
 
 // https://medium.com/@lucas_pinheiro/como-adicionar-internacionaliza%C3%A7%C3%A3o-i18n-na-sua-aplica%C3%A7%C3%A3o-react-a1ac4aea109d
 
@@ -60,7 +65,7 @@ export function Properties() {
       setProperties([])
       // let _uri = double_encode_uri(uri);
       // console.log('-URI', _uri)
-      response = await api.get(`/properties/?resourceURI=${uri}&typeOfView=${typeOfView}&language=pt`)
+      response = await api.get(`/properties/?resourceURI=${uri}&typeOfView=${typeOfView}&language=${selectedLanguage}`)
       console.log('props', response.data)
       setAgroupedProperties(response.data)
     } catch (error) {
@@ -72,43 +77,13 @@ export function Properties() {
     }
   }
 
-  /** Carrega os links semas e as propriedade unificadas se for uma classe de Generealização */
-  // async function loadSameAs(uri: string, typeOfClass: string) {
-  //   try {
-  //     if (uri) {
-  //       setProperties([])
-  //       let _uri = double_encode_uri(uri);
-  //       const response = await api.get(`/links/?sameas=${_uri}`)
-  //       console.log('===LOAD SAMEAS===\n', response.data)
-
-  //       if (Object.keys(contextos).length == 0) setContextos(response.data)
-
-  //       if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
-  //         loadUnification(response.data)
-  //       }
-  //     }
-  //   } catch (error) {
-  //     alert(JSON.stringify(error));
-  //   } finally {
-  //   }
-  // }
-
-  // async function loadUnification(object: any) {
-  //   let response: any
-  //   try {
-  //     setIsLoading(true)
-  //     setProperties([])
-  //     response = await api.post(`/properties/unification/`, { resources: object })
-  //     console.log('====PROPRIEDADES UNIFICADAS===', response.data)
-  //   } catch (error) {
-  //     alert(JSON.stringify(error));
-  //   } finally {
-  //     setTimeout(() => {
-  //       setAgroupedProperties(response.data)
-  //       setIsLoading(false)
-  //     }, NUMBERS.TIME_OUT_FROM_REQUEST)
-  //   }
-  // }
+  // useEffect(() => {
+  //   let n1 = 'Gilberto Passos Gil'
+  //   let n2 = ''
+  //   let n3 = 'Gilberto Gil'
+  //   const aname = fusionOfName(n1,n2,n3,"")
+  //   console.log('-----fusion name-----\n', aname)
+  // },[])
 
   useEffect(() => {
     const _repo_in_api_header = api.defaults.headers.common['repo']
@@ -133,6 +108,7 @@ export function Properties() {
 
   // const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW && index != NUMBERS.IDX_FUSION_VIEW
   const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW && index != NUMBERS.IDX_FUSION_VIEW
+  const ehVisaoUnificacao = (index: Number) => index == NUMBERS.IDX_UNIFICATION_VIEW
 
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
@@ -140,7 +116,7 @@ export function Properties() {
     if (ehVisaoExportada(index)) {
       navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: "1" } })
     }
-    else if (index == NUMBERS.IDX_UNIFICATION_VIEW) {
+    else if (ehVisaoUnificacao(index)) {
       navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: "0" } })
     }
     else {
@@ -158,7 +134,7 @@ export function Properties() {
     try {
       console.log('===URI DO LINK===', uri)
       setLinkedData({ link: uri, index: selectedIndex })
-      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
+      navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
     } catch (error) {
       console.log(error)
     } finally {
@@ -180,7 +156,8 @@ export function Properties() {
 
   return (
     <div className={stylesGlobal.container}>
-      <div style={{ paddingLeft: 60 }}>
+      {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */}
+      <div style={{ paddingLeft: 60 }}> 
         <MHeader
           title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
           hasButtonBack
@@ -226,21 +203,22 @@ export function Properties() {
                 selectedIndex != -4
                   ? Object.keys(agroupedProperties).length > 0 && <Box sx={{ width: "100%" }}>
                     <Paper sx={{ background: "None" }} elevation={0}>
-                      <List sx={{
+                      <List
+                      sx={{
                         width: '100%',
                         bgcolor: 'background.paper',
                         position: 'relative',
-                        overflow: 'auto',
+                        overflow: 'auto'
                       }}>
                         {/* CLASSES DISTINTAS */}
-                        <ListItem key={-3}>
+                        <ListItem key={-3} sx={{pl:0}}>
                           <Grid container spacing={2}>
-                            <Grid item sm={2}>
-                              <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "end" }} color="text.primary" gutterBottom>
-                                {estaEmPortugues ? 'type' : 'tipo'}
+                            <Grid item sm={WIDTH_OF_P}>
+                              <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
+                                {estaEmPortugues ? 'é um' : 'is a'}
                               </Typography>
                             </Grid>
-                            <Grid item sm={10}>
+                            <Grid item sm={WIDTH_OF_O}>
                               <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                 textAlign={'justify'}>
                                 {
@@ -264,21 +242,21 @@ export function Properties() {
                         {/* IMAGENS */}
                         {
                           agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL] != undefined
-                          && <ListItem key={-2}>
+                          && <ListItem key={-2} sx={{pt:"2px"}}>
                             <Grid container spacing={2}>
-                              <Grid item sm={2}>
-                                <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "end" }} color="text.primary" gutterBottom>
-                                  {estaEmPortugues ? 'image' : 'imagem'}
+                              <Grid item sm={WIDTH_OF_P}>
+                                <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
+                                  {estaEmPortugues ? 'imagem' : 'image'}
                                 </Typography>
                               </Grid>
-                              <Grid item sm={10}>
+                              <Grid item sm={WIDTH_OF_O}>
                                 <Stack direction={'row'} spacing={2} justifyContent={'flex-start'} alignItems={"center"} textAlign={'justify'}>
                                   {
                                     agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL].map((fig: any, i: React.Key | null | undefined) => {
                                       return <><Box p={0} width={130} height={135} key={i}>
                                         <img src={fig[0]} alt={fig[0]} className={styleNavigation.img_in_properties}></img>
                                       </Box>
-                                        <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
+                                        <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
                                           {/* values[1] contém a proveniência do dados (na visão de unificação) */}
                                           {fig[HAS_PROVENANCE]}
                                         </Typography>
@@ -299,12 +277,12 @@ export function Properties() {
                             && agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined)
                           && <ListItem key={-1}>
                             <Grid container spacing={2}>
-                              <Grid item sm={2}>
-                                <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "end" }} color="text.primary" gutterBottom>
+                              <Grid item sm={WIDTH_OF_P}>
+                                <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
                                   {estaEmPortugues ? 'descrição' : 'description'}
                                 </Typography>
                               </Grid>
-                              <Grid item sm={10}>
+                              <Grid item sm={WIDTH_OF_O}>
                                 {
                                   agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION].concat(
                                     agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION],
@@ -315,7 +293,7 @@ export function Properties() {
                                       <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                         <Circle size={BULLET_SIZE} weight="fill" /> {`${values[0]}`}
                                       </Typography>
-                                      <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
+                                      <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
                                         {values[HAS_PROVENANCE]}
                                       </Typography>
                                     </Stack>
@@ -334,16 +312,17 @@ export function Properties() {
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.LABEL &&
                               propOfResource != "http://www.bigdatafortaleza.com/ontology#uri" &&
                               propOfResource != "http://purl.org/dc/elements/1.1/identifier" &&
+                              propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS &&
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION &&
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION &&
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT &&
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL &&
                               propOfResource != "http://www.arida.ufc.br/ontologies/timeline#has_timeline") &&
-                              <ListItem key={idx + propOfResource}>
-                                <Grid container spacing={1.5}>
+                              <ListItem key={idx + propOfResource} sx={{pt:"2px", pb:"1px"}}>
+                                <Grid container spacing={2}>
 
-                                  <Grid item sm={2}>
-                                    <Typography sx={{ fontSize: 13, fontWeight: 600, textAlign: "end" }} color="text.primary" gutterBottom>
+                                  <Grid item sm={WIDTH_OF_P}>
+                                    <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
                                       {
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource][0][HAS_LABEL] == ""
                                           ? getPropertyFromURI(propOfResource)
@@ -352,14 +331,15 @@ export function Properties() {
                                     </Typography>
                                   </Grid>
 
-                                  <Grid item sm={10}>
+                                  <Grid item sm={WIDTH_OF_O}>
                                     <Stack direction={"column"} key={idx}>
                                       { /** VALORES DAS PROPRIEDADES */
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource].map((values: any, i: React.Key) => {
                                           return <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                             textAlign={'justify'}>
                                             { /** values[0] contém o valor literal da propriedade */
-                                              values[0].toLowerCase().includes("http://") && values[0].toLowerCase().includes("resource")
+                                              values[0].toLowerCase().includes("http") &&
+                                              agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.every((ele:string[]) => values[0].includes(getContextFromURI(ele[0])))
                                                 ? <><Link
                                                   align='left'
                                                   underline="none"
@@ -369,7 +349,7 @@ export function Properties() {
                                                 >
                                                   <Circle size={BULLET_SIZE} weight="fill" color='#000' /> {values[0]}
                                                 </Link>
-                                                  <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
+                                                  <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
                                                     {/* values[1] contém a proveniência do dados (na visão de unificação) */}
                                                     {values[HAS_PROVENANCE]}
                                                   </Typography>
@@ -378,19 +358,20 @@ export function Properties() {
                                                   <Circle size={BULLET_SIZE} weight="fill" /> {values[0]}
                                                 </Typography>
                                                   {
-                                                    (values[0].toLowerCase().includes("http") && !values[0].toLowerCase().includes("resource")) &&
+
+                                                    values[0].toLowerCase().includes("http") &&
                                                     <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                                       <a href={values[0]} target='_blank'><ArrowSquareOut size={14} /></a>
                                                     </Typography>
                                                   }
 
-                                                  <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.68rem" }} color="text.secondary" gutterBottom>
+                                                  <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
                                                     {/* values[1] contém a proveniência do dados (na visão de unificação) */}
                                                     {values[HAS_PROVENANCE]}
                                                   </Typography>
-                                                  <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.40rem" }} color="text.secondary" gutterBottom>
+                                                  <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.50rem" }} color="text.secondary" gutterBottom>
                                                     {/* values[2] == true siginifica que há divergência nos valores da propriedade */}
-                                                    {values[HAS_DIVERGENCY] == true && <Chip label={estaEmPortugues ? "divergência" : "divergence"} size="small" icon={<Asterisk size={12} color='#ed0215' />} style={{ backgroundColor: '#d7c84b22', fontSize: "0.60rem" }} />}
+                                                    {values[HAS_DIVERGENCY] == true && <Chip label={estaEmPortugues ? "divergência" : "divergence"} size="small" icon={<Asterisk size={12} color='#ed0215' />} style={{ backgroundColor: '#d7c84b22', fontSize: FONTSEZE_VALUE_PROPERTY }} />}
                                                   </Typography>
                                                 </>
                                             }
@@ -491,15 +472,20 @@ export function Properties() {
 
 
                   {/* ÁREA PARA O TIMELINE */}
-                  {/* {
-                    agroupedProperties["http://www.arida.ufc.br/ontologies/timeline#has_timeline"] && <ListItem key={-4} disablePadding>
+                  { console.log('_::_',agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))}
+                  {
+                    agroupedProperties && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
+                     && <ListItem key={-4} disablePadding>
                       <ListItemButton
                         selected={selectedIndex === -4}
                         sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                         onClick={() => navigate(ROUTES.TIMELINE, {
                           state: {
-                            resourceURI: Object.keys(contextos)[0],
-                            contextos: contextos
+                            resourceURI: Object.keys(agroupedProperties)[0],
+                            // contextos: contextos
+                            // contextos: [].push(Object.keys(agroupedProperties)[0]) concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[], idx: Key) => same[0]))
+                            contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0])) 
+                            // + agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[], idx: Key) => same[0])
                           } as stateProps
                         })}
                       >
@@ -509,7 +495,7 @@ export function Properties() {
                         <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                       </ListItemButton>
                     </ListItem>
-                  } */}
+                  }
                 </List>
                   : Object.keys(agroupedProperties).length > 0 && <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
               }
@@ -620,3 +606,42 @@ export function Properties() {
 //   }
 //   /**linkedata é para o objectProperties */
 // }, [linkedData])
+
+
+/** Carrega os links semas e as propriedade unificadas se for uma classe de Generealização */
+  // async function loadSameAs(uri: string, typeOfClass: string) {
+  //   try {
+  //     if (uri) {
+  //       setProperties([])
+  //       let _uri = double_encode_uri(uri);
+  //       const response = await api.get(`/links/?sameas=${_uri}`)
+  //       console.log('===LOAD SAMEAS===\n', response.data)
+
+  //       if (Object.keys(contextos).length == 0) setContextos(response.data)
+
+  //       if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
+  //         loadUnification(response.data)
+  //       }
+  //     }
+  //   } catch (error) {
+  //     alert(JSON.stringify(error));
+  //   } finally {
+  //   }
+  // }
+
+  // async function loadUnification(object: any) {
+  //   let response: any
+  //   try {
+  //     setIsLoading(true)
+  //     setProperties([])
+  //     response = await api.post(`/properties/unification/`, { resources: object })
+  //     console.log('====PROPRIEDADES UNIFICADAS===', response.data)
+  //   } catch (error) {
+  //     alert(JSON.stringify(error));
+  //   } finally {
+  //     setTimeout(() => {
+  //       setAgroupedProperties(response.data)
+  //       setIsLoading(false)
+  //     }, NUMBERS.TIME_OUT_FROM_REQUEST)
+  //   }
+  // }

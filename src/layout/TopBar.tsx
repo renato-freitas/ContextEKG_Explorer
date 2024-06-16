@@ -29,7 +29,7 @@ export function TopBar() {
             edge="start"
             color="inherit"
             aria-label="menu"
-            sx={{ pl: 30 }}
+            sx={{ pl: 17 }}
           >
             <MenuIcon />
           </IconButton>
@@ -44,7 +44,7 @@ export function TopBar() {
             sx={{ bgcolor: `${COLORS.AMARELO_01}` }}
             onClick={() => navigate(ROUTES.REPOSITORY_LIST)}
           />
-          <Button color="inherit" sx={{ mr: 15}}>Login</Button>
+          <Button color="inherit" sx={{ mr: 35}}>Login</Button>
         </Toolbar>
       </AppBar>
       <Offset />

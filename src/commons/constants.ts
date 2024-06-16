@@ -143,6 +143,9 @@ export const ROUTES = {
   REPOSITORY_LIST: "/repositories",
   SAVED_QUERY: "/saved-queries",
   SAVED_QUERY_FORM: "/saved-query-form",
+  
+  COMPETENCE_QUESTIONS_LIST: "/competence-questions",
+  COMPETENCE_QUESTIONS_FORM: "/competence-questions-form/",
 
   DATASOURCE_LIST: "/datasources",
   DATASOURCE_FORM: "/datasources-form",

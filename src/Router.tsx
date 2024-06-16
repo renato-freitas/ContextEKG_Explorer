@@ -30,6 +30,7 @@ import { Repositories } from './view/config/Repositories';
 import { SavedQueries } from './view/queries/SavedQueries';
 import { SavedQueryForm } from './view/queries/SavedQueryForm';
 
+import { CompetenceQuestions } from './view/competence/Competencies';
 // import { ManageMetagraph } from './view/ekg/manage/ManageMetagraph';
 
 // import { SemanticView } from './view/semantic-view/SemanticView';
@@ -74,6 +75,8 @@ export default function Router() {
         <Route path={ROUTES.SAVED_QUERY} element={<SavedQueries />} />
         <Route path={ROUTES.SAVED_QUERY_FORM} element={<SavedQueryForm />} />
         
+        <Route path={ROUTES.COMPETENCE_QUESTIONS_LIST} element={<CompetenceQuestions />} />
+
         <Route path={ROUTES.DATASOURCE_LIST} element={<DataSources />} />
         {/* <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} /> */}
         <Route path={ROUTES.DATASOURCE_FORM} element={<DataSourceForm />} />

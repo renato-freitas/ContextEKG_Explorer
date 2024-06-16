@@ -63,11 +63,11 @@ export function Classes() {
 		try {
 			setIsLoading(true)
 
-			if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER && exportedViews.length == 0) {
-				loadExportedViews()
-			}
+			// if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER && exportedViews.length == 0) {
+			// 	loadExportedViews()
+			// }
 
-			response = await api.get(`/classes/?type=${typeOfClass}&exported_view=${selectedExportedView}&language=pt`);
+			response = await api.get(`/classes/?type=${typeOfClass}&exported_view=${selectedExportedView}&language=${selectedLanguage}`);
 			console.log('*** CLASSES ***', response.data)
 			setClasses(response.data)
 			setCopyAllClasses(response.data)
@@ -96,9 +96,17 @@ export function Classes() {
 	useEffect(() => {
 		console.log('** REPOSITÓRIO NO API.HEADER **', api.defaults.headers.common['repo'])
 		const _repo_in_api_header = api.defaults.headers.common['repo']
-		if (_repo_in_api_header) loadClasses()
+		if (_repo_in_api_header) {
+			if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER) {
+				loadExportedViews()
+			}
+			else {
+				loadClasses()
+			}
+		}
 		else navigate(ROUTES.REPOSITORY_LIST)
-	}, [typeOfClass, selectedExportedView])
+		// }, [typeOfClass, selectedExportedView])
+	}, [typeOfClass])
 
 	useEffect(() => {
 		console.log('*** CLASSE NO LOCAL STORAGE ***', window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS))
@@ -106,6 +114,15 @@ export function Classes() {
 		if (_type_of_class_in_local_storage) setTypeOfClass(_type_of_class_in_local_storage)
 		else setTypeOfClass(NUMBERS.GENERALIZATION_CLASS_NUMBER)
 	}, [])
+
+
+	useEffect(() => {
+		const _repo_in_api_header = api.defaults.headers.common['repo']
+		if (_repo_in_api_header) {
+			loadClasses()
+		}
+		else navigate(ROUTES.REPOSITORY_LIST)
+	}, [selectedExportedView])
 
 	// const [selectedIndex, setSelectedIndex] = useState<Number>(1);
 	const handleListOfClassesClick = (event: any, classRDF: ClassModel) => {
@@ -157,7 +174,7 @@ export function Classes() {
 			<MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Context Selection'}`} />
 			{/* </div> */}
 			<Grid container spacing={0} sx={{ p: '4px 0' }}>
-				{/* RADIO BUTTON */}
+				{/* RADIO BUTTONS */}
 				<Grid item xs={6} sx={{ bgcolor: null }}>
 					<FormControl>
 						<RadioGroup
@@ -172,7 +189,7 @@ export function Classes() {
 									fontSize: '0.9rem !important',
 								},
 							}} />
-							<FormControlLabel value="1" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Visão Semântica Exportada" : 'Exported View'}`} sx={{
+							<FormControlLabel value="1" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Visão Exportada" : 'Exported View'}`} sx={{
 								'.css-ahj2mt-MuiTypography-root': {
 									fontSize: '0.9rem !important',
 								},
@@ -206,7 +223,7 @@ export function Classes() {
 							{
 								exportedViews.map((e, i) => <Grid key={i} item xs={12} sm={6} md={3}>
 									<Button
-										sx={{textTransform: 'none'}}
+										sx={{ textTransform: 'none' }}
 										disabled={selectedExportedView == e.datasource.value}
 										variant="contained"
 										onClick={() => setSelectedExportedView(e.datasource.value)}
@@ -227,23 +244,23 @@ export function Classes() {
 							</Grid>
 							{
 								classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
-									<Paper elevation={3} sx={{ minHeight: 300, justifyContent: "space-between" }} >
+									<Paper elevation={3} sx={{ minHeight: 200, justifyContent: "space-between" }} >
 										<Stack
 											direction="column"
 											justifyContent="space-between"
 											alignItems="center"
 											spacing={2}
-											sx={{ minHeight: 300 }}
+											sx={{ minHeight: 200, maxHeight: 250 }}
 										>
-											<Box display='flex' flexDirection="column" p={1}>
+											<Box display='flex' flexDirection="column" p={1} width={220}>
 												<Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
 													<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
 														{getPropertyFromURI(classRDF?.label?.value)}
 													</Typography>
 												</Button>
-												<Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center" }} color="text.primary" gutterBottom>
+												{/* <Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center", whiteSpace: "pre-wrap" }} color="text.primary" gutterBottom>
 													{classRDF?.classURI.value}
-												</Typography>
+												</Typography> */}
 												<Typography variant="caption" component="div" color="ActiveCaption" align="center">
 													{classRDF?.comment?.value}
 												</Typography>
@@ -266,25 +283,28 @@ export function Classes() {
 								</h4> */}
 							</div>
 						</Grid>
+						{/* CLASSES DA ONTOLOGIA */}
 						{
 							classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
-								<Paper elevation={3} sx={{ minHeight: 100, justifyContent: "space-between" }} >
+								<Paper elevation={3} sx={{ minHeight: 200, justifyContent: "space-between" }} >
 									<Stack
 										direction="column"
 										justifyContent="space-between"
 										alignItems="center"
 										spacing={2}
-										sx={{ minHeight: 100 }}
+										sx={{ minHeight: 200, maxHeight: 250 }}
 									>
-										<Box display='flex' flexDirection="column" p={1}>
+										<Box display='flex' flexDirection="column" p={1} width={220}>
 											<Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
 												<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
 													{getPropertyFromURI(classRDF?.label?.value)}
 												</Typography>
 											</Button>
-											<Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center" }} color="text.primary" gutterBottom>
-												{classRDF?.classURI.value}
-											</Typography>
+											{/* <Box width={220}>
+												<Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center", whiteSpace: "pre-wrap" }} color="text.primary" gutterBottom>
+													{classRDF?.classURI.value}
+												</Typography>
+											</Box> */}
 											<Typography variant="caption" component="div" color="ActiveCaption" align="center">
 												{classRDF?.comment?.value}
 											</Typography>

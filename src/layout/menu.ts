@@ -1,5 +1,6 @@
 import { ROUTES, USER_TYPE } from '../commons/constants';
-import { Binoculars, Person, Graph, Database, Storefront, PuzzlePiece, NavigationArrow, PaperPlaneTilt, Sparkle, BracketsCurly, GearSix } from "phosphor-react";
+import { Binoculars, Person, Graph, Database, Storefront, PuzzlePiece, NavigationArrow, PaperPlaneTilt, Sparkle, BracketsCurly, GearSix} from "phosphor-react";
+import { ShootingStar, Quotes } from '@phosphor-icons/react';
 import ManageSearchRoundedIcon from '@mui/icons-material/ManageSearchRounded';
 import { Component } from 'react';
 
@@ -62,8 +63,14 @@ export const menuConsuming = [
   {
     // title: 'Saved Queries',
     title: { 'pt': 'Consultas', 'en': 'Saved Queries' },
-    icon: Sparkle,
+    icon: ShootingStar,
     href: ROUTES.SAVED_QUERY,
+    type: [USER_TYPE.ADMIN]
+  },
+  {
+    title: { 'pt': 'Questões de Competência', 'en': 'Competence Questions' },
+    icon: Quotes,
+    href: ROUTES.COMPETENCE_QUESTIONS_LIST,
     type: [USER_TYPE.ADMIN]
   },
   // {

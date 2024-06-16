@@ -203,7 +203,7 @@ export function Resources() {
       {
         !isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
           {/* DATA SOURCES */}
-          <Grid item sm={12} justifyContent={'center'}>
+          <Grid item sm={8} justifyContent={'center'}>
             <MTable
               header={[[selectedLanguage == 'pt' ? "Recursos" : "Resources", "left"], [selectedLanguage == 'pt' ? "Proveniência" : "Provenance", "left"]]}
               size={totalOfResources}

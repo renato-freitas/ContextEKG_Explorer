@@ -64,6 +64,50 @@ export function getClassAndIdentifierFromURI(uri: string): string {
   return "";
 }
 
+// FUNÇÕES SPARQL
+// function canonicalUri(uri){
+//   tokens = uri.split("/")
+//   if (tokens.length < 2) return false
+//   return "http://www.arida.ufc.br/resource/canonical/"+tokens[tokens.length - 2]+"/"+tokens[tokens.length - 1]
+// }
+
+// function getContext(uri) {
+//   split2 = uri.split("/resource/")[1].split("/")
+//   if (split2.length < 2) return false
+//   return split2[0]
+// }
+
+function compareSize( a:string[], b:string[] ) {
+  if ( a.length < b.length ){
+    return -1;
+  }
+  if ( a.length > b.length ){
+    return 1;
+  }
+  return 0;
+}
+
+// export function fusionOfName(str1:string, str2:string, str3:string, str4:string){
+//   let m = []
+//   if (str1 != "") m.push(str1.split(" "))
+//   if (str2 != "") m.push(str2.split(" "))
+//   if (str3 != "") m.push(str3.split(" "))
+//   if (str4 != "") m.push(str4.split(" "))
+
+//   let menor = m.sort( compareSize )[0];
+
+//   // let out = menor.filter((word) => {
+//   //   function match(currentValue:string[]) { return currentValue.includes(word) }
+//   //   if (m.slice(1).every(match) == true) return word
+//   //   else return false
+//   // })
+//   return menor.join(" ")
+// }
+
+function fusionOfName(prov:string, p:string, o:string){
+  if (prov == "MusicBrainz" && p == "foaf:name") return o
+}
+
 export function getIdentifierFromURI(uri: string): string {
   if (uri) {
     let splitOne = uri?.split("/")
@@ -116,18 +160,19 @@ export function getsetTypeClassLocalStorage(): string {
 
 export function getDateFromInstantTimelin(instantURI: string): string {
   if (instantURI) {
-    let splitOne = instantURI?.split("/Instant/")
-    let lastToken1 = splitOne[1]
-
-    let split2 = lastToken1.split("-")
-    // console.log('DATA DO INSTANTE', split2)
-    let data: string
-    const day = split2[3].split('T')[0]
-    data = `${split2[1]}-${split2[2]}-${day}`
-    // data = decodeURIComponent(`${split2[1]}-${split2[2]}-${day}`)
-    const hora = decodeURIComponent("T" + split2[3].split('T')[1])
+    let lastToken1 = instantURI?.split("/Instant/")[1]
+    /** NÃO PODE USAR SPLIT("-"). TEM ID QUE USA "-" */ 
+    // let split2 = lastToken1.split("-") 
+    
+    const splitComAno = lastToken1.split('T')[0].split("-")
+    const splitComHora = lastToken1.split('T')[1]
+    const _d = splitComAno[splitComAno.length - 1]
+    const _m = splitComAno[splitComAno.length - 2]
+    const _y = splitComAno[splitComAno.length - 3]
+    // console.log('PARTE QUE TEM A DATA DO INSTANTE', splitComAno, _y, _m,_d, splitComHora)
+    let data = `${_y}-${_m}-${_d}`
+    const hora = decodeURIComponent("T" + splitComHora)
     const asDate = new Date(data + hora)
-    // console.log(asDate.toLocaleDateString("pt-BR"), asDate.toLocaleTimeString())
     return asDate.toLocaleDateString("pt-BR") + " " + asDate.toLocaleTimeString()
   }
   return "";
