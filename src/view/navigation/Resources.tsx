@@ -203,7 +203,7 @@ export function Resources() {
       {
         !isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
           {/* DATA SOURCES */}
-          <Grid item sm={8} justifyContent={'center'}>
+          <Grid item sm={9} justifyContent={'center'}>
             <MTable
               header={[[selectedLanguage == 'pt' ? "Recursos" : "Resources", "left"], [selectedLanguage == 'pt' ? "Proveniência" : "Provenance", "left"]]}
               size={totalOfResources}
@@ -220,10 +220,7 @@ export function Resources() {
                 resources.length > 0 && resources.map((resource, idx) => (
                   <TableRow key={idx} >
                     <TableCell>
-                      {/* <Stack direction={'row'} gap={1}> */}
-                      {/* {DATASOURCE_TYPES_ICONS[resource?.type?.value]} */}
                       <Typography sx={{ whiteSpace: 'pre-line'}}>{resource.label.value}</Typography>
-                      {/* </Stack> */}
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" component="div" color="gray">

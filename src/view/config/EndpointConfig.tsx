@@ -16,13 +16,14 @@ import styles from '../../styles/global.module.css'
 
 export function EndpointConfig() {
   const navigate = useNavigate()
-  const [language, setLanguage] = useState<string | null>(window.localStorage.getItem('LANGUAGE'));
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(window.localStorage.getItem('LANGUAGE'));
 
   
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setLanguage((event.target as HTMLInputElement).value);
+		setSelectedLanguage((event.target as HTMLInputElement).value);
     window.localStorage.setItem('LANGUAGE', (event.target as HTMLInputElement).value)
+    window.location.reload();
 	};
 
   return (
@@ -60,7 +61,7 @@ export function EndpointConfig() {
                 row
                 aria-labelledby="demo-controlled-radio-buttons-group"
                 name="controlled-radio-buttons-group"
-                value={language}
+                value={selectedLanguage}
               onChange={handleChange}
               >
                 <FormControlLabel value="pt" control={<Radio size="small" />} label="Português" sx={{

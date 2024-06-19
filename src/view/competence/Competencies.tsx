@@ -128,7 +128,7 @@ export function CompetenceQuestions() {
       <MHeader title={`Questões de Competência`} />
 
       {/* HEADER */}
-      <Grid container spacing={1} sx={{ p: '10px 0' }}>
+      {/* <Grid container spacing={1} sx={{ p: '10px 0' }}>
         <Grid item xs={4}>
         </Grid>
         <Grid item xs={8} gap={1} display='flex' justifyContent='flex-end'
@@ -136,7 +136,7 @@ export function CompetenceQuestions() {
           <TextField id="outlined-basic" label="Pesquisar pelo nome" variant="outlined" size="small" sx={{ width: 400 }} />
           <Button variant="contained" onClick={openForm}>+ Nova Consulta</Button>
         </Grid>
-      </Grid>
+      </Grid> */}
 
 
       <Grid container spacing={2} sx={{ mb: 1 }}>

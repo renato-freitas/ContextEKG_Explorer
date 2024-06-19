@@ -60,13 +60,12 @@ export const menuEvolve = [
 ];
 
 export const menuConsuming = [
-  {
-    // title: 'Saved Queries',
-    title: { 'pt': 'Consultas', 'en': 'Saved Queries' },
-    icon: ShootingStar,
-    href: ROUTES.SAVED_QUERY,
-    type: [USER_TYPE.ADMIN]
-  },
+  // {
+  //   title: { 'pt': 'Consultas', 'en': 'Saved Queries' },
+  //   icon: ShootingStar,
+  //   href: ROUTES.SAVED_QUERY,
+  //   type: [USER_TYPE.ADMIN]
+  // },
   {
     title: { 'pt': 'Questões de Competência', 'en': 'Competence Questions' },
     icon: Quotes,

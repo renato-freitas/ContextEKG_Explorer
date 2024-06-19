@@ -17,20 +17,19 @@ import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
 
 import { MHeader } from '../../components/MHeader';
 import { api } from "../../services/api";
-import { LoadingContext } from "../../App";
+import { LoadingContext, ClassRDFContext } from "../../App";
 import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES } from '../../commons/constants';
 
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from './navigation.module.css'
-import { Divider } from '@mui/material';
-import { LocalConvenienceStoreOutlined } from '@mui/icons-material';
+
 const HAS_LABEL = 1
 const HAS_PROVENANCE = 2
-const HAS_DIVERGENCY = 3
+const HAS_DIVERGENCY = 4
 const BULLET_SIZE = 4
-const FONTSIZE_PROPERTY = 15
+const FONTSIZE_PROPERTY = 14
 const FONTWEIGHT_PROPERTY = 450
 const FONTSEZE_VALUE_PROPERTY = "0.69rem"
 const WIDTH_OF_P = 2.5
@@ -40,12 +39,13 @@ const WIDTH_OF_O = 9.5
 
 export interface stateProps {
   resourceURI: string;
-  contextos: {}
+  // contextos: {};
 }
 export function Properties() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
+  const { contextClassRDF } = useContext(ClassRDFContext);
   const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   const [instants, setInstants] = useState<any[]>([] as any[])
@@ -68,7 +68,7 @@ export function Properties() {
       // let _uri = double_encode_uri(uri);
       // console.log('-URI', _uri)
       response = await api.get(`/properties/?resourceURI=${uri}&typeOfView=${typeOfView}&language=${selectedLanguage}`)
-      console.log('props', response.data)
+      console.log('-----props-----\n', response.data)
       setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
@@ -100,6 +100,7 @@ export function Properties() {
       if (location?.state) {
         let { resource_uri, typeOfClass } = location.state as any;
         loadSameAs(resource_uri)
+        if (typeOfClass == "1") setSelectedIndex(0)
       }
     }
     else {
@@ -117,6 +118,7 @@ export function Properties() {
         loadPropertiesOfSelectedResource(resource_uri, typeOfClass)
         setUriOfSelectedResource(resource_uri)
         if (typeOfClass == "0") setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
+        
         window.scrollTo(0, 0)
       }
     }
@@ -184,6 +186,13 @@ export function Properties() {
         <MHeader
           title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
           hasButtonBack
+        // buttonBackNavigateTo={ROUTES.RESOURCES}
+        // state={{
+        //   state: {
+        //     classRDF: { classURI: { value: ClassRDFContext } },
+        //     typeOfClass: `${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "0" : "1"}`
+        //   }
+        // }}
         />
       </div>
 
@@ -238,7 +247,7 @@ export function Properties() {
                           <Grid container spacing={2}>
                             <Grid item sm={WIDTH_OF_P}>
                               <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
-                                {estaEmPortugues ? 'é um' : 'is a'}
+                                {estaEmPortugues ? 'é um(a)' : 'is a'}
                               </Typography>
                             </Grid>
                             <Grid item sm={WIDTH_OF_O}>
@@ -296,8 +305,8 @@ export function Properties() {
                         {/* DESCRIÇÃO OU COMENTÁRIO */}
                         {
                           (agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION] != undefined
-                            && agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined
-                            && agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined)
+                            || agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined
+                            || agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined)
                           && <ListItem key={-1}>
                             <Grid container spacing={2}>
                               <Grid item sm={WIDTH_OF_P}>
@@ -358,11 +367,13 @@ export function Properties() {
                                     <Stack direction={"column"} key={idx}>
                                       { /** VALORES DAS PROPRIEDADES */
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource].map((values: any, i: React.Key) => {
+                                          console.log('valores: ', values)
                                           return <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                             textAlign={'justify'}>
                                             { /** values[0] contém o valor literal da propriedade */
-                                              values[0].toLowerCase().includes("http") &&
-                                                agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.every((ele: string[]) => values[0].includes(getContextFromURI(ele[0])))
+                                              values[0].toLowerCase().includes("http") && values[0].toLowerCase().includes("resource")
+                                                && linksSameAs?.every((ele: string) => values[0].includes(getContextFromURI(ele[0])))
+                                                // && agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.every((ele: string[]) => values[0].includes(getContextFromURI(ele[0])))
                                                 ? <><Link
                                                   align='left'
                                                   underline="none"
@@ -370,10 +381,10 @@ export function Properties() {
                                                   variant='caption'
                                                   onClick={(e) => handleListLinkClick(e, values[0])}
                                                 >
-                                                  <Circle size={BULLET_SIZE} weight="fill" color='#000' /> {values[0]}
+                                                  <Circle size={BULLET_SIZE} weight="fill" color='#000' /> {values[3]}
                                                 </Link>
                                                   <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
-                                                    {/* values[1] contém a proveniência do dados (na visão de unificação) */}
+                                                    {/*values[1] contém a proveniência do dados (na visão de unificação) */}
                                                     {values[HAS_PROVENANCE]}
                                                   </Typography>
                                                 </>
@@ -415,8 +426,6 @@ export function Properties() {
                   </Box>
                   : false
               }
-
-
             </Grid>
 
 
@@ -441,7 +450,7 @@ export function Properties() {
                         onClick={() => navigate(ROUTES.TIMELINE, {
                           state: {
                             resourceURI: Object.keys(agroupedProperties)[0],
-                            contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))
+                            // contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))
                           } as stateProps
                         })}
                       >
@@ -506,7 +515,53 @@ export function Properties() {
 
 
                 </List>
-                  : Object.keys(agroupedProperties).length > 0 && <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
+                  : <List>
+                    {
+                      agroupedProperties[Object.keys(agroupedProperties)[0]] && agroupedProperties[Object.keys(agroupedProperties)[0]]['http://www.arida.ufc.br/ontologies/timeline#has_timeline'] != undefined
+                        ? <ListItem key={-4} disablePadding>
+                          <ListItemButton
+                            selected={selectedIndex === -4}
+                            sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                            onClick={() => navigate(ROUTES.TIMELINE, {
+                              state: {
+                                resourceURI: Object.keys(agroupedProperties)[0],
+                              } as stateProps
+                            })}
+                          >
+                            <ListItemIcon sx={{ minWidth: '30px' }}>
+                              <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                            </ListItemIcon>
+                            <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                          </ListItemButton>
+                        </ListItem>
+                        : false
+                    }
+
+
+                    {
+                      linksSameAs.map((row: any, idx: Key) => {
+                        console.log('--', row)
+                        const _sameas_context = getContextFromURI(row.sameas.value)
+                        return (
+                          <ListItem key={idx} disablePadding>
+                            <ListItemButton
+                              selected={selectedIndex === idx}
+                              onClick={() => handleSelectedContextClick(idx as Number, row.sameas.value)}
+                              sx={{ bgcolor: `${COLORS.AMARELO_01} !important` }}
+                            >
+                              <ListItemIcon sx={{ minWidth: '30px' }}>
+                                <Database size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                              </ListItemIcon>
+                              <ListItemText primary={estaEmPortugues ? 'VSE ' + _sameas_context : 'ESV ' + _sameas_context} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                            </ListItemButton>
+                          </ListItem>
+                        )
+                      })
+                    }
+                    <ListItem key={linksSameAs.length + 1} disablePadding sx={{pt:1}}>
+                      <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
+                    </ListItem>
+                  </List>
               }
             </Grid>
 

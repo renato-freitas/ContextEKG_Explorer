@@ -17,7 +17,7 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
-import { Asterisk, ClockCounterClockwise, Link as LinkIcon } from 'phosphor-react';
+import { Asterisk, ClockCounterClockwise, Database, Link as LinkIcon } from 'phosphor-react';
 import { LinkSimpleBreak, Graph, ArrowRight } from '@phosphor-icons/react';
 
 import { MHeader } from "../../components/MHeader";
@@ -26,13 +26,13 @@ import { ResourceModel } from "../../models/ResourceModel";
 import { ClassModel } from "../../models/ClassModel";
 
 import { LoadingContext, ClassRDFContext } from "../../App";
-import { getContextFromURI, getDateFromInstantTimelin, getPropertyFromURI } from "../../commons/utils";
+import { double_encode_uri, getContextFromURI, getDateFromInstantTimelin, getPropertyFromURI } from "../../commons/utils";
 
 import stylesGlobal from '../../styles/global.module.css';
 import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
 import { api } from "../../services/api";
 import { stateProps } from "./Properties";
-import { Chip } from "@mui/material";
+import { Chip, StepTypeMap } from "@mui/material";
 import { InstantComponent } from "./InstantComponent";
 
 
@@ -52,7 +52,23 @@ export function TimelineView() {
   const [colorsToDataSources, setColorsToDataSources] = useState<any>({})
   // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
   const estaEmPortugues = window.localStorage.getItem('LANGUAGE') == 'pt'
+  const [linksSameAs, setLinksSameAs] = useState<any[]>([])
 
+
+  /** Carrega os links sameas do recurso selecionado*/
+  async function loadSameAs(uri: string) {
+    try {
+      if (uri) {
+        let _uri = double_encode_uri(uri);
+        const response = await api.get(`/sameas/?resourceURI=${_uri}`)
+        console.log('-------links sameas-----\n', response.data)
+        setLinksSameAs(response.data)
+      }
+    } catch (error) {
+      alert(JSON.stringify(error));
+    } finally {
+    }
+  }
 
   function getLabelOfResource(instants: any) {
     const firstKey = Object.keys(instants)[0]
@@ -96,13 +112,13 @@ export function TimelineView() {
   }
 
 
-  async function loadTimelineUnification(object: any) {
+  async function loadTimelineUnification() {
     let response: any
     try {
-      console.log('**** TIMELINE UNIFICATION ****', object)
+      // console.log('**** TIMELINE UNIFICATION ****', object)
       setIsLoading(true)
       // setProperties([])
-      response = await api.post("/timeline/unification/", { resources: object })
+      response = await api.post("/timeline/unification/", { resources: linksSameAs.map((same) => same.sameas.value) })
       console.log('RESPONSE', response.data)
     } catch (error) {
       alert(JSON.stringify(error));
@@ -116,16 +132,31 @@ export function TimelineView() {
     }
   }
 
+  useEffect(() => {
+    const _repo_in_api_header = api.defaults.headers.common['repo']
+    if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
+      if (location?.state) {
+        let { resourceURI } = location.state as stateProps;
+        console.log('R', resourceURI)
+        loadSameAs(resourceURI)
+        setSelectedIndex(0)
+      }
+    }
+    else {
+      navigate(ROUTES.REPOSITORY_LIST)
+    }
+  }, [])
 
   useEffect(() => {
     if (location?.state) {
       console.log('STATE', location.state)
-      let { resourceURI, contextos } = location.state as stateProps
+      let { resourceURI } = location.state as stateProps
       if (selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
-        loadTimelineUnification(contextos)
+        loadTimelineUnification()
       } else {
         loadTimeline(resourceURI)
-        setContextos(contextos)
+        // setContextos(contextos)
+        // setLinksSameAs(linksSameAs)
       }
     }
     window.scrollTo(0, 0)
@@ -135,11 +166,11 @@ export function TimelineView() {
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     // console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
     setSelectedIndex(index);
-    setSelectedContext(contextoSelecionado)
+    // setSelectedContext(contextoSelecionado)
     navigate(ROUTES.TIMELINE, {
       state: {
         resourceURI: contextoSelecionado,
-        contextos: contextos
+        // contextos: contextos
       }
     })
   };
@@ -150,10 +181,13 @@ export function TimelineView() {
       <MHeader
         title={estaEmPortugues ? "Linha do Tempo do recurso" : "Timeline of Resource"}
         hasButtonBack
-        buttonBackNavigateTo={ROUTES.PROPERTIES}
-        state={{ state: {
-          resource_uri:selectedContext, 
-          typeOfClass: `${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "0" : "1"}`} }}
+        // buttonBackNavigateTo={ROUTES.PROPERTIES}
+        // state={{
+        //   state: {
+        //     resource_uri: linksSameAs.length > 0 ? linksSameAs[0].sameas.value : "",
+        //     typeOfClass: `${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "0" : "1"}`
+        //   }
+        // }}
       />
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
@@ -193,22 +227,24 @@ export function TimelineView() {
                         <TimelineDot
                           variant={`${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "filled" : "outlined"}`}
                           color={`${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "info" : "grey"}`}
-                          >
+                        >
                         </TimelineDot>
                         <TimelineConnector />
                       </TimelineSeparator>
                       <TimelineContent sx={{ py: '8px', px: 2 }}>
                         {/* <Card key={idx} sx={{ padding: 1, background:`${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? colorsToDataSources[getContextFromURI(instant)] : false}` }}> */}
-                        <Card key={idx} sx={{ padding: 1}}>
+                        <Card key={idx} sx={{ padding: 1 }}>
                           <InstantComponent instant={instant} />
                           {
                             selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW
-                              ? <Chip 
-                                  label={getContextFromURI(instant)} 
-                                  size="small" 
-                                  style={{ backgroundColor: colorsToDataSources[getContextFromURI(instant)], 
-                                    fontSize: "0.60rem", 
-                                    marginLeft: '1rem' }} />
+                              ? <Chip
+                                label={getContextFromURI(instant)}
+                                size="small"
+                                style={{
+                                  backgroundColor: colorsToDataSources[getContextFromURI(instant)],
+                                  fontSize: "0.60rem",
+                                  marginLeft: '1rem'
+                                }} />
                               : false
                           }
                           {/* </Stack> */}
@@ -237,8 +273,7 @@ export function TimelineView() {
             {/* MENU DE CONTEXTOS (PAINEL DIREITO) */}
             <Grid item sm={2.5}>
               {
-                // Object.keys(contextos).length > 0
-                contextos.length > 0
+                linksSameAs.length > 1
                   ? <List sx={{
                     width: '100%',
                     bgcolor: 'background.paper',
@@ -246,33 +281,11 @@ export function TimelineView() {
                     overflow: 'auto',
                     padding: 0
                   }}>
-                    {/* {
-                      contextos && contextos.map((same: string, idx: Key) => {
-                        return same.includes('resource/canonical') && (
-                          <ListItem key={idx} disablePadding>
-                            <ListItemButton
-                              sx={{ bgcolor: selectedIndex === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                              selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
-                              onClick={() => {
-                                // handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, estaEmPortugues ? "Visão de Fusão" : "Fusion View")
-                                handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, same)
-                              }}
-                            >
-                              <ListItemIcon sx={{ minWidth: '30px' }}>
-                                <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                              </ListItemIcon>
-                              <ListItemText primary={estaEmPortugues ? "Visão de Fusão" : "Fusion View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                            </ListItemButton>
-                          </ListItem>
-                        )
-                      })
-                    } */}
                     <ListItem key={NUMBERS.IDX_UNIFICATION_VIEW} disablePadding>
                       <ListItemButton
                         sx={{ bgcolor: selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                         selected={selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW}
-                        // onClick={() => navigate(ROUTES.TIMELINE, { state: uriOfselectedResource })}
-                        onClick={() => handleSelectedContextClick(NUMBERS.IDX_UNIFICATION_VIEW, contextos[0])}
+                        onClick={() => handleSelectedContextClick(NUMBERS.IDX_UNIFICATION_VIEW, linksSameAs[0].sameas.value)}
                       >
                         <ListItemIcon sx={{ minWidth: '30px' }}>
                           <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -280,36 +293,29 @@ export function TimelineView() {
                         <ListItemText primary={"Visão de Unificação"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                       </ListItemButton>
                     </ListItem>
-                    {/* <ListItem key={NUMBERS.IDX_SELECTED_VIEW} disablePadding>
-                      <ListItemButton
-                        sx={{ bgcolor: selectedIndex === NUMBERS.IDX_SELECTED_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                        selected={selectedIndex === NUMBERS.IDX_SELECTED_VIEW}
-                        onClick={() => handleSelectedContextClick(NUMBERS.IDX_SELECTED_VIEW, contextos[0])}
-                      >
-                        <ListItemIcon sx={{ minWidth: '30px' }}>
-                          <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                        </ListItemIcon>
-                        <ListItemText primary={getContextFromURI(contextos[0])} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                      </ListItemButton>
-                    </ListItem> */}
+                    
+
                     {
-                      contextos && contextos.map((same: string, idx: Key) => {
+                      linksSameAs.map((row: any, idx: Key) => {
+                        console.log('--', row)
+                        const _sameas_context = getContextFromURI(row.sameas.value)
                         return (
                           <ListItem key={idx} disablePadding>
                             <ListItemButton
-                              sx={{ bgcolor: selectedIndex === idx ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                               selected={selectedIndex === idx}
-                              onClick={() => handleSelectedContextClick(idx as Number, same)}
+                              onClick={() => handleSelectedContextClick(idx as Number, row.sameas.value)}
+                              sx={{ bgcolor: selectedIndex === idx ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                             >
                               <ListItemIcon sx={{ minWidth: '30px' }}>
-                                <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                                <Database size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
                               </ListItemIcon>
-                              <ListItemText primary={getContextFromURI(same)} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                              <ListItemText primary={estaEmPortugues ? 'VSE ' + _sameas_context : 'ESV ' + _sameas_context} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                             </ListItemButton>
                           </ListItem>
                         )
                       })
                     }
+
                   </List>
                   : false
               }

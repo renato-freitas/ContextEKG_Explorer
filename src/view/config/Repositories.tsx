@@ -1,25 +1,20 @@
-import { useState, useEffect, useContext, ChangeEvent, KeyboardEvent, Key } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect, useContext, ChangeEvent, KeyboardEvent } from "react";
 import Grid from '@mui/material/Grid'
-import IconButton from '@mui/material/IconButton'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
-import Tooltip from '@mui/material/Tooltip'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Checkbox from "@mui/material/Checkbox";
-import { Eye } from "phosphor-react";
 
 import { MHeader } from "../../components/MHeader";
 import { MTable } from "../../components/MTable";
 
 import { api } from "../../services/api";
-import { ResourceModel } from "../../models/ResourceModel";
-import { ClassModel } from "../../models/ClassModel";
 
-import { LoadingContext, ClassRDFContext } from "../../App";
-import { double_encode_uri, getContextFromURI, getsetRepositoryLocalStorage, printt, setRepositoryLocalStorage } from "../../commons/utils";
-import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
+import { LoadingContext } from "../../App";
+import { getsetRepositoryLocalStorage, setRepositoryLocalStorage } from "../../commons/utils";
+import { NUMBERS } from "../../commons/constants";
+import { languages } from "../../commons/languages";
 
 import styles from '../../styles/global.module.css';
 import { RepositoryModel } from "../../models/RepositoryModel";
@@ -27,18 +22,12 @@ import { RepositoryModel } from "../../models/RepositoryModel";
 
 
 export function Repositories() {
-  const location = useLocation();
-  const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const { contextClassRDF, setContextClassRDF } = useContext(ClassRDFContext);
   const [page, setPage] = useState(0);
-  const [selectedClass, setSelectedClass] = useState<string>("");
-  const [selectedClassRDF, setSelectedClassRDF] = useState<ClassModel>();
-  const [selectedRepository, setSelectedRepository] = useState<RepositoryModel>();
   const [repositories, setRepositories] = useState<RepositoryModel[]>([]);
   const [labelToSearch, setLabelToSearch] = useState<string>("");
   const [runingSearch, setRuningSearch] = useState<boolean>(false);
-  const [totalOfResources, setTotalOfResources] = useState<number>(0);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("pt");
 
 
   async function loadRepositories() {
@@ -59,47 +48,10 @@ export function Repositories() {
     }
   }
 
-  // async function getTotalResources(RDFClass: string) {
-  //   let response: any
-  //   try {
-  //     // let uri = double_encode_uri(RDFClass)
-  //     let uri = double_encode_uri(contextClassRDF.classURI.value)
-  //     response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}`)
-  //   } catch (error) {
-  //     console.log(`><`, error);
-  //   } finally {
-  //     setTimeout(() => {
-  //       setTotalOfResources(response.data)
-  //       console.log(`total: `, response.data)
-  //       console.log(`total: `, typeof response.data)
-  //     }, NUMBERS.TIME_OUT_FROM_REQUEST)
-  //   }
-  // }
-
-
-
-  // useEffect(() => {
-  //   function onEdit() {
-  //     console.log('CLASS RDF CONTEXTO', contextClassRDF)
-  //     try {
-  //       if (location.state) {
-  //         let classRDF = location.state as ClassModel;
-  //         let classURI = classRDF.classURI?.value as string
-  //         console.log("1. CLASSE ESCOLHIDA", classRDF.classURI?.value)
-  //         setSelectedClass(classURI)
-  //         setSelectedClassRDF(classRDF)
-  //         loadRepositories()
-  //       } else {
-  //         loadRepositories()
-  //       }
-  //     } catch (err) {
-  //       printt("Erro", err)
-  //     } finally {
-  //       window.scrollTo(0, 0)
-  //     }
-  //   }
-  //   onEdit();
-  // }, [location.state, runingSearch]);
+  useEffect(() => {
+    let b:string = window.localStorage.getItem('LANGUAGE') as string
+    setSelectedLanguage(b)
+  }, []);
 
 
   useEffect(() => {
@@ -152,13 +104,15 @@ export function Repositories() {
     setChecked(repository);
     setRepositoryLocalStorage(repository)
     api.defaults.headers.common['repo'] = repository
+    window.scrollTo(0,0)
   };
+
   return (
     <div className={styles.container}>
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={6} sx={{ bgcolor: null }}>
           <MHeader
-            title={`Seleção de Repositório`}
+            title={languages.repository.title(selectedLanguage)}
             hasButtonBack
           />
         </Grid>

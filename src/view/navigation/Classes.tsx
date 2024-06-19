@@ -46,12 +46,13 @@ export function Classes() {
 			response = await api.get('/classes/exported-views');
 			setExportedViews(response.data)
 			setSelectedExportedView(response.data[0]?.datasource.value)
-			console.log('===EXPORTED VIEW===', response.data)
+			console.log('-----visões exportadas-----', response.data)
 		} catch (error) {
 			console.log(`><`, error);
 		} finally {
-			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
+
 			setTimeout(() => {
+				window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
 				setIsLoading(false)
 			}, NUMBERS.TIME_OUT_FROM_REQUEST)
 		}
@@ -62,11 +63,6 @@ export function Classes() {
 		let response: any
 		try {
 			setIsLoading(true)
-
-			// if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER && exportedViews.length == 0) {
-			// 	loadExportedViews()
-			// }
-
 			response = await api.get(`/classes/?type=${typeOfClass}&exported_view=${selectedExportedView}&language=${selectedLanguage}`);
 			console.log('*** CLASSES ***', response.data)
 			setClasses(response.data)
@@ -94,19 +90,31 @@ export function Classes() {
 	};
 
 	useEffect(() => {
-		console.log('** REPOSITÓRIO NO API.HEADER **', api.defaults.headers.common['repo'])
+		// console.log('** REPOSITÓRIO NO API.HEADER **', api.defaults.headers.common['repo'])
+		setClasses([])
 		const _repo_in_api_header = api.defaults.headers.common['repo']
 		if (_repo_in_api_header) {
 			if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER) {
 				loadExportedViews()
 			}
-			else {
-				loadClasses()
-			}
+			// else {
+			loadClasses()
+			// }
 		}
 		else navigate(ROUTES.REPOSITORY_LIST)
 		// }, [typeOfClass, selectedExportedView])
 	}, [typeOfClass])
+
+
+	useEffect(() => {
+		console.log('-----buscar classes da visão exportada selecionada-----\n')
+		setClasses([])
+		const _repo_in_api_header = api.defaults.headers.common['repo']
+		if (_repo_in_api_header) {
+			loadClasses()
+		}
+		else navigate(ROUTES.REPOSITORY_LIST)
+	}, [selectedExportedView])
 
 	useEffect(() => {
 		console.log('*** CLASSE NO LOCAL STORAGE ***', window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS))
@@ -116,13 +124,6 @@ export function Classes() {
 	}, [])
 
 
-	useEffect(() => {
-		const _repo_in_api_header = api.defaults.headers.common['repo']
-		if (_repo_in_api_header) {
-			loadClasses()
-		}
-		else navigate(ROUTES.REPOSITORY_LIST)
-	}, [selectedExportedView])
 
 	// const [selectedIndex, setSelectedIndex] = useState<Number>(1);
 	const handleListOfClassesClick = (event: any, classRDF: ClassModel) => {
@@ -215,13 +216,13 @@ export function Classes() {
 				</Grid>
 			</Grid>
 
-			{/* FONTES DE DADOS */}
+			{/* FONTES DE DADOS | EXPORTED VIEWS */}
 			{
 				exportedViews.length > 0
 					? <>
 						<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }} marginBottom={1}>
 							{
-								exportedViews.map((e, i) => <Grid key={i} item xs={12} sm={6} md={3}>
+								!isLoading && exportedViews.map((e, i) => <Grid key={i} item xs={12} sm={6} md={3}>
 									<Button
 										sx={{ textTransform: 'none' }}
 										disabled={selectedExportedView == e.datasource.value}
@@ -235,15 +236,15 @@ export function Classes() {
 						</Grid>
 						<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 							<Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
-								<div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
-									<h4>{subTitle()}{` (${classes.length > 0 ? classes.length : ""})`}</h4>
-									{/* <h4>{`Classes ${typeOfClass == "0" ? "de Generalização" : typeOfClass == "1" ? 'Exportadas' : 'Metadados'}`}
-										{` (${classes.length > 0 ? classes.length : ""})`}
-									</h4> */}
-								</div>
+								{
+									!isLoading &&
+									<div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
+										<h4>{subTitle()}{` (${classes.length > 0 ? classes.length : ""})`}</h4>
+									</div>
+								}
 							</Grid>
 							{
-								classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
+								!isLoading && classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
 									<Paper elevation={3} sx={{ minHeight: 200, justifyContent: "space-between" }} >
 										<Stack
 											direction="column"
@@ -274,18 +275,18 @@ export function Classes() {
 							}
 						</Grid>
 					</>
-					: <Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+					:
+					<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 						<Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
-							<div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
-								<h4>{subTitle()}{` (${classes.length > 0 ? classes.length : ""})`}</h4>
-								{/* <h4>{`Classes ${typeOfClass == "0" ? "de Generalização" : typeOfClass == "1" ? 'Exportadas' : 'Metadados'}`}
-									{` (${classes.length > 0 ? classes.length : ""})`}
-								</h4> */}
-							</div>
+							{
+								!isLoading && <div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
+									<h4>{subTitle()}{` (${classes.length > 0 ? classes.length : ""})`}</h4>
+								</div>
+							}
 						</Grid>
 						{/* CLASSES DA ONTOLOGIA */}
 						{
-							classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
+							!isLoading && classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
 								<Paper elevation={3} sx={{ minHeight: 200, justifyContent: "space-between" }} >
 									<Stack
 										direction="column"
