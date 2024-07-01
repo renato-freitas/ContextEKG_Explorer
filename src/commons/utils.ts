@@ -153,7 +153,7 @@ export function setTypeClassLocalStorage(typeClass: string): void {
   localStorage.setItem('typeClass', typeClass)
 }
 
-export function getsetTypeClassLocalStorage(): string {
+export function getTypeOfClassOnLocalStorage(): string {
   return localStorage.getItem('typeClass') || ""
 }
 

@@ -59,11 +59,12 @@ export function Resources() {
       console.log(`><`, error);
     } finally {
       window.scrollTo(0, 0)
-      setTimeout(() => {
-        setIsLoading(false)
-        setResources(response.data)
-        // setPage(0)
-      }, NUMBERS.TIME_OUT_FROM_REQUEST)
+      setIsLoading(false)
+      setResources(response.data)
+      // setTimeout(() => {
+
+      // setPage(0)
+      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
@@ -75,15 +76,15 @@ export function Resources() {
       // let uri = double_encode_uri(contextClassRDF.classURI.value)
       let if_sameas = typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER ? true : false
       response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}&sameas=${if_sameas}`)
+      console.log(`total:`, response.data)
       setTotalOfResources(response.data)
     } catch (error) {
       console.log(`><`, error);
     } finally {
-      setTimeout(() => {
-        console.log(`total:`, response.data)
+      // setTimeout(() => {
         // console.log(`total: `, typeof response.data)
         // setPage(0);
-      }, NUMBERS.TIME_OUT_FROM_REQUEST)
+      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
@@ -130,7 +131,7 @@ export function Resources() {
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
     setSelectedIndex(idx);
     setSelectedResource(resource)
-    navigate(ROUTES.PROPERTIES, { state: {resource_uri:resource.uri.value, typeOfClass: typeOfSelectedClass} })
+    navigate(ROUTES.PROPERTIES, { state: { resource_uri: resource.uri.value, typeOfClass: typeOfSelectedClass } })
   };
 
 
@@ -178,7 +179,7 @@ export function Resources() {
             // title={`Classe "${selectedClassRDF?.label?.value}"`}
             title={selectedLanguage == 'pt' ? `Classe "${contextClassRDF.label?.value}"` : `"${contextClassRDF.label?.value}" Class`}
             hasButtonBack
-            buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
+            // buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
           />
         </Grid>
 
@@ -201,9 +202,9 @@ export function Resources() {
 
       {/* CONTENT */}
       {
-        !isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
+        resources.length > 0 && <Grid container spacing={4} sx={{ mb: 1 }}>
           {/* DATA SOURCES */}
-          <Grid item sm={9} justifyContent={'center'}>
+          <Grid item sm={12} justifyContent={'center'}>
             <MTable
               header={[[selectedLanguage == 'pt' ? "Recursos" : "Resources", "left"], [selectedLanguage == 'pt' ? "Proveniência" : "Provenance", "left"]]}
               size={totalOfResources}
@@ -217,10 +218,10 @@ export function Resources() {
               loading={false}
             >
               {
-                resources.length > 0 && resources.map((resource, idx) => (
+                resources.map((resource, idx) => (
                   <TableRow key={idx} >
                     <TableCell>
-                      <Typography sx={{ whiteSpace: 'pre-line'}}>{resource.label.value}</Typography>
+                      <Typography sx={{ whiteSpace: 'pre-line' }}>{resource.label.value}</Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" component="div" color="gray">

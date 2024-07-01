@@ -14,7 +14,8 @@ import IconButton from '@mui/material/IconButton'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
-import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table, Star, Play } from 'phosphor-react';
+import ManageSearchRoundedIcon from '@mui/icons-material/ManageSearchRounded';
+import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table, Star, Play, ArrowSquareOut } from 'phosphor-react';
 import { Link } from "react-router-dom";
 
 import { CompetenceQuestionModel } from '../../models/models';
@@ -42,6 +43,10 @@ export function CompetenceQuestions() {
   const [competenceQuestionResult, setCompetenceQuestionResult] = useState([]);
   const [competenceQuestionResulVariables, setCompetenceQuestionResultVariables] = useState<Array<[string, typeAlignOfCell]>>([]);
   const [selectedCompetenceQuestion, setSelectedCompetenceQuestion] = useState<CompetenceQuestionModel>({} as CompetenceQuestionModel);
+  const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
+  let auxLabelOfClasses = [] as string[];
+  const estaEmPortugues = selectedLanguage == 'pt'
+
 
   async function loadCompetenceQuestions() {
     try {
@@ -125,7 +130,7 @@ export function CompetenceQuestions() {
 
   return (
     <div className={styles.container}>
-      <MHeader title={`Questões de Competência`} />
+      <MHeader title={`${estaEmPortugues ? "Questões de Competência" : "Competence Questions"}`} />
 
       {/* HEADER */}
       {/* <Grid container spacing={1} sx={{ p: '10px 0' }}>
@@ -143,7 +148,7 @@ export function CompetenceQuestions() {
         {/* QUESTÕES DE COMPETÊNCIA */}
         <Grid item sm={12} justifyContent={'center'}>
           <MTable
-            header={[["Recursos", "left"], ["Descrição", "left"]]}
+            header={[[estaEmPortugues ? "Recursos" : "Resources", "left"], [estaEmPortugues ? "Descrição" : "Description", "left"]]}
             size={competenceQuestions.length}
             rowsPerPage={rowsPerPage}
             page={page}
@@ -187,7 +192,7 @@ export function CompetenceQuestions() {
       {/* RENDERIZA O RESULTADO DA QUESTÃO DE COMPETÊNCIA */}
       {
         competenceQuestionResult.length > 0
-          ? <><MHeader title={`Resultado`} />
+          ? <><MHeader title={`${estaEmPortugues ? "Resultado" : "Result"}`} />
             <MTable
               header={competenceQuestionResulVariables}
               headerBackColor={COLORS.TO_DATA_SOURCES_IN_UNIFICATION_VIEW[0]}
@@ -203,11 +208,18 @@ export function CompetenceQuestions() {
                 competenceQuestionResult.map((row, idx) => {
                   return <TableRow key={idx}>
                     {
-                      Object.keys(row).map((key) => {
-                        return <TableCell>
-                          <Stack direction={'row'} gap={1}>
-                            <Typography>{row[key]["value"]}</Typography>
-                          </Stack>
+                      Object.keys(row).map((key: string) => {
+                        return <TableCell align='center'>
+                          {/* <Stack direction={'row'} gap={1}> */}
+                          {
+                            (row[key]["value"] as string).toLowerCase().includes("http")
+                              ? <IconButton color='primary' size="small"
+                              onClick={() => navigate(ROUTES.PROPERTIES, { state: { resource_uri: row[key]["value"], typeOfClass: "1"}})}>
+                                <ManageSearchRoundedIcon />
+                              </IconButton>
+                              : <Typography>{row[key]["value"]}</Typography>
+                          }
+                          {/* </Stack> */}
                         </TableCell>
                       })
                     }
@@ -225,6 +237,6 @@ export function CompetenceQuestions() {
         deleteInstance={handleRemove}
         instance={selectedCompetenceQuestion}
       />
-    </div>
+    </div >
   );
 }

@@ -32,7 +32,7 @@ import stylesGlobal from '../../styles/global.module.css';
 import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
 import { api } from "../../services/api";
 import { stateProps } from "./Properties";
-import { Chip, StepTypeMap } from "@mui/material";
+import { Button, Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, StepTypeMap } from "@mui/material";
 import { InstantComponent } from "./InstantComponent";
 
 
@@ -49,6 +49,8 @@ export function TimelineView() {
   const [contextos, setContextos] = useState<any>([])
   const [selectedIndex, setSelectedIndex] = useState<Number>(NUMBERS.IDX_SELECTED_VIEW);
   const [selectedContext, setSelectedContext] = useState<string>();
+  const [selectedOwlProperty, setSelectedOwlProperty] = useState<string>('');
+  const [owlProperties, setOwlProperties] = useState<any>([]);
   const [colorsToDataSources, setColorsToDataSources] = useState<any>({})
   // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
   const estaEmPortugues = window.localStorage.getItem('LANGUAGE') == 'pt'
@@ -61,7 +63,7 @@ export function TimelineView() {
       if (uri) {
         let _uri = double_encode_uri(uri);
         const response = await api.get(`/sameas/?resourceURI=${_uri}`)
-        console.log('-------links sameas-----\n', response.data)
+        // console.log('-------links sameas-----\n', response.data)
         setLinksSameAs(response.data)
       }
     } catch (error) {
@@ -73,9 +75,7 @@ export function TimelineView() {
   function getLabelOfResource(instants: any) {
     const firstKey = Object.keys(instants)[0]
     const firstValue = instants[firstKey][0]
-    console.log('FV', firstValue.label.value)
     setLabelOfResource(firstValue.label.value)
-
   }
 
   function putBackgroundColorInCardByDataSource(instants: any) {
@@ -91,23 +91,37 @@ export function TimelineView() {
     setColorsToDataSources(_colorsToDataSources)
   }
 
+
+  function getOwlProperties(instants: any) {
+    let _owlProps: any = {}
+    Object.keys(instants).forEach((inst: any) => {
+      instants[inst].forEach((ins: any) => {
+        if (_owlProps[ins.property.value] == undefined) {
+           _owlProps[ins.property.value] = ins.propertyRDF.value
+        }
+      })
+    })
+    setOwlProperties(_owlProps)
+  }
+
   async function loadTimeline(resourceURI: string) {
     let response: any
     try {
       setIsLoading(true)
       setUriOfSelectedResource(resourceURI)
-      response = await api.get(`/timeline/?resourceURI=${resourceURI}`)
-      console.log('*** TIMELINE -', response.data)
+      response = await api.get(`/timeline/?resourceURI=${resourceURI}&owlProperty=${selectedOwlProperty}`)
+      // console.log('*** TIMELINE -', response.data)
+      setIsLoading(false)
+      setInstants(response.data)
       getLabelOfResource(response.data)
+      getOwlProperties(response.data)
     } catch (error) {
       console.log(`><`, error);
     } finally {
       window.scrollTo(0, 0)
-      setTimeout(() => {
-        setIsLoading(false)
-        setInstants(response.data)
-
-      }, NUMBERS.TIME_OUT_FROM_REQUEST)
+      // setTimeout(() => {
+        
+      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
@@ -118,17 +132,18 @@ export function TimelineView() {
       // console.log('**** TIMELINE UNIFICATION ****', object)
       setIsLoading(true)
       // setProperties([])
-      response = await api.post("/timeline/unification/", { resources: linksSameAs.map((same) => same.sameas.value) })
+      response = await api.post(`/timeline/unification?owlProperty=${selectedOwlProperty}`, { resources: linksSameAs.map((same) => same.sameas.value) })
       console.log('RESPONSE', response.data)
+      setInstants(response.data)
+      putBackgroundColorInCardByDataSource(response.data)
+      getOwlProperties(response.data)
+      setIsLoading(false)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
-      setTimeout(() => {
-        // setAgroupedProperties(response.data)
-        setInstants(response.data)
-        putBackgroundColorInCardByDataSource(response.data)
-        setIsLoading(false)
-      }, NUMBERS.TIME_OUT_FROM_REQUEST)
+      // setTimeout(() => {
+      // setAgroupedProperties(response.data)
+      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
@@ -137,7 +152,7 @@ export function TimelineView() {
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       if (location?.state) {
         let { resourceURI } = location.state as stateProps;
-        console.log('R', resourceURI)
+        // console.log('R', resourceURI)
         loadSameAs(resourceURI)
         setSelectedIndex(0)
       }
@@ -149,7 +164,7 @@ export function TimelineView() {
 
   useEffect(() => {
     if (location?.state) {
-      console.log('STATE', location.state)
+      // console.log('STATE', location.state)
       let { resourceURI } = location.state as stateProps
       if (selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
         loadTimelineUnification()
@@ -160,7 +175,7 @@ export function TimelineView() {
       }
     }
     window.scrollTo(0, 0)
-  }, [location.state])
+  }, [location.state, selectedOwlProperty])
 
 
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
@@ -175,20 +190,48 @@ export function TimelineView() {
     })
   };
 
+
+  const handleSelectedOwlProperty = (event: SelectChangeEvent) => {
+    console.log('qual prop selec', event.target.value as string)
+    setSelectedOwlProperty(event.target.value as string)
+  };
+
   return (
     <div className={stylesGlobal.container}>
+      <Grid container spacing={0}>
+        <Grid item xs={6} sx={{ bgcolor: null }}>
+          <MHeader
+            title={estaEmPortugues ? "Histórico do recurso" : "Timeline of Resource"}
+            hasButtonBack
+          // buttonBackNavigateTo={ROUTES.PROPERTIES}
+          // state={{
+          //   state: {
+          //     resource_uri: linksSameAs.length > 0 ? linksSameAs[0].sameas.value : "",
+          //     typeOfClass: `${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "0" : "1"}`
+          //   }
+          // }}
+          />
+        </Grid>
 
-      <MHeader
-        title={estaEmPortugues ? "Linha do Tempo do recurso" : "Timeline of Resource"}
-        hasButtonBack
-        // buttonBackNavigateTo={ROUTES.PROPERTIES}
-        // state={{
-        //   state: {
-        //     resource_uri: linksSameAs.length > 0 ? linksSameAs[0].sameas.value : "",
-        //     typeOfClass: `${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "0" : "1"}`
-        //   }
-        // }}
-      />
+        <Grid item xs={3}>
+          <FormControl sx={{ m: 0, minWidth: 300 }} size="small">
+            <InputLabel id="demo-simple-select-label">Filtrar Propriedade</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={selectedOwlProperty}
+              label="Filtrar Propriedade"
+              onChange={handleSelectedOwlProperty}
+            >
+              <MenuItem value={''}></MenuItem>
+              {Object.keys(owlProperties).map((_key: any, idx: Key) => <MenuItem key={idx} value={owlProperties[_key]}>{_key}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+
+
+
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
         { /** LABEL DO RECURSO */
@@ -251,7 +294,9 @@ export function TimelineView() {
                           {
                             instants[instant].map((update: any, _idx: Key) => {
                               return <Stack key={_idx} direction={"row"} spacing={1} textAlign={'center'}>
-                                <Typography variant="caption" component="div" color="gray">{update.property.value}:</Typography>
+                                <Typography variant="caption" component="div" color="gray">
+                                  {update.property.value}
+                                </Typography>
                                 {/* <Stack direction={"row"} alignItems={'center'} spacing={1}> */}
                                 <Typography color={'secondary'} variant="caption">{update.va.value}</Typography>
                                 {/* <Typography color={'GrayText'} variant="caption"><span>&rarr;</span></Typography> */}
@@ -293,11 +338,11 @@ export function TimelineView() {
                         <ListItemText primary={"Visão de Unificação"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
                       </ListItemButton>
                     </ListItem>
-                    
+
 
                     {
                       linksSameAs.map((row: any, idx: Key) => {
-                        console.log('--', row)
+                        // console.log('--', row)
                         const _sameas_context = getContextFromURI(row.sameas.value)
                         return (
                           <ListItem key={idx} disablePadding>
@@ -319,6 +364,22 @@ export function TimelineView() {
                   </List>
                   : false
               }
+              <List>
+                <ListItem key={-5} disablePadding>
+                  <ListItemButton
+                    // href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(contextos)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
+                    href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(instants)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
+                    target='_blank'
+                    selected={selectedIndex === -5}
+                    sx={{ bgcolor: selectedIndex === -5 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                  >
+                    <ListItemIcon sx={{ minWidth: '30px' }}>
+                      <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                    </ListItemIcon>
+                    <ListItemText primary={estaEmPortugues ? 'Visão Gráfica' : 'Graphical View'} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
             </Grid>
           </Grid>
         }

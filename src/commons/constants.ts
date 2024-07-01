@@ -1,6 +1,9 @@
 /**SEMANTIC WEB */
 // const MOKG = "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#";
 // export const VSKG = "http://www.arida.ufc.br/VSKG/";
+export const TEXTS = {
+  APP: "ContextEKG Explorer"
+}
 
 export const NAMESPACES = {
   RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -281,8 +284,8 @@ export const NUMBERS = {
   IDX_SELECTED_VIEW: -1,
   GENERALIZATION_CLASS_NUMBER: "0",
   EXPORTED_CLASS_NUMBER: "1",
-  GRAPHDB_BROWSER_CONFIG: "&config=636bec7f4b2446018b09e14ad8bd9117"
-  
+  GRAPHDB_BROWSER_CONFIG: "&config=636bec7f4b2446018b09e14ad8bd9117",
+  INICIAL_ROWS_PER_PAGE: 6
 }
 
 // https://encycolorpedia.pt/1976d2

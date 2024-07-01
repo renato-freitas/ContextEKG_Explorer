@@ -26,8 +26,8 @@ export function Sidebar() {
   const { pathname } = useLocation();
   const [selectedLanguage, setSelectecLanguage] = useState<string>(window.localStorage.getItem('LANGUAGE') as any)
   return (
-    // <Paper elevation={3} sx={{position: 'absolute', ml: 0.3, mt:1}}>
-    <Paper elevation={3} sx={{position: 'absolute', ml: 18, mt:1, width:90}}>
+    // <Paper elevation={3} sx={{position: 'absolute', ml: 0.3, mt:1, width:90}}>
+    <Paper elevation={3} sx={{position: 'absolute', ml: 8, mt:0, width:90}}>
       <SidebarContainer>
         <List>
           {

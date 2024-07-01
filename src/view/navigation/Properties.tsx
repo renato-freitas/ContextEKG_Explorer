@@ -54,7 +54,7 @@ export function Properties() {
   const [contextos, setContextos] = useState<any>({})
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
   const [selectedIndex, setSelectedIndex] = useState<Number | undefined>(undefined);
-  const [typeOfSelectedClass, setTypeOfSelectedClass] = useState<string>("");
+  const [typeOfSelectedView, setTypeOfSelectedView] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
   let auxLabelOfClasses = [] as string[];
   const estaEmPortugues = selectedLanguage == 'pt'
@@ -73,9 +73,9 @@ export function Properties() {
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
-      setTimeout(() => {
-        setIsLoading(false)
-      }, NUMBERS.TIME_OUT_FROM_REQUEST)
+      setIsLoading(false)
+      // setTimeout(() => {
+      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
@@ -99,6 +99,7 @@ export function Properties() {
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       if (location?.state) {
         let { resource_uri, typeOfClass } = location.state as any;
+        setTypeOfSelectedView(typeOfClass)
         loadSameAs(resource_uri)
         if (typeOfClass == "1") setSelectedIndex(0)
       }
@@ -118,7 +119,7 @@ export function Properties() {
         loadPropertiesOfSelectedResource(resource_uri, typeOfClass)
         setUriOfSelectedResource(resource_uri)
         if (typeOfClass == "0") setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
-        
+
         window.scrollTo(0, 0)
       }
     }
@@ -182,7 +183,7 @@ export function Properties() {
   return (
     <div className={stylesGlobal.container}>
       {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */}
-      <div style={{ paddingLeft: 60 }}>
+      {/* <div style={{ paddingLeft: 60 }}> */}
         <MHeader
           title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
           hasButtonBack
@@ -194,7 +195,7 @@ export function Properties() {
         //   }
         // }}
         />
-      </div>
+      {/* </div> */}
 
       <Box sx={{ flexGrow: 1, padding: 0 }}>
         {
@@ -211,7 +212,10 @@ export function Properties() {
 
                 </h3>
                 <Typography sx={{ fontSize: 11, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {obtemURICanonica(uriOfselectedResource)}
+                  {typeOfSelectedView == NUMBERS.GENERALIZATION_CLASS_NUMBER 
+                    ? obtemURICanonica(uriOfselectedResource)
+                    : uriOfselectedResource
+                  }
                 </Typography>
               </div>
             </Grid>
@@ -367,7 +371,7 @@ export function Properties() {
                                     <Stack direction={"column"} key={idx}>
                                       { /** VALORES DAS PROPRIEDADES */
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource].map((values: any, i: React.Key) => {
-                                          console.log('valores: ', values)
+                                          // console.log('valores: ', values)
                                           return <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                             textAlign={'justify'}>
                                             { /** values[0] contém o valor literal da propriedade */
@@ -440,27 +444,8 @@ export function Properties() {
                   overflow: 'auto',
                   padding: 0
                 }}>
-                  {console.log('_::_', agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))}
-                  {
-                    agroupedProperties && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
-                    && <ListItem key={-4} disablePadding>
-                      <ListItemButton
-                        selected={selectedIndex === -4}
-                        sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                        onClick={() => navigate(ROUTES.TIMELINE, {
-                          state: {
-                            resourceURI: Object.keys(agroupedProperties)[0],
-                            // contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))
-                          } as stateProps
-                        })}
-                      >
-                        <ListItemIcon sx={{ minWidth: '30px' }}>
-                          <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                        </ListItemIcon>
-                        <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                      </ListItemButton>
-                    </ListItem>
-                  }
+                  {/* {console.log('_::_', agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))} */}
+
 
                   <ListItem key={NUMBERS.IDX_FUSION_VIEW} disablePadding>
                     <ListItemButton
@@ -558,11 +543,47 @@ export function Properties() {
                         )
                       })
                     }
-                    <ListItem key={linksSameAs.length + 1} disablePadding sx={{pt:1}}>
+                    <ListItem key={linksSameAs.length + 1} disablePadding sx={{ pt: 1 }}>
                       <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
                     </ListItem>
                   </List>
               }
+              <List>
+                {
+                  agroupedProperties[Object.keys(agroupedProperties)[0]] && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
+                  && <ListItem key={-4} disablePadding>
+                    <ListItemButton
+                      selected={selectedIndex === -4}
+                      sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                      onClick={() => navigate(ROUTES.TIMELINE, {
+                        state: {
+                          resourceURI: Object.keys(agroupedProperties)[0],
+                          // contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))
+                        } as stateProps
+                      })}
+                    >
+                      <ListItemIcon sx={{ minWidth: '30px' }}>
+                        <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                      </ListItemIcon>
+                      <ListItemText primary={"Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                    </ListItemButton>
+                  </ListItem>
+                }
+                <ListItem key={-5} disablePadding>
+                  <ListItemButton
+                    // href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(contextos)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
+                    href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(agroupedProperties)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
+                    target='_blank'
+                    selected={selectedIndex === -5}
+                    sx={{ bgcolor: selectedIndex === -5 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                  >
+                    <ListItemIcon sx={{ minWidth: '30px' }}>
+                      <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
+                    </ListItemIcon>
+                    <ListItemText primary={estaEmPortugues ? 'Visão Gráfica' : 'Graphical View'} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
             </Grid>
 
             {/* <Grid item sm={2.5}>

@@ -29,7 +29,7 @@ export function EndpointConfig() {
   return (
     <div className={styles.container}>
 
-      <MHeader title={`Configurações`} />
+      <MHeader title={`${selectedLanguage == 'pt' ? 'Configurações':'Settings'}`} />
 
       <Grid container>
         <Grid item xs={12}>
@@ -53,7 +53,7 @@ export function EndpointConfig() {
         <Grid item xs={12} sx={{ bgcolor: null }}>
           <Stack direction={'row'} spacing={2} alignItems={'center'}>
             <Typography variant="body1">
-              Linguagem de preferência
+              {`${selectedLanguage == 'pt'?'Linguagem de preferência':'Language'}`}
             </Typography>
 
             <FormControl>
@@ -64,12 +64,12 @@ export function EndpointConfig() {
                 value={selectedLanguage}
               onChange={handleChange}
               >
-                <FormControlLabel value="pt" control={<Radio size="small" />} label="Português" sx={{
+                <FormControlLabel value="pt" control={<Radio size="small" />} label={selectedLanguage == 'pt'?"Português":"Portuguese"} sx={{
                   '.css-ahj2mt-MuiTypography-root': {
                     fontSize: '0.9rem !important',
                   },
                 }} />
-                <FormControlLabel value="en" control={<Radio size="small" />} label="Inglês" sx={{
+                <FormControlLabel value="en" control={<Radio size="small" />} label={selectedLanguage == 'pt'?"Inglês":"English"} sx={{
                   '.css-ahj2mt-MuiTypography-root': {
                     fontSize: '0.9rem !important',
                   },

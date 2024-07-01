@@ -32,13 +32,12 @@ export const menuEvolve = [
     href: [ROUTES.NAVIGATION, ROUTES.RESOURCES, ROUTES.PROPERTIES],
     type: [USER_TYPE.ADMIN]
   },
-  {
-    // title: 'Data Sources',
-    title: { 'pt': 'Fonte de Dados', 'en': 'Data Sources' },
-    icon: Database,
-    href: [ROUTES.DATASOURCE_LIST],
-    type: [USER_TYPE.ADMIN]
-  },
+  // {
+  //   title: { 'pt': 'Fonte de Dados', 'en': 'Data Sources' },
+  //   icon: Database,
+  //   href: [ROUTES.DATASOURCE_LIST],
+  //   type: [USER_TYPE.ADMIN]
+  // },
   // {
   //   title: 'Organizações',
   //   icon: Storefront,

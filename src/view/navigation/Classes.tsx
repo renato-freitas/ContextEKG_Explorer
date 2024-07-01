@@ -14,7 +14,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 import { ROUTES, NUMBERS, COLORS, LOCAL_STORAGE } from "../../commons/constants";
-import { getPropertyFromURI, setTypeClassLocalStorage } from "../../commons/utils";
+import { getPropertyFromURI, getsetRepositoryLocalStorage, getTypeOfClassOnLocalStorage, setTypeClassLocalStorage as setTypeOfClassOnLocalStorage } from "../../commons/utils";
 import { api } from "../../services/api";
 import { MHeader } from "../../components/MHeader";
 import { LoadingContext, ClassRDFContext } from "../../App";
@@ -34,7 +34,8 @@ export function Classes() {
 	const [selectedExportedView, setSelectedExportedView] = useState<string>("");
 	const [copyAllclasses, setCopyAllClasses] = useState<ClassModel[]>([]);
 	const [foundClasses, setFoundClasses] = useState<ClassModel[]>([]);
-	const [typeOfClass, setTypeOfClass] = useState<String>(NUMBERS.GENERALIZATION_CLASS_NUMBER);
+	// const [typeOfClass, setTypeOfClass] = useState<String>(NUMBERS.GENERALIZATION_CLASS_NUMBER);
+	const [typeOfClass, setTypeOfClass] = useState<String>(getTypeOfClassOnLocalStorage());
 	const [nameOfClassToFind, setNameOfClassToFind] = useState('');
 	const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
 
@@ -45,16 +46,12 @@ export function Classes() {
 			setIsLoading(true)
 			response = await api.get('/classes/exported-views');
 			setExportedViews(response.data)
-			setSelectedExportedView(response.data[0]?.datasource.value)
 			console.log('-----visões exportadas-----', response.data)
 		} catch (error) {
 			console.log(`><`, error);
 		} finally {
-
-			setTimeout(() => {
-				window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
-				setIsLoading(false)
-			}, NUMBERS.TIME_OUT_FROM_REQUEST)
+			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
+			setIsLoading(false)
 		}
 
 	}
@@ -67,15 +64,11 @@ export function Classes() {
 			console.log('*** CLASSES ***', response.data)
 			setClasses(response.data)
 			setCopyAllClasses(response.data)
+			setIsLoading(false)
 		} catch (error) {
 			console.log(`><`, error);
 		} finally {
 			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
-			setTimeout(() => {
-				setIsLoading(false)
-				setClasses(response.data)
-				setCopyAllClasses(response.data)
-			}, NUMBERS.TIME_OUT_FROM_REQUEST)
 		}
 
 	}
@@ -86,42 +79,52 @@ export function Classes() {
 			setExportedViews([])
 		}
 		setTypeOfClass((event.target as HTMLInputElement).value);
-		setTypeClassLocalStorage((event.target as HTMLInputElement).value)
+		setTypeOfClassOnLocalStorage((event.target as HTMLInputElement).value)
 	};
 
 	useEffect(() => {
+		console.log('use effect type of class')
 		// console.log('** REPOSITÓRIO NO API.HEADER **', api.defaults.headers.common['repo'])
 		setClasses([])
 		const _repo_in_api_header = api.defaults.headers.common['repo']
 		if (_repo_in_api_header) {
-			if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER) {
+			if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER && exportedViews.length == 0) {
 				loadExportedViews()
+				if(selectedExportedView != "") loadClasses()
 			}
-			// else {
-			loadClasses()
-			// }
+			else {
+				loadClasses()
+			}
 		}
-		else navigate(ROUTES.REPOSITORY_LIST)
+		else {
+			api.defaults.headers.common['repo'] = getsetRepositoryLocalStorage()
+			navigate(ROUTES.REPOSITORY_LIST)
+		}
 		// }, [typeOfClass, selectedExportedView])
-	}, [typeOfClass])
+	}, [typeOfClass, selectedExportedView])
 
 
-	useEffect(() => {
-		console.log('-----buscar classes da visão exportada selecionada-----\n')
-		setClasses([])
-		const _repo_in_api_header = api.defaults.headers.common['repo']
-		if (_repo_in_api_header) {
-			loadClasses()
-		}
-		else navigate(ROUTES.REPOSITORY_LIST)
-	}, [selectedExportedView])
+	// useEffect(() => {
+	// 	console.log('-----buscar classes da visão exportada selecionada-----\n')
+	// 	console.log('SEV', selectedExportedView)
+	// 	console.log('state', location.state)
+	// 	console.log('local', window.localStorage.getItem("classe"))
+	// 	setClasses([])
+	// 	const _repo_in_api_header = api.defaults.headers.common['repo']
+	// 	if (_repo_in_api_header) {
+	// 		if(classes.length <= 0) loadClasses()
+	// 	}
+	// 	else navigate(ROUTES.REPOSITORY_LIST)
+	// }, [selectedExportedView])
 
-	useEffect(() => {
-		console.log('*** CLASSE NO LOCAL STORAGE ***', window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS))
-		const _type_of_class_in_local_storage = window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS)
-		if (_type_of_class_in_local_storage) setTypeOfClass(_type_of_class_in_local_storage)
-		else setTypeOfClass(NUMBERS.GENERALIZATION_CLASS_NUMBER)
-	}, [])
+	// useEffect(() => {
+	// 	setClasses([])
+	// 	console.log('*** CLASSE NO LOCAL STORAGE ***', window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS))
+	// 	const _type_of_class_in_local_storage = window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS)
+	// 	// if (_type_of_class_in_local_storage) setTypeOfClass(_type_of_class_in_local_storage)
+	// 	// else setTypeOfClass(NUMBERS.GENERALIZATION_CLASS_NUMBER)
+	// 	setTypeOfClass(NUMBERS.GENERALIZATION_CLASS_NUMBER)
+	// }, [])
 
 
 
@@ -164,7 +167,7 @@ export function Classes() {
 	const subTitle = () => {
 		let _c_g = selectedLanguage == 'pt' ? "Classes de Generalização" : "Generalization Classes"
 		let _c_e = selectedLanguage == 'pt' ? "Classes Exportadas" : "Exported Classes"
-		let _c_m = selectedLanguage == 'pt' ? "Classes de Metadados" : "Metadata Classes"
+		let _c_m = selectedLanguage == 'pt' ? "Classes de Generalização" : "Generalization Classes"
 		return `${typeOfClass == "0" ? _c_g : typeOfClass == "1" ? _c_e : _c_m}`
 	}
 
@@ -174,6 +177,7 @@ export function Classes() {
 			{/* <MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Class Selection'}`} /> */}
 			<MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Context Selection'}`} />
 			{/* </div> */}
+
 			<Grid container spacing={0} sx={{ p: '4px 0' }}>
 				{/* RADIO BUTTONS */}
 				<Grid item xs={6} sx={{ bgcolor: null }}>
@@ -203,7 +207,7 @@ export function Classes() {
 						</RadioGroup>
 					</FormControl>
 				</Grid>
-				{/* PESQUISAR */}
+				{/* CAMPO DE PESQUISA */}
 				<Grid item xs={6} sx={{ bgcolor: null }} display={'flex'} justifyContent={'flex-end'}>
 					<TextField sx={{ width: document.body.clientWidth * 0.3 }}
 						id="outlined-basic" label={selectedLanguage == 'pt' ? "Pesquisar pelo nome da classe" : "Search by name"} variant="outlined" size="small"
@@ -222,19 +226,24 @@ export function Classes() {
 					? <>
 						<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }} marginBottom={1}>
 							{
-								!isLoading && exportedViews.map((e, i) => <Grid key={i} item xs={12} sm={6} md={3}>
+								exportedViews.map((e, i) => <Grid key={i} item xs={12} sm={6} md={3}>
 									<Button
 										sx={{ textTransform: 'none' }}
 										disabled={selectedExportedView == e.datasource.value}
 										variant="contained"
-										onClick={() => setSelectedExportedView(e.datasource.value)}
+										onClick={() => {
+											setSelectedExportedView(e.datasource.value)
+											window.localStorage.setItem('classe',e.datasource.value)
+										}
+										}
 									>
 										{e.datasource.value}
 									</Button>
 								</Grid>)
 							}
 						</Grid>
-						<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+						{
+							!isLoading && classes.length > 0 && <Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 							<Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
 								{
 									!isLoading &&
@@ -274,6 +283,7 @@ export function Classes() {
 								</Grid>)
 							}
 						</Grid>
+						}
 					</>
 					:
 					<Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
@@ -286,7 +296,7 @@ export function Classes() {
 						</Grid>
 						{/* CLASSES DA ONTOLOGIA */}
 						{
-							!isLoading && classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
+							!isLoading && classes.length > 0 && classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
 								<Paper elevation={3} sx={{ minHeight: 200, justifyContent: "space-between" }} >
 									<Stack
 										direction="column"

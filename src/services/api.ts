@@ -10,7 +10,7 @@ export const api = axios.create({
   //   "repo": localStorage.getItem("repository") as string
   // }
 });
-// api.defaults.headers.common["repo"] =  localStorage.getItem("repository") as string;
+api.defaults.headers.common["repo"] =  localStorage.getItem("repository") as string;
 api.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
 api.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
 
@@ -32,8 +32,10 @@ api.interceptors.response.use(
       // throw new Error("Acesso não autorizado");
       throw new Error(error.response?.data);
     } else if (error.response?.status === 403) {
+      api.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
       window.location.reload();
     } else if (error.response?.status === 404) {
+      api.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
       // throw new Error("Não encontrado");
       throw new Error(error.response.data);
     } else if (error.response?.status === 409) {
@@ -43,6 +45,7 @@ api.interceptors.response.use(
     } else if (error.response?.status === 504) {
       throw new Error("Tempo esgotado");
     } else {
+      api.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
       throw new Error("Erro desconhecido");
     }
   }

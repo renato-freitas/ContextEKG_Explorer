@@ -72,7 +72,7 @@ export function Repositories() {
     loadRepositories()
   };
 
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(NUMBERS.INICIAL_ROWS_PER_PAGE);
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
     console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -101,6 +101,7 @@ export function Repositories() {
 
   const [checked, setChecked] = useState("");
   const handleChangeRepository = (event: React.ChangeEvent<HTMLInputElement>, repository:string) => {
+    console.log('-----repositório-----', repository)
     setChecked(repository);
     setRepositoryLocalStorage(repository)
     api.defaults.headers.common['repo'] = repository
