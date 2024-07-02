@@ -1,0 +1,248 @@
+@prefix : <http://www.arida.ufc.br/ontologies/music.owl#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix mo: <http://purl.org/ontology/mo/> .
+@prefix dbo: <http://dbpedia.org/ontology/> .
+@prefix svm: <http://www.arida.ufc.br/ontologies/music#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix vskg: <http://www.arida.ufc.br/VSKG/> .
+@base <http://www.arida.ufc.br/ontologies/music.owl> .
+
+<https://graphdb.arida.site/repositories/EKG_MUSICA_BR/rdf-graphs/TBOX> {
+  
+ <http://www.arida.ufc.br/ontologies/music.owl> rdf:type owl:Ontology ;
+                                                owl:versionIRI <http://www.arida.ufc.br/ontologies/music/1.0.0> ;
+                                                rdfs:comment "Ontologia de canções, artista e álbuns."@pt .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.org/dc/elements/1.1/title
+dc:title rdf:type owl:AnnotationProperty ;
+         rdfs:label "title"@en ,
+                    "título"@pt .
+
+###  http://www.arida.ufc.br/ontologies/music#isFromExportedView
+svm:isFromExportedView rdf:type owl:AnnotationProperty .
+
+
+###  http://www.arida.ufc.br/VSKG/belongsToESV
+vskg:belongsToESV rdf:type owl:AnnotationProperty ;
+  rdfs:label "pertence a visão semântica exportada"@pt, "belongs to exporte semantic view"@en.
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://xmlns.com/foaf/0.1/made
+foaf:made rdf:type owl:ObjectProperty ;
+          rdfs:label "gravou | fez"@pt ,
+                     "made de record"@en .
+
+
+###  http://xmlns.com/foaf/0.1/maker
+foaf:maker rdf:type owl:ObjectProperty ;
+           rdfs:label "artist"@en ,
+                      "artista"@pt .                    
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://dbpedia.org/ontology/birthDate
+dbo:birthDate rdf:type owl:DatatypeProperty ;
+        rdfs:label "data de nascimento"@pt ,
+                   "birth date"@en .
+
+# ###  http://dbpedia.org/ontology/birthDate
+# dbo:birthDate rdf:type owl:DatatypeProperty ;
+#         rdfs:label "data de nascimento"@pt ,
+#                    "birth date"@en .                
+
+###  http://purl.org/dc/elements/1.1/date
+dc:date rdf:type owl:DatatypeProperty ;
+        rdfs:label "data"@pt ,
+                   "date"@en .
+
+###  http://purl.org/ontology/mo/track_number
+mo:track_number rdf:type owl:DatatypeProperty ;
+                rdfs:domain mo:Track ;
+                rdfs:comment "Indica a posição de uma música no disco"@pt, "Indicates the position of a track on a record medium (a CD, etc.)."@en;
+                rdfs:label "número da faixa"@pt, "track number"@en .
+
+
+###  http://www.w3.org/2006/vcard/ns#fn
+vcard:fn rdf:type owl:DatatypeProperty ;
+                rdfs:comment "Nome Completo de um recurso."@pt ;
+                rdfs:label "nome completo"@pt, "fullname"@en .
+
+
+###  http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+rdf:type rdf:type owl:DatatypeProperty ;
+                rdfs:label "é um"@pt, "is a"@en .
+
+
+###  http://schema.org/            
+schema:thumbnail rdf:type owl:DatatypeProperty ;
+                rdfs:label "imagem"@pt, "image"@en .
+
+###  http://xmlns.com/foaf/0.1/name
+foaf:name rdf:type owl:DatatypeProperty ;
+                rdfs:label "nome"@pt, "name"@en .
+
+###  http://xmlns.com/foaf/0.1/homepage
+foaf:homepage rdf:type owl:DatatypeProperty ;
+                rdfs:label "site"@pt, "web page"@en .
+
+
+###  http://www.arida.ufc.br/ontologies/music#country
+svm:country rdf:type owl:DatatypeProperty ;
+            rdfs:label "country of record"@en ,
+                       "país da gravação"@pt .            
+
+###  http://www.arida.ufc.br/ontologies/music#followers
+svm:followers rdf:type owl:DatatypeProperty ;
+                rdfs:label "seguidores"@pt, "followers"@en .
+
+###  http://www.arida.ufc.br/ontologies/music#popularity
+svm:popularity rdf:type owl:DatatypeProperty ;
+                rdfs:label "popularidade"@pt, "popularity"@en .              
+
+###  http://www.arida.ufc.br/ontologies/music#type
+svm:type rdf:type owl:DatatypeProperty ;
+                rdfs:label "do tipo"@pt, "type"@en . 
+
+
+###  http://www.arida.ufc.br/ontologies/music#genres
+svm:genres rdf:type owl:DatatypeProperty ;
+                rdfs:label "gêneros"@pt, "genres"@en . 
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://purl.org/ontology/mo/MusicArtist
+mo:MusicArtist rdf:type owl:Class ;
+               rdfs:comment "A person or a group of people (or a computer :-) ), whose musical creative work shows sensitivity and imagination."@en ,
+                            "Uma pessoa ou grupo de pessoas (ou um computador), cujo trabalho criativo musical mostra sensibilidade e imaginação."@pt ;
+               rdfs:label "Music Artist"@en ,
+                          "Músico | Artista"@pt .
+
+
+###  http://purl.org/ontology/mo/Record
+mo:Record rdf:type owl:Class ;
+          rdfs:comment "A published record (manifestation which first aim is to render the product of a recording)."@en ,
+                       "Um registro publicado (manifestação cujo primeiro objetivo é renderizar o produto de uma gravação)."@pt ;
+          rdfs:label "Álbum"@pt ,
+                     "Record"@en .
+
+
+###  http://purl.org/ontology/mo/Track
+mo:Track rdf:type owl:Class ;
+         rdfs:comment "A track on a particular record."@en ,
+                      "Faixa ou música de uma gravação."@pt ;
+         rdfs:label "Faixa | Música"@pt ,
+                    "Track | Song"@en .
+
+
+
+###  http://www.arida.ufc.br/ontologies/music#MusicArtist_MusicBrainz
+svm:MusicArtist_MusicBrainz rdf:type owl:Class ;
+                            rdfs:subClassOf mo:MusicArtist ;
+                            vskg:belongsToESV "MusicBrainz";
+                            rdfs:comment "A person or a group of people (or a computer :-), whose musical creative work shows sensitivity and imagination."@en,
+                              "Uma pessoa ou grupo de pessoas na MusicBrainz cujo trabalho criativo musical mostra sensibilidade e imaginação."@pt ;
+                            rdfs:label "Music Artist MusicBrainz"@en,
+                              "Músico | Artista MusicBrainz"@pt .
+
+
+###  http://www.arida.ufc.br/ontologies/music#MusicArtist_Spotify
+svm:MusicArtist_Spotify rdf:type owl:Class ;
+                        rdfs:subClassOf mo:MusicArtist ;
+                        vskg:belongsToESV "Spotify";
+                        rdfs:comment "A person or a group of people whose make music."@en,
+                          "Uma pessoa ou grupo de pessoas que tem trabalho musical na Spotify."@pt ;
+                        rdfs:label "Music Artist Spotify"@en,
+                          "Músico | Artista Spotify"@pt .
+
+
+###  http://www.arida.ufc.br/ontologies/music#MusicArtist_Wikidata
+svm:MusicArtist_Wikidata rdf:type owl:Class ;
+                         rdfs:subClassOf mo:MusicArtist ;
+                         vskg:belongsToESV "Wikidata";
+                         rdfs:comment "A person or a group of people whose make music."@en,
+                          "Uma pessoa ou grupo de pessoas que tem trabalho musical na Wikidata."@pt ;
+                        rdfs:label "Music Artist Wikidata"@en,
+                          "Músico | Artista Wikidata"@pt .
+
+
+###  http://www.arida.ufc.br/ontologies/music#Record_MusicBrainz
+svm:Record_MusicBrainz rdf:type owl:Class ;
+                       rdfs:subClassOf mo:Record ;
+                       vskg:belongsToESV "MusicBrainz";
+                       rdfs:comment "A published record."@en ,
+                       "Um registro publicado de uma gravação."@pt ;
+                      rdfs:label "Álbum MusicBrainz"@pt ,
+                                "MusicBrainz Record"@en .
+
+
+###  http://www.arida.ufc.br/ontologies/music#Record_Spotify
+svm:Record_Spotify rdf:type owl:Class ;
+                   rdfs:subClassOf mo:Record ;
+                   vskg:belongsToESV "Spotify";
+                   rdfs:comment "A published record."@en ,
+                       "Um registro publicado de uma gravação."@pt ;
+                      rdfs:label "Álbum Spotify"@pt ,
+                                "Spotify Record"@en .
+
+###  http://www.arida.ufc.br/ontologies/music#Record_Wikidata
+svm:Record_Wikidata rdf:type owl:Class ;
+                   rdfs:subClassOf mo:Record ;
+                   vskg:belongsToESV "Wikidata";
+                   rdfs:comment "A published record."@en ,
+                       "Um registro publicado de uma gravação."@pt ;
+                      rdfs:label "Álbum Wikidata"@pt ,
+                                "Wikidata Record"@en .
+
+
+###  http://www.arida.ufc.br/ontologies/music#Track_Spotify
+svm:Track_Spotify rdf:type owl:Class ;
+                      rdfs:subClassOf mo:Track ;
+                      vskg:belongsToESV "Spotify";
+                       rdfs:comment "A Spotify track on a particular record."@en ,
+                      "Faixa ou música de uma gravação na Spotify."@pt ;
+                      rdfs:label "Faixa | Música Spotify"@pt ,
+                    "Spotify Track | Song"@en .
+
+
+###  http://www.arida.ufc.br/ontologies/music#Track_MusicBrainz
+svm:Track_MusicBrainz rdf:type owl:Class ;
+                      rdfs:subClassOf mo:Track ;
+                      vskg:belongsToESV "MusicBrainz";
+                       rdfs:comment "A MusicBrainz track on a particular record."@en ,
+                      "Faixa ou música de uma gravação na MusicBrainz."@pt ;
+                      rdfs:label "Faixa | Música MusicBrainz"@pt ,
+                    "MusicBrainz Track | Song"@en .
+
+
+###  http://www.arida.ufc.br/ontologies/music#Track_Wikidata
+svm:Track_Wikidata rdf:type owl:Class ;
+                      rdfs:subClassOf mo:Track ;
+                      vskg:belongsToESV "Wikidata";
+                      rdfs:comment "A Wikidata track on a particular record."@en ,
+                      "Faixa ou música de uma gravação na Wikidata."@pt ;
+                      rdfs:label "Faixa | Música Wikidata"@pt ,
+                    "Wikidata Track | Song"@en .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
+
+}
