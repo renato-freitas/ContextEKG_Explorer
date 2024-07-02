@@ -17,33 +17,36 @@ Suas principais _features_ incluem:
 ## Demonstração
 Vídeo de demonstração da ferramenta no [Youtube](https://www.youtube.com/watch?v=LrPs3Hh-WfI).
 
-Grafos de dados da visão semântica usado na demo:
+Grafos de dados da visão semântica usado na demo: [grafos-musica-demo.zip](kgs-demo/grafos-musica-demo.zip) 
 
-Grafo de metadados da visão semântica usado na demo: 
+Grafo de metadados da visão semântica usado na demo: [ontologia-musica-br.trig](kgs-demo/ontologia-musica-br.trig) 
 
 
 
 
 ## Observações 
-### Data Design Pattern
+Para a visão semântica ser explorada com a _ContextEKG_Explorer_ ela deve ser construída com o nosso _Data Design Pattern_ (DDP) e observar algumas restrições:
+
+### 1. Data Design Pattern
+
 <img src="src/img/ddp-sv.png" alt="Description" width="400" height="300">
-Para um grafo ser explorado na ferramenta ContextEKG_Explorer ele deve se construído com o nosso DDP e observar algumas restrições:
-- Na nossa abordagem, os recursos dos grafos de conhecimento são construídos, mandatoriamente, com as propriedades dc:identifier e rdfs:label. O dc:identifier é para um controle interno e o rdfs:label.
+
+- Os recursos dos grafos de dados e metadados devem ter as propriedades _dc:identifier_ e _rdfs:label_. O _dc:identifier_ é para um controle interno e o _rdfs:label_ é o principal valor de exibição do recurso. 
 
 - Não foi testada com BlankNodes.
 
-### Vocabulário
+### 2. Vocabulário Esperado pela Ferramenta
 Para renderizar as triplas, a ContextEKG_Explorer espera alguns termos.
 
-Para as _timelines_, por exemplo, o grafo deve ser derivado da ontologia de timelines:
+- Para as _timelines_, por exemplo, o grafo deve ser derivado da ontologia de timelines:
 
 <img src="src/img/ontologia-timeline.png" alt="Description" width="400" height="300">
 
-A ontologia da visão semântica:
+- Para a ontologia da visão semântica:
 
-As classes das visões exportadas devem ter a propriedade ``vskg:belongsToESV'' com rdfs:range xds:string, cujo valor deve ser exatamente o mesmo nome da fonte de dados. Um exemplo em Turtle:
+As classes das visões exportadas devem ter a propriedade _vskg:belongsToESV_ com _rdfs:range_ do tipo _xsd:string_, cujo valor deve ser exatamente o mesmo nome da fonte de dados. Um exemplo em Turtle seria:
 
-```sparql
+```turtle
 svm:MusicalArtist rdf:type owl:Class.
 svm:MusicalArtist vskg:belongsToESV "Wikidata"
 ```
