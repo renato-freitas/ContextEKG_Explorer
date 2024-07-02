@@ -10,12 +10,16 @@ Suas principais _features_ incluem:
 - facilidade na descoberta de contexto;
 - pode ser aplicada em qualquer domínio do conhecimento;
 - consultas SPARQL otimizadas, ideais para explorar grafos em larga escala, incluindo grafos virtuais;
-- permite alternar a linguagem de preferência entre português e inglês. 
+- facilitar a alternância da linguagem de preferência entre português e inglês nas consultas SPARQL. 
 
 
 
 ## Demonstração
-Vídeo de demonstração da ferramenta no [Youtube](https://www.youtube.com/watch?v=LrPs3Hh-WfI)
+Vídeo de demonstração da ferramenta no [Youtube](https://www.youtube.com/watch?v=LrPs3Hh-WfI).
+
+Grafos de dados da visão semântica usado na demo:
+
+Grafo de metadados da visão semântica usado na demo: 
 
 
 
