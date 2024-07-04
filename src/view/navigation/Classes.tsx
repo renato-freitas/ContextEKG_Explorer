@@ -75,7 +75,8 @@ export function Classes() {
 
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if ((event.target as HTMLInputElement).value == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
+		if ((event.target as HTMLInputElement).value == NUMBERS.CODE_UNIFICATION_VIEW
+	|| (event.target as HTMLInputElement).value == NUMBERS.CODE_FUSION_VIEW) {
 			setExportedViews([])
 		}
 		setTypeOfClass((event.target as HTMLInputElement).value);
@@ -88,7 +89,7 @@ export function Classes() {
 		setClasses([])
 		const _repo_in_api_header = api.defaults.headers.common['repo']
 		if (_repo_in_api_header) {
-			if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER && exportedViews.length == 0) {
+			if (typeOfClass == NUMBERS.CODE_EXPORTED_VIEW && exportedViews.length == 0) {
 				loadExportedViews()
 				if(selectedExportedView != "") loadClasses()
 			}

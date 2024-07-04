@@ -48,7 +48,7 @@ export function Resources() {
       console.log('nome procurado:', labelToSearch)
       // let uri = double_encode_uri(contextClassRDF.classURI.value)
       let uri = double_encode_uri(classURI)
-      if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
+      if (typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW || typeOfClass == NUMBERS.CODE_FUSION_VIEW) {
         response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${selectedLanguage}`)
       }
       else {
@@ -74,7 +74,7 @@ export function Resources() {
     try {
       let uri = double_encode_uri(classURI)
       // let uri = double_encode_uri(contextClassRDF.classURI.value)
-      let if_sameas = typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER ? true : false
+      let if_sameas = typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW ? true : false
       response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}&sameas=${if_sameas}`)
       console.log(`total:`, response.data)
       setTotalOfResources(response.data)
@@ -225,7 +225,7 @@ export function Resources() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" component="div" color="gray">
-                        {typeOfSelectedClass == NUMBERS.GENERALIZATION_CLASS_NUMBER ? selectedLanguage == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
+                        {typeOfSelectedClass == NUMBERS.CODE_UNIFICATION_VIEW ? selectedLanguage == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
                       </Typography>
                     </TableCell>
                     <TableCell align='right'>

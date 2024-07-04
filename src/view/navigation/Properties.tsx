@@ -65,8 +65,6 @@ export function Properties() {
     try {
       setIsLoading(true)
       setProperties([])
-      // let _uri = double_encode_uri(uri);
-      // console.log('-URI', _uri)
       response = await api.get(`/properties/?resourceURI=${uri}&typeOfView=${typeOfView}&language=${selectedLanguage}`)
       console.log('-----props-----\n', response.data)
       setAgroupedProperties(response.data)
@@ -74,8 +72,6 @@ export function Properties() {
       alert(JSON.stringify(error));
     } finally {
       setIsLoading(false)
-      // setTimeout(() => {
-      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
@@ -101,7 +97,8 @@ export function Properties() {
         let { resource_uri, typeOfClass } = location.state as any;
         setTypeOfSelectedView(typeOfClass)
         loadSameAs(resource_uri)
-        if (typeOfClass == "1") setSelectedIndex(0)
+        if (typeOfClass == NUMBERS.CODE_EXPORTED_VIEW) setSelectedIndex(0)
+        if (typeOfClass == NUMBERS.CODE_FUSION_VIEW) setSelectedIndex(NUMBERS.IDX_FUSION_VIEW)
       }
     }
     else {
@@ -212,7 +209,7 @@ export function Properties() {
 
                 </h3>
                 <Typography sx={{ fontSize: 11, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {typeOfSelectedView == NUMBERS.GENERALIZATION_CLASS_NUMBER 
+                  {typeOfSelectedView == NUMBERS.CODE_UNIFICATION_VIEW 
                     ? obtemURICanonica(uriOfselectedResource)
                     : uriOfselectedResource
                   }
@@ -444,9 +441,6 @@ export function Properties() {
                   overflow: 'auto',
                   padding: 0
                 }}>
-                  {/* {console.log('_::_', agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))} */}
-
-
                   <ListItem key={NUMBERS.IDX_FUSION_VIEW} disablePadding>
                     <ListItemButton
                       selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
@@ -571,7 +565,6 @@ export function Properties() {
                 }
                 <ListItem key={-5} disablePadding>
                   <ListItemButton
-                    // href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(contextos)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
                     href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(agroupedProperties)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
                     target='_blank'
                     selected={selectedIndex === -5}
@@ -585,105 +578,6 @@ export function Properties() {
                 </ListItem>
               </List>
             </Grid>
-
-            {/* <Grid item sm={2.5}>
-              {
-                Object.keys(agroupedProperties).length > 0 ? <List sx={{
-                  width: '100%',
-                  bgcolor: 'background.paper',
-                  position: 'relative',
-                  overflow: 'auto',
-                  padding: 0
-                }}>
-                  {
-                    agroupedProperties && agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS] != undefined
-                    && <ListItem key={NUMBERS.IDX_FUSION_VIEW} disablePadding>
-                      <ListItemButton
-                        selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
-                        onClick={() => handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, Object.keys(agroupedProperties)[0].toString())}
-                        sx={{ bgcolor: selectedIndex === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                      >
-                        <ListItemIcon sx={{ minWidth: '30px' }}>
-                          <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                        </ListItemIcon>
-                        <ListItemText primary={estaEmPortugues ? "Visão de Fusão" : "Fusion View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                      </ListItemButton>
-                    </ListItem>
-                  }
-
-
-                  <ListItem key={NUMBERS.IDX_UNIFICATION_VIEW} disablePadding>
-                    <ListItemButton
-                      selected={selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW}
-                      onClick={() => handleSelectedContextClick(NUMBERS.IDX_UNIFICATION_VIEW, Object.keys(agroupedProperties)[0].toString())}
-                      sx={{ bgcolor: selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                    >
-                      <ListItemIcon sx={{ minWidth: '30px' }}>
-                        <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                      </ListItemIcon>
-                      <ListItemText primary={estaEmPortugues ? "Visão de Unificação" : "Unification View"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                    </ListItemButton>
-                  </ListItem>
-
-                  <ListItem key={-1} disablePadding>
-                    <ListItemButton
-                      selected={selectedIndex === -1}
-                      onClick={() => handleSelectedContextClick(-1, Object.keys(agroupedProperties)[0])}
-                      sx={{ bgcolor: selectedIndex === -1 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                    >
-                      <ListItemIcon sx={{ minWidth: '30px' }}>
-                        <Database size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                      </ListItemIcon>
-                      <ListItemText primary={estaEmPortugues ? "VSE " + getContextFromURI(Object.keys(agroupedProperties)[0]) : 'ESV ' + getContextFromURI(Object.keys(contextos)[0])} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                    </ListItemButton>
-                  </ListItem>
-                  {
-                    agroupedProperties && agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[], idx: Key) => {
-                      const _same_context = getContextFromURI(same[0])
-                      return (
-                        <ListItem key={idx} disablePadding>
-                          <ListItemButton
-                            selected={selectedIndex === idx}
-                            onClick={() => handleSelectedContextClick(idx as Number, same[0])}
-                            sx={{ bgcolor: selectedIndex === idx ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                          >
-                            <ListItemIcon sx={{ minWidth: '30px' }}>
-                              <Database size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                            </ListItemIcon>
-                            <ListItemText primary={estaEmPortugues ? 'VSE ' + _same_context : 'ESV ' + _same_context} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                          </ListItemButton>
-                        </ListItem>
-                      )
-                    })
-                  }
-
-
-                  { console.log('_::_',agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))}
-                  {
-                    agroupedProperties && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
-                     && <ListItem key={-4} disablePadding>
-                      <ListItemButton
-                        selected={selectedIndex === -4}
-                        sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                        onClick={() => navigate(ROUTES.TIMELINE, {
-                          state: {
-                            resourceURI: Object.keys(agroupedProperties)[0],
-                            contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0])) 
-                          } as stateProps
-                        })}
-                      >
-                        <ListItemIcon sx={{ minWidth: '30px' }}>
-                          <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
-                        </ListItemIcon>
-                        <ListItemText primary={"Visão Timeline"} primaryTypographyProps={{ fontSize: NUMBERS.SIZE_TEXT_MENU_CONTEXT }} />
-                      </ListItemButton>
-                    </ListItem>
-                  }
-                </List>
-                  : Object.keys(agroupedProperties).length > 0 && <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
-              }
-            </Grid> */}
-
           </Grid> /**container 2 */
         }
       </Box>
