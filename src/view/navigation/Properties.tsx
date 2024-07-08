@@ -286,7 +286,7 @@ export function Properties() {
                                 <Stack direction={'row'} spacing={2} justifyContent={'flex-start'} alignItems={"center"} textAlign={'justify'}>
                                   {
                                     agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL].map((fig: any, i: React.Key | null | undefined) => {
-                                      return <><Box p={0} width={130} height={135} key={i}>
+                                      return <><Box p={0} width={160} height={140} key={i}>
                                         <img src={fig[0]} alt={fig[0]} className={styleNavigation.img_in_properties}></img>
                                       </Box>
                                         <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
@@ -374,7 +374,6 @@ export function Properties() {
                                             { /** values[0] contém o valor literal da propriedade */
                                               values[0].toLowerCase().includes("http") && values[0].toLowerCase().includes("resource")
                                                 && linksSameAs?.every((ele: string) => values[0].includes(getContextFromURI(ele[0])))
-                                                // && agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.every((ele: string[]) => values[0].includes(getContextFromURI(ele[0])))
                                                 ? <><Link
                                                   align='left'
                                                   underline="none"
@@ -390,10 +389,12 @@ export function Properties() {
                                                   </Typography>
                                                 </>
                                                 : <><Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
-                                                  <Circle size={BULLET_SIZE} weight="fill" /> {values[0]}
+                                                  <Circle size={BULLET_SIZE} weight="fill" /> 
+                                                  {/* {propOfResource == "http://purl.org/dc/elements/1.1/date" ? " "+new Date("1998").toLocaleDateString("pt-BR") : " "+values[0]} */}
+                                                  {" "+values[0]}
                                                 </Typography>
                                                   {
-
+                                                    // Link externo
                                                     values[0].toLowerCase().includes("http") &&
                                                     <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                                       <a href={values[0]} target='_blank'><ArrowSquareOut size={14} /></a>
