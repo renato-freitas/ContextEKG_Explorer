@@ -18,9 +18,10 @@ import { ClassModel } from "../../models/ClassModel";
 
 import { LoadingContext, ClassRDFContext } from "../../App";
 import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
-import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
+import { COLORS, NAMESPACES, NUMBERS, ROUTES, TEXTS } from "../../commons/constants";
 import stylesGlobal from '../../styles/global.module.css';
 import styles from './navigation.module.css';
+import { Button } from "@mui/material";
 
 
 
@@ -82,8 +83,8 @@ export function Resources() {
       console.log(`><`, error);
     } finally {
       // setTimeout(() => {
-        // console.log(`total: `, typeof response.data)
-        // setPage(0);
+      // console.log(`total: `, typeof response.data)
+      // setPage(0);
       // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
@@ -169,6 +170,13 @@ export function Resources() {
   };
 
 
+  const handleProvenanceClick = (event: any, classRDF: any) => {
+		// setContextClassRDF(classRDF.classURI.value)
+    console.log('provenance', classRDF)
+    console.log('provenance', NAMESPACES.ARIDA_RESOURCE_METADATA + "ESV_" + classRDF)
+		// navigate(ROUTES.PROPERTIES, { state: { classRDF, typeOfClass: NUMBERS.CODE_EXPORTED_VIEW } })
+    navigate(ROUTES.METADATA_PROPERTIES, { state: { resource_uri: NAMESPACES.ARIDA_RESOURCE_METADATA + "ESV_" + classRDF, typeOfClass: typeOfSelectedClass } })
+	};
 
   return (
     <div className={stylesGlobal.container}>
@@ -179,7 +187,7 @@ export function Resources() {
             // title={`Classe "${selectedClassRDF?.label?.value}"`}
             title={selectedLanguage == 'pt' ? `Classe "${contextClassRDF.label?.value}"` : `"${contextClassRDF.label?.value}" Class`}
             hasButtonBack
-            // buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
+          // buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
           />
         </Grid>
 
@@ -224,9 +232,11 @@ export function Resources() {
                       <Typography sx={{ whiteSpace: 'pre-line' }}>{resource.label.value}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="caption" component="div" color="gray">
-                        {typeOfSelectedClass == NUMBERS.CODE_UNIFICATION_VIEW ? selectedLanguage == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
-                      </Typography>
+                      <Button variant="text" onClick={(event) => handleProvenanceClick(event, getContextFromURI(resource?.uri?.value))}>
+                        <Typography variant="caption" component="div" color="gray">
+                          {typeOfSelectedClass == NUMBERS.CODE_UNIFICATION_VIEW ? selectedLanguage == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
+                        </Typography>
+                      </Button>
                     </TableCell>
                     <TableCell align='right'>
                       <Tooltip title={selectedLanguage == 'pt' ? "Propriedades" : "Properties"}>

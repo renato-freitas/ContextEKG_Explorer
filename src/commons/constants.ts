@@ -5,6 +5,7 @@ export const TEXTS = {
   APP: "ContextEKG Explorer"
 }
 
+const ARIDA_URL_BASE = "http://www.arida.ufc.br"
 export const NAMESPACES = {
   RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
   RDFS: "http://www.w3.org/2000/01/rdf-schema#",
@@ -23,8 +24,9 @@ export const NAMESPACES = {
   SCHEMA: "http://schema.org/",
   BASE: "http://www.sefaz.ma.gov.br/resource/",
   VSKG: "http://www.arida.ufc.br/VSKG#",
-  VSKGR: "http://www.arida.ufc.br/VSKG/resource/",
-  META_EKG: "http://www.arida.ufc.br/meta-ekg/resource/",
+  VSKGR: `${ARIDA_URL_BASE}/VSKG/resource/`,
+  META_EKG: `${ARIDA_URL_BASE}/meta-ekg/resource/`,
+  ARIDA_RESOURCE_METADATA: `${ARIDA_URL_BASE}/resource/metadata/`,
   MOKG: "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#"
 }
 
@@ -120,7 +122,8 @@ export const HIGHLIGHT_CLASSES = [
   'http://xmlns.com/foaf/0.1/Organization',
   'http://www.sefaz.ma.gov.br/ontology/Estabelecimento',
   'http://xmlns.com/foaf/0.1/Person',
-  'http://www.sefaz.ma.gov.br/ontology/Sociedade']
+  'http://www.sefaz.ma.gov.br/ontology/Sociedade'
+]
 
 
 
@@ -132,6 +135,7 @@ export const ROUTES = {
   ABOUT: '/about',
   METAGRAPHS: "/metagrahs",
   METAGRAPHS_FORM: "/metagraph-form",
+
   ORGANIZATION_LIST: "/organizations",
   ORGANIZATION_FORM: "/organization-form",
   ORGANIZATION_DOC: "/organization-doc",
@@ -166,9 +170,12 @@ export const ROUTES = {
   RESOURCES: "/resources",
   PROPERTIES: "/properties",
   TIMELINE: "/timeline",
+
+  // KG DE METADADOS
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
-
+  
+  
   SEMANTIC_VIEW: '/semantic-view',
   LOCAL_GRAPH_CONSTRUCT: '/localgraph-construct',
   LOCAL_GRAPH_FORM: '/localgraph-form',
@@ -176,13 +183,14 @@ export const ROUTES = {
   EXPORTED_VIEW_MANAGE: '/exportedview-manage',
 
   MAPPINGS_LIST: '/mappings',
-
   TRIPLES_MAP_FORM: '/triplesmap-form',
 
   META_MASHUP_LIST: '/meta-mashups',
   META_MASHUP_FORM: '/meta-mashup-form',
   META_MASHUP_MANAGE: '/meta-mashup-manage',
   META_MASHUP_SPARQP_QUERY_PARAMS_FORM: '/meta-mashup/sparql-query-params',
+
+  METADATA_PROPERTIES: '/metadata-properties',
 },
 
   USER_TYPE = {

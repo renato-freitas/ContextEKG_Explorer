@@ -31,6 +31,8 @@ import { SavedQueries } from './view/queries/SavedQueries';
 import { SavedQueryForm } from './view/queries/SavedQueryForm';
 
 import { CompetenceQuestions } from './view/competence/Competencies';
+
+import { MetadataProperties } from './view/metadata/MetadataProperties';
 // import { ManageMetagraph } from './view/ekg/manage/ManageMetagraph';
 
 // import { SemanticView } from './view/semantic-view/SemanticView';
@@ -45,6 +47,7 @@ import { CompetenceQuestions } from './view/competence/Competencies';
 // import { MashupForm } from './view/mashup/MetaMashupForm';
 // import { MetaMashupManage } from './view/mashup/manage/MetaMashupManage';
 // import { SparqlQueryParamsForm } from './view/mashup/manage/SparqlQueryParamsForm';
+
 
 import { ROUTES } from './commons/constants';
 
@@ -85,6 +88,8 @@ export default function Router() {
         <Route path={ROUTES.TABLE_FORM} element={<TableForm />} />
         <Route path={ROUTES.COLUMN_LIST} element={<ColumnList />} />
         <Route path={ROUTES.COLUMN_FORM} element={<ColumnForm />} />
+        
+        <Route path={ROUTES.METADATA_PROPERTIES} element={<MetadataProperties />} />
         {/* Build Metadata */}
         {/* <Route path={ROUTES.MANAGE_METAGRAPH} element={<ManageMetagraph />} /> */}
         {/* <Route path={ROUTES.MANAGE_META_DATASOURCES} element={<MetaDataSources />} /> */}
