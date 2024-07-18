@@ -1,23 +1,13 @@
-// import { createStore, applyMiddleware } from "redux";
-// import thunk from "redux-thunk";
-// import { composeWithDevTools } from "redux-devtools-extension";
-// import RootReducers from "./RootReducers";
-// import { persistStore, persistReducer } from "redux-persist";
-// import storage from "redux-persist/lib/storage"; 
-// // defaults to localStorage for web
+import { configureStore } from '@reduxjs/toolkit'
+import contextReducer from './counterState'
 
-// const persistConfig = {
-//   key: "root",
-//   storage
-// };
+export const store = configureStore({
+  reducer: {
+    context: contextReducer
+  },
+})
 
-// const persistedReducer = persistReducer(persistConfig, RootReducers);
-
-// const Store = createStore(
-//   persistedReducer,
-//   composeWithDevTools(applyMiddleware(thunk))
-// );
-// let Persistor = persistStore(Store);
-
-// export { Store, Persistor };
-export const nada:string = "nada"
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<typeof store.getState>
+// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
+export type AppDispatch = typeof store.dispatch

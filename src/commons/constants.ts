@@ -291,8 +291,8 @@ export const NUMBERS = {
   IDX_UNIFICATION_VIEW: -2,
   IDX_SELECTED_VIEW: -1,
   CODE_UNIFICATION_VIEW: "0",
-  CODE_FUSION_VIEW: "2",
   CODE_EXPORTED_VIEW: "1",
+  CODE_FUSION_VIEW: "2",
   GRAPHDB_BROWSER_CONFIG: "&config=636bec7f4b2446018b09e14ad8bd9117",
   INICIAL_ROWS_PER_PAGE: 6
 }
@@ -310,7 +310,9 @@ export const COLORS = {
 
 
 export const LOCAL_STORAGE = {
+  LANGUAGE: "language",
   REPOSITORY: "repository",
   CONTEXT: "context",
+  GLOBAL_CONTEXT: "globalContext",
   TYPE_OF_CLASS: "typeClass"
 }

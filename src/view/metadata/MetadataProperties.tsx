@@ -297,7 +297,7 @@ export function MetadataProperties() {
                                                   underline="none"
                                                   component="button"
                                                   variant='caption'
-                                                  onClick={(e) => handleListLinkClick(e, values[0])}
+                                                  onClick={(e:any) => handleListLinkClick(e, values[0])}
                                                 >
                                                   <Circle size={BULLET_SIZE} weight="fill" color='#000' /> {values[3]}
                                                 </Link>

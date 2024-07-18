@@ -13,17 +13,18 @@ import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database } from 'phosphor-react';
-import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
+import { LinkSimpleBreak, Graph, ListMagnifyingGlass } from '@phosphor-icons/react';
 
 import { MHeader } from '../../components/MHeader';
 import { api } from "../../services/api";
 import { LoadingContext, ClassRDFContext } from "../../App";
-import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI } from "../../commons/utils";
+import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI, updateGlobalContext } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
-import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES } from '../../commons/constants';
+import { COLORS, EKG_CONTEXT_VOCABULARY, LOCAL_STORAGE, NUMBERS, ROUTES } from '../../commons/constants';
 
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from './navigation.module.css'
+import { IconButton, Tooltip } from '@mui/material';
 
 const HAS_LABEL = 1
 const HAS_PROVENANCE = 2
@@ -112,7 +113,8 @@ export function Properties() {
       if (location?.state) {
         let { resource_uri, typeOfClass } = location.state as any;
 
-        console.log('contexto selecionado: ', resource_uri, typeOfClass)
+        // console.log('contexto selecionado: ', resource_uri, typeOfClass)
+        console.log('prop.globalContext: ', window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT))
         loadPropertiesOfSelectedResource(resource_uri, typeOfClass)
         setUriOfSelectedResource(resource_uri)
         if (typeOfClass == "0") setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
@@ -136,14 +138,17 @@ export function Properties() {
     console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
     setSelectedIndex(index);
     if (ehVisaoExportada(index)) {
-      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: "1" } })
+      updateGlobalContext({ resourceURI: contextoSelecionado, view: NUMBERS.CODE_EXPORTED_VIEW, exportedView: getContextFromURI(contextoSelecionado) })
+      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_EXPORTED_VIEW } })
     }
     else if (ehVisaoUnificacao(index)) {
-      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: "0" } })
+      updateGlobalContext({ resourceURI: contextoSelecionado, view: NUMBERS.CODE_UNIFICATION_VIEW, exportedView: "" })
+      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_UNIFICATION_VIEW } })
     }
     else {
+      updateGlobalContext({ resourceURI: contextoSelecionado, view: NUMBERS.CODE_FUSION_VIEW, exportedView: "" })
       console.log('-------chamando visão de fusão---------\n')
-      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: "2" } })
+      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_FUSION_VIEW } })
     }
   };
 
@@ -152,9 +157,10 @@ export function Properties() {
 
 
   /** Clicar em um ObjectProperty */
-  async function handleListLinkClick(event: any, uri: string) {
+  async function handleObjectPropertiesClick(event: any, uri: string) {
     // event.preventDefault();
     try {
+      updateGlobalContext({ resourceURI: uri })
       console.log('===URI DO LINK===', uri)
       setLinkedData({ link: uri, index: selectedIndex })
       navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
@@ -176,23 +182,30 @@ export function Properties() {
 
 
 
+  {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */}
+  {/* <div style={{ paddingLeft: 60 }}> */}
 
   return (
     <div className={stylesGlobal.container}>
-      {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */}
-      {/* <div style={{ paddingLeft: 60 }}> */}
-        <MHeader
-          title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
-          hasButtonBack
-        // buttonBackNavigateTo={ROUTES.RESOURCES}
-        // state={{
-        //   state: {
-        //     classRDF: { classURI: { value: ClassRDFContext } },
-        //     typeOfClass: `${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "0" : "1"}`
-        //   }
-        // }}
-        />
+      <Grid container spacing={1} sx={{ p: '2px 0' }}>
+        <Grid item xs={7.5} sx={{ bgcolor: null }}>
+          <MHeader
+            title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
+          />
+        </Grid>
+        <Grid item xs={2} sx={{ bgcolor: null, display: 'flex', justifyContent:'flex-end', alignContent:'flex-end' }}>
+          <Tooltip title={estaEmPortugues ? "Ir para a lista de recursos no contexto atual" : "Go to resources list in current context"}>
+            <IconButton color='primary' size="small">
+              {/* onClick={() => navigate(ROUTES.PROPERTIES, { state: { resource_uri: row[key]["value"], typeOfClass: "1" } })}> */}
+              <ListMagnifyingGlass size={22} />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={2.5}></Grid>
+      </Grid>
+
       {/* </div> */}
+
 
       <Box sx={{ flexGrow: 1, padding: 0 }}>
         {
@@ -209,7 +222,7 @@ export function Properties() {
 
                 </h3>
                 <Typography sx={{ fontSize: 11, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {typeOfSelectedView == NUMBERS.CODE_UNIFICATION_VIEW 
+                  {typeOfSelectedView == NUMBERS.CODE_UNIFICATION_VIEW
                     ? obtemURICanonica(uriOfselectedResource)
                     : uriOfselectedResource
                   }
@@ -379,7 +392,7 @@ export function Properties() {
                                                   underline="none"
                                                   component="button"
                                                   variant='caption'
-                                                  onClick={(e) => handleListLinkClick(e, values[0])}
+                                                  onClick={(e: any) => handleObjectPropertiesClick(e, values[0])}
                                                 >
                                                   <Circle size={BULLET_SIZE} weight="fill" color='#000' /> {values[3]}
                                                 </Link>
@@ -389,9 +402,9 @@ export function Properties() {
                                                   </Typography>
                                                 </>
                                                 : <><Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
-                                                  <Circle size={BULLET_SIZE} weight="fill" /> 
+                                                  <Circle size={BULLET_SIZE} weight="fill" />
                                                   {/* {propOfResource == "http://purl.org/dc/elements/1.1/date" ? " "+new Date("1998").toLocaleDateString("pt-BR") : " "+values[0]} */}
-                                                  {" "+values[0]}
+                                                  {" " + values[0]}
                                                 </Typography>
                                                   {
                                                     // Link externo

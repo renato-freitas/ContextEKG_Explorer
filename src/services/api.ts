@@ -1,11 +1,11 @@
 import axios from "axios";
-import { getsetRepositoryLocalStorage, printt } from "../commons/utils";
+// import { getsetRepositoryLocalStorage, printt } from "../commons/utils";
 // var pjson = require("../../package.json");
 // https://testdriven.io/blog/developing-a-single-page-app-with-fastapi-and-vuejs/
 
 export const api = axios.create({
   // withCredentials: true,
-  baseURL: "http://localhost:8000",
+  baseURL: "http://127.0.0.1:8000",
   // headers: {
   //   "repo": localStorage.getItem("repository") as string
   // }
@@ -53,7 +53,9 @@ api.interceptors.response.use(
 
 // api.interceptors.request.use((config) => {
 //   config.headers = Object.assign({
-//     'repo': localStorage.getItem("repository") as string
+//     'repo': localStorage.getItem("repository") as string,
+//     "Authorization": "Bearer " + localStorage.getItem("token"),
+//     "Access-Control-Allow-Origin": "*"
 //   }, config.headers)
 // })
 

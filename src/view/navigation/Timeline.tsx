@@ -199,21 +199,14 @@ export function TimelineView() {
   return (
     <div className={stylesGlobal.container}>
       <Grid container spacing={0}>
-        <Grid item xs={6} sx={{ bgcolor: null }}>
+        <Grid item xs={6.5} sx={{ bgcolor: null }}>
           <MHeader
             title={estaEmPortugues ? "Histórico do recurso" : "Timeline of Resource"}
             hasButtonBack
-          // buttonBackNavigateTo={ROUTES.PROPERTIES}
-          // state={{
-          //   state: {
-          //     resource_uri: linksSameAs.length > 0 ? linksSameAs[0].sameas.value : "",
-          //     typeOfClass: `${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? "0" : "1"}`
-          //   }
-          // }}
           />
         </Grid>
 
-        <Grid item xs={3}>
+        <Grid item xs={3} sx={{ bgcolor: null, display: 'flex', justifyContent:'flex-end', alignContent:'flex-end', paddingRight:1 }}>
           <FormControl sx={{ m: 0, minWidth: 300 }} size="small">
             <InputLabel id="demo-simple-select-label">Filtrar Propriedade</InputLabel>
             <Select
@@ -228,6 +221,7 @@ export function TimelineView() {
             </Select>
           </FormControl>
         </Grid>
+        <Grid item xs={2.5}></Grid>
       </Grid>
 
 

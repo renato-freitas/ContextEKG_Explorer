@@ -17,8 +17,8 @@ import { ResourceModel } from "../../models/ResourceModel";
 import { ClassModel } from "../../models/ClassModel";
 
 import { LoadingContext, ClassRDFContext } from "../../App";
-import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
-import { COLORS, NAMESPACES, NUMBERS, ROUTES, TEXTS } from "../../commons/constants";
+import { double_encode_uri, getContextFromURI, printt, updateGlobalContext } from "../../commons/utils";
+import { COLORS, LOCAL_STORAGE, NAMESPACES, NUMBERS, ROUTES, TEXTS } from "../../commons/constants";
 import stylesGlobal from '../../styles/global.module.css';
 import styles from './navigation.module.css';
 import { Button } from "@mui/material";
@@ -40,6 +40,7 @@ export function Resources() {
   const [runingSearch, setRuningSearch] = useState<boolean>(false);
   const [totalOfResources, setTotalOfResources] = useState<number>(0);
   const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
+  const [globalContext, setGlobalContext] = useState(JSON.parse(window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT) as string));
 
 
   async function loadResourcesOfSelectedClass(classURI: string, typeOfClass: string, newPage: number) {
@@ -130,6 +131,7 @@ export function Resources() {
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
+    updateGlobalContext({resourceURI: resource.uri.value})
     setSelectedIndex(idx);
     setSelectedResource(resource)
     navigate(ROUTES.PROPERTIES, { state: { resource_uri: resource.uri.value, typeOfClass: typeOfSelectedClass } })

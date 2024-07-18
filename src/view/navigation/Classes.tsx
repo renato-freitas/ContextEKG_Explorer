@@ -14,7 +14,11 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 import { ROUTES, NUMBERS, COLORS, LOCAL_STORAGE } from "../../commons/constants";
-import { getPropertyFromURI, getsetRepositoryLocalStorage, getTypeOfClassOnLocalStorage, setTypeClassLocalStorage as setTypeOfClassOnLocalStorage } from "../../commons/utils";
+import { getPropertyFromURI, getsetRepositoryLocalStorage, 
+	getTypeOfClassOnLocalStorage, 
+	setTypeClassLocalStorage as setTypeOfClassOnLocalStorage,
+	updateGlobalContext
+ } from "../../commons/utils";
 import { api } from "../../services/api";
 import { MHeader } from "../../components/MHeader";
 import { LoadingContext, ClassRDFContext } from "../../App";
@@ -38,7 +42,28 @@ export function Classes() {
 	const [typeOfClass, setTypeOfClass] = useState<String>(getTypeOfClassOnLocalStorage());
 	const [nameOfClassToFind, setNameOfClassToFind] = useState('');
 	const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
+	const [globalContext, setGlobalContext] = useState(JSON.parse(window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT) as string));
 
+
+	async function loadClasses() {
+		let response: any
+		try {
+			setIsLoading(true)
+			console.log('globalContext', globalContext.view)
+			// response = await api.get(`/classes/?type=${globalContext.view}&exported_view=${selectedExportedView}&language=${selectedLanguage}`);
+			response = await api.get(`/classes/?type=${globalContext.view}&exported_view=${globalContext.exportedView}&language=${globalContext.language}`);
+			console.log('*** CLASSES ***', response.data)
+			setClasses(response.data)
+			setCopyAllClasses(response.data)
+			setIsLoading(false)
+		} catch (error) {
+			console.log(`><`, error);
+		} finally {
+			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
+			// console.log('O QUE TEM AGORA?', globalContext)
+		}
+
+	}
 
 	async function loadExportedViews() {
 		let response: any
@@ -56,22 +81,7 @@ export function Classes() {
 
 	}
 
-	async function loadClasses() {
-		let response: any
-		try {
-			setIsLoading(true)
-			response = await api.get(`/classes/?type=${typeOfClass}&exported_view=${selectedExportedView}&language=${selectedLanguage}`);
-			console.log('*** CLASSES ***', response.data)
-			setClasses(response.data)
-			setCopyAllClasses(response.data)
-			setIsLoading(false)
-		} catch (error) {
-			console.log(`><`, error);
-		} finally {
-			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
-		}
-
-	}
+	
 
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,6 +91,9 @@ export function Classes() {
 		}
 		setTypeOfClass((event.target as HTMLInputElement).value);
 		setTypeOfClassOnLocalStorage((event.target as HTMLInputElement).value)
+
+
+		updateGlobalContext({view:(event.target as HTMLInputElement).value})
 	};
 
 	useEffect(() => {
@@ -132,6 +145,7 @@ export function Classes() {
 	// const [selectedIndex, setSelectedIndex] = useState<Number>(1);
 	const handleListOfClassesClick = (event: any, classRDF: ClassModel) => {
 		// setContextClassRDF(classRDF.classURI.value)
+		updateGlobalContext({classURI: classRDF.classURI.value})
 		setContextClassRDF(classRDF)
 		navigate(ROUTES.RESOURCES, { state: { classRDF, typeOfClass } })
 	};
@@ -180,7 +194,7 @@ export function Classes() {
 			{/* </div> */}
 
 			<Grid container spacing={0} sx={{ p: '4px 0' }}>
-				{/* RADIO BUTTONS */}
+				{/* RADIO BUTTONS | SELEÇÃO DE VISÃO */}
 				<Grid item xs={6} sx={{ bgcolor: null }}>
 					<FormControl>
 						<RadioGroup
@@ -235,6 +249,7 @@ export function Classes() {
 										onClick={() => {
 											setSelectedExportedView(e.datasource.value)
 											window.localStorage.setItem('classe',e.datasource.value)
+											updateGlobalContext({exportedView:e.datasource.value})
 										}
 										}
 									>

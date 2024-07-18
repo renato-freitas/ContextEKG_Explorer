@@ -1,4 +1,5 @@
 import { Repositories } from "../view/config/Repositories";
+import { LOCAL_STORAGE } from "./constants";
 
 export function printt(text: string, value?: any): void {
   console.log(`*** ${text.toUpperCase()} ***`, value ? value : "")
@@ -157,6 +158,11 @@ export function getTypeOfClassOnLocalStorage(): string {
   return localStorage.getItem('typeClass') || ""
 }
 
+export function updateGlobalContext(object:any) {
+  let _currentGlobalContext = window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT) as string
+  let updatedGlobalContext = {...JSON.parse(_currentGlobalContext), ...object}
+  window.localStorage.setItem(LOCAL_STORAGE.GLOBAL_CONTEXT, JSON.stringify(updatedGlobalContext))
+}
 
 export function getDateFromInstantTimelin(instantURI: string): string {
   if (instantURI) {

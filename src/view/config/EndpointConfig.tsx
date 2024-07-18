@@ -9,27 +9,34 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../../redux/store'
+import { decrement, increment } from '../../redux/counterState';
+
 import { MHeader } from "../../components/MHeader";
 import { ROUTES } from "../../commons/constants";
-import { getsetRepositoryLocalStorage } from "../../commons/utils";
+import { getsetRepositoryLocalStorage, updateGlobalContext } from "../../commons/utils";
 import styles from '../../styles/global.module.css'
 
 export function EndpointConfig() {
   const navigate = useNavigate()
+  const count = useSelector((state: RootState) => state.context.value)
+  const dispatch = useDispatch()
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(window.localStorage.getItem('LANGUAGE'));
 
-  
+
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setSelectedLanguage((event.target as HTMLInputElement).value);
+    updateGlobalContext({language:(event.target as HTMLInputElement).value})
+    setSelectedLanguage((event.target as HTMLInputElement).value);
     window.localStorage.setItem('LANGUAGE', (event.target as HTMLInputElement).value)
     window.location.reload();
-	};
+  };
 
   return (
     <div className={styles.container}>
 
-      <MHeader title={`${selectedLanguage == 'pt' ? 'Configurações':'Settings'}`} />
+      <MHeader title={`${selectedLanguage == 'pt' ? 'Configurações' : 'Settings'}`} />
 
       <Grid container>
         <Grid item xs={12}>
@@ -53,7 +60,7 @@ export function EndpointConfig() {
         <Grid item xs={12} sx={{ bgcolor: null }}>
           <Stack direction={'row'} spacing={2} alignItems={'center'}>
             <Typography variant="body1">
-              {`${selectedLanguage == 'pt'?'Linguagem de preferência':'Language'}`}
+              {`${selectedLanguage == 'pt' ? 'Linguagem de preferência' : 'Language'}`}
             </Typography>
 
             <FormControl>
@@ -62,14 +69,14 @@ export function EndpointConfig() {
                 aria-labelledby="demo-controlled-radio-buttons-group"
                 name="controlled-radio-buttons-group"
                 value={selectedLanguage}
-              onChange={handleChange}
+                onChange={handleChange}
               >
-                <FormControlLabel value="pt" control={<Radio size="small" />} label={selectedLanguage == 'pt'?"Português":"Portuguese"} sx={{
+                <FormControlLabel value="pt" control={<Radio size="small" />} label={selectedLanguage == 'pt' ? "Português" : "Portuguese"} sx={{
                   '.css-ahj2mt-MuiTypography-root': {
                     fontSize: '0.9rem !important',
                   },
                 }} />
-                <FormControlLabel value="en" control={<Radio size="small" />} label={selectedLanguage == 'pt'?"Inglês":"English"} sx={{
+                <FormControlLabel value="en" control={<Radio size="small" />} label={selectedLanguage == 'pt' ? "Inglês" : "English"} sx={{
                   '.css-ahj2mt-MuiTypography-root': {
                     fontSize: '0.9rem !important',
                   },
@@ -79,6 +86,21 @@ export function EndpointConfig() {
           </Stack>
         </Grid>
       </Grid>
+      <div>
+        <button
+          aria-label="Increment value"
+          onClick={() => dispatch(increment())}
+        >
+          Increment
+        </button>
+        <span>{count}</span>
+        <button
+          aria-label="Decrement value"
+          onClick={() => dispatch(decrement())}
+        >
+          Decrement
+        </button>
+      </div>
     </div>
   );
 }
