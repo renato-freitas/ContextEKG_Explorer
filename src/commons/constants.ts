@@ -2,7 +2,8 @@
 // const MOKG = "http://www.arida.ufc.org/ontologies/metadata-of-knowledge-graph#";
 // export const VSKG = "http://www.arida.ufc.br/VSKG/";
 export const TEXTS = {
-  APP: "ContextEKG Explorer"
+  APP: "ContextEKG Explorer",
+  DEPLOY: "PRODUTION"
 }
 
 const ARIDA_URL_BASE = "http://www.arida.ufc.br"
@@ -166,7 +167,7 @@ export const ROUTES = {
   COLUMN_FORM: "/column-form",
   TOPICS: "/topics",
   // NAVIGATION
-  NAVIGATION: "/classes",
+  CLASSES: "/classes",
   RESOURCES: "/resources",
   PROPERTIES: "/properties",
   TIMELINE: "/timeline",
@@ -290,9 +291,9 @@ export const NUMBERS = {
   IDX_FUSION_VIEW: -3,
   IDX_UNIFICATION_VIEW: -2,
   IDX_SELECTED_VIEW: -1,
-  CODE_UNIFICATION_VIEW: "0",
-  CODE_EXPORTED_VIEW: "1",
-  CODE_FUSION_VIEW: "2",
+  CODE_OF_UNIFICATION_VIEW: "0",
+  CODE_OF_EXPORTED_VIEW: "1",
+  CODE_OF_FUSION_VIEW: "2",
   GRAPHDB_BROWSER_CONFIG: "&config=636bec7f4b2446018b09e14ad8bd9117",
   INICIAL_ROWS_PER_PAGE: 6
 }

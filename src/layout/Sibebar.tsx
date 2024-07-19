@@ -9,11 +9,14 @@ import { SidebarContainer } from './Sidebar.styles'
 import { menuEvolve, menuConsuming, menuConfig } from './menu';
 import { NavLink } from 'react-router-dom';
 import { Paper, Stack } from '@mui/material';
-import { Component, Key, useState } from 'react';
-import { string } from 'zod';
+import { Component, Key } from 'react';
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../redux/store'
 const MENU_FONTE_SIZE = "0.7rem"
 const MENU_ICON_SIZE = 20
 const PADDING_LEFT_ITEMS = 1.3
+const SIDEBAR_MARGIN_WHEN_FOR_PAPER_IMAGE = {position: 'absolute', ml: 8, mt:0, width:90}
+const SIDEBAR_MARGIN_WHEN_PRODUCTION = {position: 'absolute', ml: 0.3, mt:0, width:100}
 
 interface itemProps {
   title: {},
@@ -24,18 +27,15 @@ interface itemProps {
 
 export function Sidebar() {
   const { pathname } = useLocation();
-  const [selectedLanguage, setSelectecLanguage] = useState<string>(window.localStorage.getItem('LANGUAGE') as any)
+	const dispatch = useDispatch();
+	const global_context = useSelector((state: RootState) => state.globalContext)
   return (
-    // <Paper elevation={3} sx={{position: 'absolute', ml: 0.3, mt:1, width:90}}>
-    <Paper elevation={3} sx={{position: 'absolute', ml: 8, mt:0, width:90}}>
+    <Paper elevation={3} sx={SIDEBAR_MARGIN_WHEN_PRODUCTION}>
       <SidebarContainer>
         <List>
           {
             menuEvolve.map((item:any, index:Key) => (
-              // let title = item.title[lan]
-              // <ListItem key={item.title['pt']} disablePadding>
               <ListItem key={index} disablePadding>
-                {/* <ListItemButton component={NavLink} to={item.href} selected={pathname === item.href}> */}
                 <ListItemButton 
 									sx={{pl:PADDING_LEFT_ITEMS}}
 									component={NavLink} 
@@ -45,7 +45,7 @@ export function Sidebar() {
                     <ListItemIcon>
                       <item.icon size={MENU_ICON_SIZE} />
                     </ListItemIcon>
-                    <ListItemText primary={item.title[selectedLanguage]} primaryTypographyProps={{ fontSize: MENU_FONTE_SIZE }} />
+                    <ListItemText primary={item.title[global_context.language]} primaryTypographyProps={{ fontSize: MENU_FONTE_SIZE }} />
                   </Stack>
                 </ListItemButton>
               </ListItem>
@@ -56,7 +56,7 @@ export function Sidebar() {
         <Divider />
         <List>
           {menuConsuming.map((item:any, index) => (
-            <ListItem key={item.title[selectedLanguage]} disablePadding>
+            <ListItem key={item.title[global_context.language]} disablePadding>
               <ListItemButton 
 								sx={{pl:PADDING_LEFT_ITEMS}}
 								component={NavLink} 
@@ -65,7 +65,7 @@ export function Sidebar() {
                   <ListItemIcon>
                     <item.icon size={MENU_ICON_SIZE} />
                   </ListItemIcon>
-                  <ListItemText primary={item.title[selectedLanguage]} primaryTypographyProps={{ fontSize: MENU_FONTE_SIZE }} />
+                  <ListItemText primary={item.title[global_context.language]} primaryTypographyProps={{ fontSize: MENU_FONTE_SIZE }} />
                 </Stack>
               </ListItemButton>
             </ListItem>
@@ -82,7 +82,7 @@ export function Sidebar() {
                   <ListItemIcon>
                     <item.icon size={MENU_ICON_SIZE} />
                   </ListItemIcon>
-                  <ListItemText primary={item.title[selectedLanguage]} primaryTypographyProps={{ fontSize: MENU_FONTE_SIZE }} />
+                  <ListItemText primary={item.title[global_context.language]} primaryTypographyProps={{ fontSize: MENU_FONTE_SIZE }} />
                 </Stack>
               </ListItemButton>
             </ListItem>
@@ -92,80 +92,3 @@ export function Sidebar() {
     </Paper>
   )
 }
-
-
-
-
-// 				{
-		// 			return exportedViews.map((expview, index) => {
-		// 				return <Grid item xs={12} sm={6} md={3} key={index}>
-		// 					<Paper elevation={3} sx={{ minHeight: 300, justifyContent: "space-between" }} >
-		// 						<Stack
-		// 							direction="column"
-		// 							justifyContent="space-between"
-		// 							alignItems="center"
-		// 							spacing={2}
-		// 							sx={{ minHeight: 300 }}
-		// 						>
-		// 							<Box display='flex' flexDirection="column" p={1}>
-		// 								{/* <Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}> */}
-		// 								<Button variant="text">
-		// 									<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
-		// 										{expview?.datasource?.value}
-		// 									</Typography>
-		// 								</Button>
-		// 							</Box>
-
-		// 						</Stack>
-		// 					</Paper>
-		// 				</Grid>
-		// 			</Grid>
-		// }
-		// 	: false
-
-			// <Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-			// 	{
-
-			// 			? 
-			// 			})
-			// 	/** CABEÇALHO */
-			// 	: !isLoading && <Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
-			// 		<div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
-			// 			<h4>{`Classes ${typeOfClass == "0" ? "de Generalização" : typeOfClass == "1" ? 'Exportadas' : 'Metadados'}`}
-			// 				{` (${classes.length > 0 ? classes.length : ""})`}
-			// 			</h4>
-			// 		</div>
-			// 	</Grid>
-
-			// 		/** LISTA DAS CLASSES */
-			// 		!isLoading && classes.length > 0 && classes.map((classRDF, index) =>
-			// 	<Grid item xs={12} sm={6} md={3} key={index}>
-			// 		<Paper elevation={3} sx={{ minHeight: 300, justifyContent: "space-between" }} >
-			// 			<Stack
-			// 				direction="column"
-			// 				justifyContent="space-between"
-			// 				alignItems="center"
-			// 				spacing={2}
-			// 				sx={{ minHeight: 300 }}
-			// 			>
-			// 				<Box display='flex' flexDirection="column" p={1}>
-			// 					<Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
-			// 						<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
-			// 							{getPropertyFromURI(classRDF?.label?.value)}
-			// 						</Typography>
-			// 					</Button>
-			// 					<Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center" }} color="text.primary" gutterBottom>
-			// 						{classRDF?.classURI.value}
-			// 					</Typography>
-			// 					<Typography variant="caption" component="div" color="ActiveCaption" align="center">
-			// 						{classRDF?.comment?.value}
-			// 					</Typography>
-			// 				</Box>
-			// 				<Box p={1} width={200} height={120} display="flex" alignItems="flex-end" justifyContent="flex-end">
-			// 					{classRDF?.image?.value && <img src={classRDF?.image?.value} alt={getPropertyFromURI(classRDF?.label?.value)} className={style.img_responsive}></img>}
-			// 				</Box>
-			// 			</Stack>
-			// 		</Paper>
-			// 	</Grid>)
-			// 	}
-			// </Grid>

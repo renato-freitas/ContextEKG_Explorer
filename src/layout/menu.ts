@@ -29,7 +29,7 @@ export const menuEvolve = [
     title: { 'pt': 'Exploração', 'en': 'Exploration' },
     // icon: PaperPlaneTilt,
     icon: ManageSearchRoundedIcon,
-    href: [ROUTES.NAVIGATION, ROUTES.RESOURCES, ROUTES.PROPERTIES],
+    href: [ROUTES.CLASSES, ROUTES.RESOURCES, ROUTES.PROPERTIES],
     type: [USER_TYPE.ADMIN]
   },
   // {

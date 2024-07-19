@@ -9,6 +9,10 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { Eye } from "phosphor-react";
 
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../../redux/store'
+import { updasteResourceURI } from '../../redux/globalContextSlice';
+
 import { MHeader } from "../../components/MHeader";
 import { MTable } from "../../components/MTable";
 
@@ -17,10 +21,9 @@ import { ResourceModel } from "../../models/ResourceModel";
 import { ClassModel } from "../../models/ClassModel";
 
 import { LoadingContext, ClassRDFContext } from "../../App";
-import { double_encode_uri, getContextFromURI, printt, updateGlobalContext } from "../../commons/utils";
-import { COLORS, LOCAL_STORAGE, NAMESPACES, NUMBERS, ROUTES, TEXTS } from "../../commons/constants";
+import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
+import { COLORS, NAMESPACES, NUMBERS, ROUTES } from "../../commons/constants";
 import stylesGlobal from '../../styles/global.module.css';
-import styles from './navigation.module.css';
 import { Button } from "@mui/material";
 
 
@@ -28,6 +31,8 @@ import { Button } from "@mui/material";
 export function Resources() {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const global_context = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   const { contextClassRDF } = useContext(ClassRDFContext);
   const [page, setPage] = useState(0);
@@ -39,44 +44,47 @@ export function Resources() {
   const [typeOfSelectedClass, setTypeOfSelectedClass] = useState<string>("");
   const [runingSearch, setRuningSearch] = useState<boolean>(false);
   const [totalOfResources, setTotalOfResources] = useState<number>(0);
-  const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
-  const [globalContext, setGlobalContext] = useState(JSON.parse(window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT) as string));
+  // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
+  // const [globalContext, setGlobalContext] = useState(JSON.parse(window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT) as string));
 
 
-  async function loadResourcesOfSelectedClass(classURI: string, typeOfClass: string, newPage: number) {
+  async function loadResourcesOfSelectedClass(newPage: number) {
     let response: any
     try {
       setIsLoading(true)
       console.log('nome procurado:', labelToSearch)
       // let uri = double_encode_uri(contextClassRDF.classURI.value)
-      let uri = double_encode_uri(classURI)
-      if (typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW || typeOfClass == NUMBERS.CODE_FUSION_VIEW) {
-        response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${selectedLanguage}`)
+      // let uri = double_encode_uri(classURI)
+      let uri = double_encode_uri(global_context.classRDF?.classURI?.value as string)
+      // if (typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW || typeOfClass == NUMBERS.CODE_FUSION_VIEW) {
+      // if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) {
+      if ([NUMBERS.CODE_OF_UNIFICATION_VIEW, NUMBERS.CODE_OF_FUSION_VIEW].includes(global_context.view)) {
+        // response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${selectedLanguage}`)
+        response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
       }
       else {
-        response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${selectedLanguage}`)
+        // response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
+        response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
       }
       console.log('recursos da classe:', response.data)
+      setResources(response.data)
+      setIsLoading(false)
     } catch (error) {
       console.log(`><`, error);
     } finally {
       window.scrollTo(0, 0)
-      setIsLoading(false)
-      setResources(response.data)
-      // setTimeout(() => {
-
-      // setPage(0)
-      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
   /**Esse total de recursos é para saber até onde paginar */
-  async function getTotalResources(classURI: string, typeOfClass: string) {
+  async function getTotalResources() {
     let response: any
     try {
-      let uri = double_encode_uri(classURI)
+      // let uri = double_encode_uri(classURI)
+      let uri = double_encode_uri(global_context?.classRDF?.classURI.value as string)
       // let uri = double_encode_uri(contextClassRDF.classURI.value)
-      let if_sameas = typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW ? true : false
+      // let if_sameas = typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW ? true : false
+      let if_sameas = global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW ? true : false
       response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}&sameas=${if_sameas}`)
       console.log(`total:`, response.data)
       setTotalOfResources(response.data)
@@ -93,6 +101,7 @@ export function Resources() {
 
 
   useEffect(() => {
+    console.log('--- global_context ---', global_context)
     function onEdit() {
       try {
         const _repo_in_api_header = api.defaults.headers.common['repo']
@@ -106,13 +115,14 @@ export function Resources() {
             // setSelectedClass(classURI)
             setSelectedClassRDF(_state.classRDF)
             setTypeOfSelectedClass(_state.typeOfClass)
-            loadResourcesOfSelectedClass(classURI, _state.typeOfClass, page)
-            getTotalResources(classURI, _state.typeOfClass)
+            // loadResourcesOfSelectedClass(classURI, _state.typeOfClass, page)
+            loadResourcesOfSelectedClass(page)
+            getTotalResources()
           }
           else {
-            console.log('react.context class rdf:', contextClassRDF)
-            loadResourcesOfSelectedClass(contextClassRDF.classURI.value, typeOfSelectedClass, page)
-            getTotalResources(contextClassRDF.classURI.value, typeOfSelectedClass)
+            // console.log('react.context class rdf:', contextClassRDF)
+            loadResourcesOfSelectedClass(page)
+            getTotalResources()
           }
         }
         else {
@@ -131,10 +141,12 @@ export function Resources() {
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
-    updateGlobalContext({resourceURI: resource.uri.value})
+    // updateGlobalContext({resourceURI: resource.uri.value})
+    dispatch(updasteResourceURI(resource.uri.value))
     setSelectedIndex(idx);
     setSelectedResource(resource)
-    navigate(ROUTES.PROPERTIES, { state: { resource_uri: resource.uri.value, typeOfClass: typeOfSelectedClass } })
+    // navigate(ROUTES.PROPERTIES, { state: { resource_uri: resource.uri.value, typeOfClass: typeOfSelectedClass } })
+    navigate(ROUTES.PROPERTIES)
   };
 
 
@@ -142,7 +154,7 @@ export function Resources() {
   /**Pagination */
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
-    loadResourcesOfSelectedClass(selectedClassRDF?.classURI?.value as string, typeOfSelectedClass, newPage)
+    loadResourcesOfSelectedClass(newPage)
   };
 
   const [rowsPerPage, setRowsPerPage] = useState(6);
@@ -173,50 +185,42 @@ export function Resources() {
 
 
   const handleProvenanceClick = (event: any, classRDF: any) => {
-		// setContextClassRDF(classRDF.classURI.value)
+    // setContextClassRDF(classRDF.classURI.value)
     console.log('provenance', classRDF)
     console.log('provenance', NAMESPACES.ARIDA_RESOURCE_METADATA + "ESV_" + classRDF)
-		// navigate(ROUTES.PROPERTIES, { state: { classRDF, typeOfClass: NUMBERS.CODE_EXPORTED_VIEW } })
+    // navigate(ROUTES.PROPERTIES, { state: { classRDF, typeOfClass: NUMBERS.CODE_EXPORTED_VIEW } })
     navigate(ROUTES.METADATA_PROPERTIES, { state: { resource_uri: NAMESPACES.ARIDA_RESOURCE_METADATA + "ESV_" + classRDF, typeOfClass: typeOfSelectedClass } })
-	};
+  };
 
   return (
     <div className={stylesGlobal.container}>
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={6} sx={{ bgcolor: null }}>
           <MHeader
-            // title={`Recursos da classe ${getPropertyFromURI(selectedClass)}`}
-            // title={`Classe "${selectedClassRDF?.label?.value}"`}
-            title={selectedLanguage == 'pt' ? `Classe "${contextClassRDF.label?.value}"` : `"${contextClassRDF.label?.value}" Class`}
+            title={global_context.language == 'pt' ? `Classe "${global_context.classRDF?.label?.value}"` : `"${global_context.classRDF?.label?.value}" Class`}
             hasButtonBack
-          // buttonBackNavigateTo={`${ROUTES.NAVIGATION}`}
+            buttonBackNavigateTo={ROUTES.CLASSES}
           />
         </Grid>
 
         <Grid item xs={6} display='flex' justifyContent='flex-end' sx={{ bgcolor: null }}>
-          {/* <Stack direction={'row'} gap={1} alignItems={'center'}>
-            <Tooltip title="Teste">
-              <Info size={32}></Info>
-            </Tooltip> */}
           <TextField sx={{ width: 450 }}
-            id="outlined-basic" label={selectedLanguage == 'pt' ? "Pesquisar somente pelo nome do recurso" : "Search by name"} variant="outlined" size="small"
+            id="outlined-basic" label={global_context.language == 'pt' ? "Pesquisar somente pelo nome do recurso" : "Search by name"} variant="outlined" size="small"
             value={labelToSearch}
             onChange={handleSearchResourceLabel}
             // error={labelToSearch.length > 1 && foundClasses.length == 0}
             helperText={(labelToSearch.length > 1 && resources.length == 0) ? "Sem corespondência." : false}
             onKeyUp={handleSearchEscape}
           />
-          {/* </Stack> */}
         </Grid>
       </Grid>
 
       {/* CONTENT */}
       {
-        resources.length > 0 && <Grid container spacing={4} sx={{ mb: 1 }}>
-          {/* DATA SOURCES */}
+        !isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
           <Grid item sm={12} justifyContent={'center'}>
             <MTable
-              header={[[selectedLanguage == 'pt' ? "Recursos" : "Resources", "left"], [selectedLanguage == 'pt' ? "Proveniência" : "Provenance", "left"]]}
+              header={[[global_context.language == 'pt' ? "Recursos" : "Resources", "left"], [global_context.language == 'pt' ? "Proveniência" : "Provenance", "left"]]}
               size={totalOfResources}
               // size={ ((page +1) * rowsPerPage) < totalOfResources ? totalOfResources : resources.length}
               rowsPerPage={rowsPerPage}
@@ -236,12 +240,12 @@ export function Resources() {
                     <TableCell>
                       <Button variant="text" onClick={(event) => handleProvenanceClick(event, getContextFromURI(resource?.uri?.value))}>
                         <Typography variant="caption" component="div" color="gray">
-                          {typeOfSelectedClass == NUMBERS.CODE_UNIFICATION_VIEW ? selectedLanguage == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
+                          {[NUMBERS.CODE_OF_UNIFICATION_VIEW, NUMBERS.CODE_OF_FUSION_VIEW].includes(global_context.view) ? global_context.language == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
                         </Typography>
                       </Button>
                     </TableCell>
                     <TableCell align='right'>
-                      <Tooltip title={selectedLanguage == 'pt' ? "Propriedades" : "Properties"}>
+                      <Tooltip title={global_context.language == 'pt' ? "Propriedades" : "Properties"}>
                         <IconButton onClick={(event) => handleListOfResourcesClick(event, idx, resource)} sx={{ p: "4px !important" }}>
                           <Eye size={22} color={COLORS.AZUL_04} />
                         </IconButton>
@@ -253,39 +257,6 @@ export function Resources() {
           </Grid>
         </Grid>
       }
-
-      {/* <Grid container spacing={1}>
-        <Grid item sm={12}>
-          <List sx={{
-            bgcolor: 'None',
-            position: 'relative',
-            overflow: 'auto',
-            '& ul': { padding: 0 },
-          }}>
-            {resources.map((row, idx) => <ListItemButton key={row?.uri?.value}
-              selected={selectedIndex === idx}
-              onClick={(event) => handleListItemClick(event, idx, row)}
-            >
-              <MCard
-                bgcolor={changeBgColorCard(idx)}>
-                <Box sx={{ width: window.screen.width * 0.6 }}>
-                  <Grid item sm={12} gap={3}>
-                    <Stack direction="row" spacing={1}>
-                      <Typography variant="body2" component="div">
-                        {idx + 1} - {getPropertyFromURI(row.label.value)}
-                      </Typography>
-                      <Typography variant="caption" component="div" color="gray">
-                        - {getContextFromURI(row?.uri?.value)}
-                      </Typography>
-                    </Stack>
-                  </Grid>
-                </Box>
-              </MCard>
-            </ListItemButton>
-            )}
-          </List>
-        </Grid>
-      </Grid> */}
     </div >
   )
 }

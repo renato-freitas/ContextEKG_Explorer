@@ -136,7 +136,7 @@ export function MetadataProperties() {
 
                 </h3>
                 <Typography sx={{ fontSize: 11, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {typeOfSelectedView == NUMBERS.CODE_UNIFICATION_VIEW
+                  {typeOfSelectedView == NUMBERS.CODE_OF_UNIFICATION_VIEW
                     ? uriOfselectedResource
                     : uriOfselectedResource
                   }

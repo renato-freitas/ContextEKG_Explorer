@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import contextReducer from './counterState'
+import globalContextReducer from './globalContextSlice'
 
 export const store = configureStore({
   reducer: {
-    context: contextReducer
+    globalContext: globalContextReducer
   },
 })
 

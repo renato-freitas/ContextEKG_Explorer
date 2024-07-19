@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Key, useDebugValue } from 'react';
+import React, { useState, useEffect, useContext, Key } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -12,19 +12,25 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database } from 'phosphor-react';
-import { LinkSimpleBreak, Graph, ListMagnifyingGlass } from '@phosphor-icons/react';
+import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database, Receipt } from 'phosphor-react';
+import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
+
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../../redux/store'
+import { updateView, updateResourceAndView } from '../../redux/globalContextSlice';
+
 
 import { MHeader } from '../../components/MHeader';
 import { api } from "../../services/api";
 import { LoadingContext, ClassRDFContext } from "../../App";
-import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI, updateGlobalContext } from "../../commons/utils";
+import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
-import { COLORS, EKG_CONTEXT_VOCABULARY, LOCAL_STORAGE, NUMBERS, ROUTES } from '../../commons/constants';
+import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES, TEXTS } from '../../commons/constants';
 
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from './navigation.module.css'
 import { IconButton, Tooltip } from '@mui/material';
+
 
 const HAS_LABEL = 1
 const HAS_PROVENANCE = 2
@@ -33,8 +39,13 @@ const BULLET_SIZE = 4
 const FONTSIZE_PROPERTY = 14
 const FONTWEIGHT_PROPERTY = 450
 const FONTSEZE_VALUE_PROPERTY = "0.69rem"
-const WIDTH_OF_P = 2.5
-const WIDTH_OF_O = 9.5
+const WIDTH_OF_P = TEXTS.DEPLOY == "PRODUCTION" ? 3 : 2.5
+const WIDTH_OF_O = TEXTS.DEPLOY == "PRODUCTION" ? 9 : 9.5
+
+const LABEL_MARGIN_WHEN_PRODUCTION = TEXTS.DEPLOY == "PRODUCTION" 
+  ? { background: COLORS.CINZA_01, padding: "0px 10px 0px 10px" }
+  : { background: COLORS.CINZA_01, padding: "0px 10px 0px 60px" }
+
 
 // https://medium.com/@lucas_pinheiro/como-adicionar-internacionaliza%C3%A7%C3%A3o-i18n-na-sua-aplica%C3%A7%C3%A3o-react-a1ac4aea109d
 
@@ -43,31 +54,30 @@ export interface stateProps {
   // contextos: {};
 }
 export function Properties() {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const global_context = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const { contextClassRDF } = useContext(ClassRDFContext);
   const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
-  const [instants, setInstants] = useState<any[]>([] as any[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
   const [linkedData, setLinkedData] = useState<any>({});
-  const [contextos, setContextos] = useState<any>({})
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
-  const [selectedIndex, setSelectedIndex] = useState<Number | undefined>(undefined);
+  const [selectedIndexOfMenu, setSelectedIndexOfMenu] = useState<Number | undefined>(undefined);
   const [typeOfSelectedView, setTypeOfSelectedView] = useState<string>("");
-  const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
   let auxLabelOfClasses = [] as string[];
-  const estaEmPortugues = selectedLanguage == 'pt'
+  const estaEmPortugues = global_context.language == 'pt'
 
 
-  async function loadPropertiesOfSelectedResource(uri: string, typeOfView: string) {
+  async function loadPropertiesOfSelectedResource() {
     let response: any
     try {
       setIsLoading(true)
       setProperties([])
-      response = await api.get(`/properties/?resourceURI=${uri}&typeOfView=${typeOfView}&language=${selectedLanguage}`)
-      console.log('-----props-----\n', response.data)
+      // response = await api.get(`/properties/?resourceURI=${uri}&typeOfView=${typeOfView}&language=${selectedLanguage}`)
+      response = await api.get(`/properties/?resourceURI=${global_context.resourceURI}&typeOfView=${global_context.view}&language=${global_context.language}`)
+      // console.log('-----props-----\n', response.data)
       setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
@@ -82,7 +92,7 @@ export function Properties() {
       if (uri) {
         let _uri = double_encode_uri(uri);
         const response = await api.get(`/sameas/?resourceURI=${_uri}`)
-        console.log('-------links sameas-----\n', response.data)
+        console.log('--- links sameas ---\n', response.data)
         setLinksSameAs(response.data)
       }
     } catch (error) {
@@ -92,15 +102,21 @@ export function Properties() {
   }
 
   useEffect(() => {
+    console.log('--- global_context ---', global_context)
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      if (location?.state) {
-        let { resource_uri, typeOfClass } = location.state as any;
-        setTypeOfSelectedView(typeOfClass)
-        loadSameAs(resource_uri)
-        if (typeOfClass == NUMBERS.CODE_EXPORTED_VIEW) setSelectedIndex(0)
-        if (typeOfClass == NUMBERS.CODE_FUSION_VIEW) setSelectedIndex(NUMBERS.IDX_FUSION_VIEW)
-      }
+      // if (location?.state) {
+        // let { resource_uri, typeOfClass } = location.state as any;
+        // setTypeOfSelectedView(typeOfClass)
+        setTypeOfSelectedView(global_context.view)
+        loadSameAs(global_context.resourceURI)
+        // loadSameAs(resource_uri)
+        // if (typeOfClass == NUMBERS.CODE_OF_EXPORTED_VIEW) setSelectedIndexOfMenu(0)
+        // if (typeOfClass == NUMBERS.CODE_OF_FUSION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
+        if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) setSelectedIndexOfMenu(0)
+        else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
+        else if (global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
+      // }
     }
     else {
       navigate(ROUTES.REPOSITORY_LIST)
@@ -108,24 +124,27 @@ export function Properties() {
   }, [])
 
   useEffect(() => {
+    console.log('--- global_context ---', global_context)
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      if (location?.state) {
-        let { resource_uri, typeOfClass } = location.state as any;
+      console.log('--- index ---')
+      // if (location?.state) {
+        // let { resource_uri, typeOfClass } = location.state as any;
 
         // console.log('contexto selecionado: ', resource_uri, typeOfClass)
-        console.log('prop.globalContext: ', window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT))
-        loadPropertiesOfSelectedResource(resource_uri, typeOfClass)
-        setUriOfSelectedResource(resource_uri)
-        if (typeOfClass == "0") setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
+        // console.log('prop.globalContext: ', window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT))
+        loadPropertiesOfSelectedResource()
+        // setUriOfSelectedResource(resource_uri)
+        // if (typeOfClass == "0") setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
+        if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
 
         window.scrollTo(0, 0)
-      }
+      // }
     }
     else {
       navigate(ROUTES.REPOSITORY_LIST)
     }
-  }, [location?.state])
+  }, [location?.state, selectedIndexOfMenu])
 
 
 
@@ -136,20 +155,22 @@ export function Properties() {
 
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
-    setSelectedIndex(index);
+    setSelectedIndexOfMenu(index);
     if (ehVisaoExportada(index)) {
-      updateGlobalContext({ resourceURI: contextoSelecionado, view: NUMBERS.CODE_EXPORTED_VIEW, exportedView: getContextFromURI(contextoSelecionado) })
-      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_EXPORTED_VIEW } })
+      dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
+      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_OF_EXPORTED_VIEW } })
+      // navigate(ROUTES.PROPERTIES)
     }
     else if (ehVisaoUnificacao(index)) {
-      updateGlobalContext({ resourceURI: contextoSelecionado, view: NUMBERS.CODE_UNIFICATION_VIEW, exportedView: "" })
-      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_UNIFICATION_VIEW } })
+      dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_UNIFICATION_VIEW }))
+      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_OF_UNIFICATION_VIEW } })
+      // navigate(ROUTES.PROPERTIES)
     }
     else {
-      updateGlobalContext({ resourceURI: contextoSelecionado, view: NUMBERS.CODE_FUSION_VIEW, exportedView: "" })
-      console.log('-------chamando visão de fusão---------\n')
-      navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_FUSION_VIEW } })
+      dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_FUSION_VIEW }))
+      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_OF_FUSION_VIEW } })
     }
+    navigate(ROUTES.PROPERTIES)
   };
 
 
@@ -160,9 +181,9 @@ export function Properties() {
   async function handleObjectPropertiesClick(event: any, uri: string) {
     // event.preventDefault();
     try {
-      updateGlobalContext({ resourceURI: uri })
+      // updateResourceAndView({ resourceURI: uri })
       console.log('===URI DO LINK===', uri)
-      setLinkedData({ link: uri, index: selectedIndex })
+      setLinkedData({ link: uri, index: selectedIndexOfMenu })
       navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
     } catch (error) {
       console.log(error)
@@ -182,8 +203,8 @@ export function Properties() {
 
 
 
-  {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */}
-  {/* <div style={{ paddingLeft: 60 }}> */}
+  {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */ }
+  {/* <div style={{ paddingLeft: 60 }}> */ }
 
   return (
     <div className={stylesGlobal.container}>
@@ -193,11 +214,11 @@ export function Properties() {
             title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
           />
         </Grid>
-        <Grid item xs={2} sx={{ bgcolor: null, display: 'flex', justifyContent:'flex-end', alignContent:'flex-end' }}>
+        <Grid item xs={2} sx={{ bgcolor: null, display: 'flex', justifyContent: 'flex-end', alignContent: 'flex-end' }}>
           <Tooltip title={estaEmPortugues ? "Ir para a lista de recursos no contexto atual" : "Go to resources list in current context"}>
-            <IconButton color='primary' size="small">
-              {/* onClick={() => navigate(ROUTES.PROPERTIES, { state: { resource_uri: row[key]["value"], typeOfClass: "1" } })}> */}
-              <ListMagnifyingGlass size={22} />
+            <IconButton color='primary' size="small"
+              onClick={() => navigate(ROUTES.RESOURCES)}>
+              <Receipt size={22} />
             </IconButton>
           </Tooltip>
         </Grid>
@@ -212,7 +233,7 @@ export function Properties() {
           /** LABEL DO RECURSO */
           !isLoading && Object.keys(agroupedProperties).length > 0 && <Grid container spacing={1}>
             <Grid item sm={9.5}>
-              <div style={{ background: COLORS.CINZA_01, padding: "0px 10px 0px 60px" }}>
+              <div style={LABEL_MARGIN_WHEN_PRODUCTION}>
                 <h3 style={{ whiteSpace: 'pre-line' }}>
                   {
                     agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.w3.org/2000/01/rdf-schema#label"] != undefined
@@ -222,9 +243,11 @@ export function Properties() {
 
                 </h3>
                 <Typography sx={{ fontSize: 11, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {typeOfSelectedView == NUMBERS.CODE_UNIFICATION_VIEW
-                    ? obtemURICanonica(uriOfselectedResource)
-                    : uriOfselectedResource
+                  {
+                    /** A URI canonical deveria vir do backend */
+                    global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_FUSION_VIEW
+                      ? obtemURICanonica(global_context.resourceURI)
+                      : global_context.resourceURI
                   }
                 </Typography>
               </div>
@@ -246,7 +269,7 @@ export function Properties() {
             {/* LISTA DAS PROPRIEDADES DO RECURSO (PAINEL ESQUERDO) */}
             <Grid item sm={9.5}>
               {
-                selectedIndex != -4
+                selectedIndexOfMenu != -4
                   ? Object.keys(agroupedProperties).length > 0 && <Box sx={{ width: "100%" }}>
                     <Paper sx={{ background: "None" }} elevation={0}>
                       <List
@@ -299,14 +322,14 @@ export function Properties() {
                                 <Stack direction={'row'} spacing={2} justifyContent={'flex-start'} alignItems={"center"} textAlign={'justify'}>
                                   {
                                     agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL].map((fig: any, i: React.Key | null | undefined) => {
-                                      return <><Box p={0} width={160} height={140} key={i}>
+                                      return <Box p={0} width={160} height={140} key={i}>
                                         <img src={fig[0]} alt={fig[0]} className={styleNavigation.img_in_properties}></img>
-                                      </Box>
+                                        {/* </Box> */}
                                         <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
                                           {/* values[1] contém a proveniência do dados (na visão de unificação) */}
                                           {fig[HAS_PROVENANCE]}
                                         </Typography>
-                                      </>
+                                      </Box>
                                     })
                                   }
                                 </Stack>
@@ -335,7 +358,7 @@ export function Properties() {
                                     agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT]
                                   ).map((values: (string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined)[], i: React.Key) => {
                                     return values && <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
-                                      textAlign={'justify'}>
+                                      textAlign={'justify'} key={i}>
                                       <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                         <Circle size={BULLET_SIZE} weight="fill" /> {`${values[0]}`}
                                       </Typography>
@@ -382,7 +405,7 @@ export function Properties() {
                                       { /** VALORES DAS PROPRIEDADES */
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource].map((values: any, i: React.Key) => {
                                           // console.log('valores: ', values)
-                                          return <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
+                                          return <Stack key={i} direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                             textAlign={'justify'}>
                                             { /** values[0] contém o valor literal da propriedade */
                                               values[0].toLowerCase().includes("http") && values[0].toLowerCase().includes("resource")
@@ -457,9 +480,9 @@ export function Properties() {
                 }}>
                   <ListItem key={NUMBERS.IDX_FUSION_VIEW} disablePadding>
                     <ListItemButton
-                      selected={selectedIndex === NUMBERS.IDX_FUSION_VIEW}
+                      selected={selectedIndexOfMenu === NUMBERS.IDX_FUSION_VIEW}
                       onClick={() => handleSelectedContextClick(NUMBERS.IDX_FUSION_VIEW, linksSameAs[0].sameas.value)}
-                      sx={{ bgcolor: selectedIndex === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                      sx={{ bgcolor: selectedIndexOfMenu === NUMBERS.IDX_FUSION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                     >
                       <ListItemIcon sx={{ minWidth: '30px' }}>
                         <LinkSimpleBreak size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -472,9 +495,9 @@ export function Properties() {
 
                   <ListItem key={NUMBERS.IDX_UNIFICATION_VIEW} disablePadding>
                     <ListItemButton
-                      selected={selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW}
+                      selected={selectedIndexOfMenu === NUMBERS.IDX_UNIFICATION_VIEW}
                       onClick={() => handleSelectedContextClick(NUMBERS.IDX_UNIFICATION_VIEW, linksSameAs[0].sameas.value)}
-                      sx={{ bgcolor: selectedIndex === NUMBERS.IDX_UNIFICATION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                      sx={{ bgcolor: selectedIndexOfMenu === NUMBERS.IDX_UNIFICATION_VIEW ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                     >
                       <ListItemIcon sx={{ minWidth: '30px' }}>
                         <LinkIcon size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -486,14 +509,14 @@ export function Properties() {
 
                   {
                     linksSameAs.map((row: any, idx: Key) => {
-                      console.log('--', row)
+                      // console.log('--', row)
                       const _sameas_context = getContextFromURI(row.sameas.value)
                       return (
                         <ListItem key={idx} disablePadding>
                           <ListItemButton
-                            selected={selectedIndex === idx}
+                            selected={selectedIndexOfMenu === idx}
                             onClick={() => handleSelectedContextClick(idx as Number, row.sameas.value)}
-                            sx={{ bgcolor: selectedIndex === idx ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                            sx={{ bgcolor: selectedIndexOfMenu === idx ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                           >
                             <ListItemIcon sx={{ minWidth: '30px' }}>
                               <Database size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -513,8 +536,8 @@ export function Properties() {
                       agroupedProperties[Object.keys(agroupedProperties)[0]] && agroupedProperties[Object.keys(agroupedProperties)[0]]['http://www.arida.ufc.br/ontologies/timeline#has_timeline'] != undefined
                         ? <ListItem key={-4} disablePadding>
                           <ListItemButton
-                            selected={selectedIndex === -4}
-                            sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                            selected={selectedIndexOfMenu === -4}
+                            sx={{ bgcolor: selectedIndexOfMenu === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                             onClick={() => navigate(ROUTES.TIMELINE, {
                               state: {
                                 resourceURI: Object.keys(agroupedProperties)[0],
@@ -538,7 +561,7 @@ export function Properties() {
                         return (
                           <ListItem key={idx} disablePadding>
                             <ListItemButton
-                              selected={selectedIndex === idx}
+                              selected={selectedIndexOfMenu === idx}
                               onClick={() => handleSelectedContextClick(idx as Number, row.sameas.value)}
                               sx={{ bgcolor: `${COLORS.AMARELO_01} !important` }}
                             >
@@ -552,7 +575,7 @@ export function Properties() {
                       })
                     }
                     <ListItem key={linksSameAs.length + 1} disablePadding sx={{ pt: 1 }}>
-                      <Chip label={estaEmPortugues ? 'Recurso sem link "sameAs"' : 'No sameAs links'} color='warning' />
+                      <Chip label={estaEmPortugues ? 'Sem link owl:sameAs' : 'No owl:sameAs link'} color='warning' />
                     </ListItem>
                   </List>
               }
@@ -561,8 +584,8 @@ export function Properties() {
                   agroupedProperties[Object.keys(agroupedProperties)[0]] && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
                   && <ListItem key={-4} disablePadding>
                     <ListItemButton
-                      selected={selectedIndex === -4}
-                      sx={{ bgcolor: selectedIndex === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                      selected={selectedIndexOfMenu === -4}
+                      sx={{ bgcolor: selectedIndexOfMenu === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                       onClick={() => navigate(ROUTES.TIMELINE, {
                         state: {
                           resourceURI: Object.keys(agroupedProperties)[0],
@@ -581,8 +604,8 @@ export function Properties() {
                   <ListItemButton
                     href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(agroupedProperties)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
                     target='_blank'
-                    selected={selectedIndex === -5}
-                    sx={{ bgcolor: selectedIndex === -5 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                    selected={selectedIndexOfMenu === -5}
+                    sx={{ bgcolor: selectedIndexOfMenu === -5 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
                   >
                     <ListItemIcon sx={{ minWidth: '30px' }}>
                       <Graph size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />

@@ -9,6 +9,9 @@ import {
 } from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
 import { TablePaginationActions } from '../commons/pagination';
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../redux/store'
+import { updateView, updateExportedView, updateClassRDF } from '../redux/globalContextSlice';
 import { CaretLeft, CaretRight } from 'phosphor-react';
 
 type typeAlignOfCell = "right" | "left" | "inherit" | "center" | "justify" | undefined
@@ -35,10 +38,12 @@ const PAINEL_LEFT_SIZE = widthOfBody * 0.2
 // console.log("Width: " + element?.offsetWidth + "px"); 
 
 export function MTable(props: MTable) {
+  const dispatch = useDispatch();
+	const global_context = useSelector((state: RootState) => state.globalContext)
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
-  const estaEmPortugues = selectedLanguage == 'pt'
+  // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
+  const estaEmPortugues = global_context.language == 'pt'
   // const [page, setPage] = React.useState(1);
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value); console.log(value)
@@ -61,7 +66,7 @@ export function MTable(props: MTable) {
             {
               props.hasActions &&
               <TableCell key={'Ações'} align={props.alignActions ? props.alignActions : 'center'}>
-                <Typography component={'p'} variant="caption" fontWeight="800">{selectedLanguage == 'pt' ? "Ações" : "Actions"}</Typography>
+                <Typography component={'p'} variant="caption" fontWeight="800">{global_context.language == 'pt' ? "Ações" : "Actions"}</Typography>
               </TableCell>
             }
           </TableRow>
@@ -93,7 +98,7 @@ export function MTable(props: MTable) {
                   },
                   native: false,
                 }}
-                labelRowsPerPage={selectedLanguage == 'pt' ? "Linhas por Página" : "Rows per Page"}
+                labelRowsPerPage={global_context.language == 'pt' ? "Linhas por Página" : "Rows per Page"}
                 onPageChange={props.handleChangePage}
                 onRowsPerPageChange={props.handleChangeRowsPerPage}
                 ActionsComponent={TablePaginationActions}

@@ -13,12 +13,14 @@ import RadioGroup from '@mui/material/RadioGroup'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-import { ROUTES, NUMBERS, COLORS, LOCAL_STORAGE } from "../../commons/constants";
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../../redux/store'
+import { updateView, updateExportedView, updateClassRDF } from '../../redux/globalContextSlice';
+
+import { ROUTES, NUMBERS, COLORS } from "../../commons/constants";
 import { getPropertyFromURI, getsetRepositoryLocalStorage, 
 	getTypeOfClassOnLocalStorage, 
-	setTypeClassLocalStorage as setTypeOfClassOnLocalStorage,
-	updateGlobalContext
- } from "../../commons/utils";
+	setTypeClassLocalStorage as setTypeOfClassOnLocalStorage } from "../../commons/utils";
 import { api } from "../../services/api";
 import { MHeader } from "../../components/MHeader";
 import { LoadingContext, ClassRDFContext } from "../../App";
@@ -29,41 +31,38 @@ import style from './navigation.module.css'
 // https://medium.com/@lucas_pinheiro/como-adicionar-internacionaliza%C3%A7%C3%A3o-i18n-na-sua-aplica%C3%A7%C3%A3o-react-a1ac4aea109d
 // const NUMBER_OF_GENERALIZATION_CLASS = "0"
 export function Classes() {
-	const location = useLocation();
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const global_context = useSelector((state: RootState) => state.globalContext)
 	const { isLoading, setIsLoading } = useContext(LoadingContext);
-	const { contextClassRDF, setContextClassRDF } = useContext(ClassRDFContext);
 	const [classes, setClasses] = useState<ClassModel[]>([]);
 	const [exportedViews, setExportedViews] = useState<any[]>([]);
 	const [selectedExportedView, setSelectedExportedView] = useState<string>("");
 	const [copyAllclasses, setCopyAllClasses] = useState<ClassModel[]>([]);
 	const [foundClasses, setFoundClasses] = useState<ClassModel[]>([]);
-	// const [typeOfClass, setTypeOfClass] = useState<String>(NUMBERS.GENERALIZATION_CLASS_NUMBER);
-	const [typeOfClass, setTypeOfClass] = useState<String>(getTypeOfClassOnLocalStorage());
+	// const [typeOfClass, setTypeOfClass] = useState<String>(getTypeOfClassOnLocalStorage());
 	const [nameOfClassToFind, setNameOfClassToFind] = useState('');
-	const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
-	const [globalContext, setGlobalContext] = useState(JSON.parse(window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT) as string));
 
 
 	async function loadClasses() {
 		let response: any
 		try {
 			setIsLoading(true)
-			console.log('globalContext', globalContext.view)
 			// response = await api.get(`/classes/?type=${globalContext.view}&exported_view=${selectedExportedView}&language=${selectedLanguage}`);
-			response = await api.get(`/classes/?type=${globalContext.view}&exported_view=${globalContext.exportedView}&language=${globalContext.language}`);
-			console.log('*** CLASSES ***', response.data)
+			response = await api.get(`/classes/?view=${global_context.view}&exported_view=${global_context.exportedView}&language=${global_context.language}`);
+			// console.log('*** CLASSES ***', response.data)
 			setClasses(response.data)
 			setCopyAllClasses(response.data)
 			setIsLoading(false)
 		} catch (error) {
-			console.log(`><`, error);
+			console.error(`---catch---`, error);
 		} finally {
 			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
-			// console.log('O QUE TEM AGORA?', globalContext)
 		}
 
 	}
+
+
 
 	async function loadExportedViews() {
 		let response: any
@@ -84,25 +83,28 @@ export function Classes() {
 	
 
 
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if ((event.target as HTMLInputElement).value == NUMBERS.CODE_UNIFICATION_VIEW
-	|| (event.target as HTMLInputElement).value == NUMBERS.CODE_FUSION_VIEW) {
+	const handleChangeOfView = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if ((event.target as HTMLInputElement).value == NUMBERS.CODE_OF_UNIFICATION_VIEW
+				|| (event.target as HTMLInputElement).value == NUMBERS.CODE_OF_FUSION_VIEW) {
 			setExportedViews([])
 		}
-		setTypeOfClass((event.target as HTMLInputElement).value);
-		setTypeOfClassOnLocalStorage((event.target as HTMLInputElement).value)
+		// setTypeOfClass((event.target as HTMLInputElement).value);
+		// setTypeOfClassOnLocalStorage((event.target as HTMLInputElement).value)
 
-
-		updateGlobalContext({view:(event.target as HTMLInputElement).value})
+		/** REDUX TOOLKIT */
+		dispatch(updateView((event.target as HTMLInputElement).value))
 	};
 
 	useEffect(() => {
-		console.log('use effect type of class')
+		console.log('--- use effect type of class ---')
+		console.log('--- global_context ---', global_context)
+
 		// console.log('** REPOSITÓRIO NO API.HEADER **', api.defaults.headers.common['repo'])
 		setClasses([])
 		const _repo_in_api_header = api.defaults.headers.common['repo']
 		if (_repo_in_api_header) {
-			if (typeOfClass == NUMBERS.CODE_EXPORTED_VIEW && exportedViews.length == 0) {
+			// if (typeOfClass == NUMBERS.CODE_OF_EXPORTED_VIEW && exportedViews.length == 0) {
+			if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW && exportedViews.length == 0) {
 				loadExportedViews()
 				if(selectedExportedView != "") loadClasses()
 			}
@@ -115,7 +117,7 @@ export function Classes() {
 			navigate(ROUTES.REPOSITORY_LIST)
 		}
 		// }, [typeOfClass, selectedExportedView])
-	}, [typeOfClass, selectedExportedView])
+	}, [global_context.view, selectedExportedView])
 
 
 	// useEffect(() => {
@@ -145,9 +147,11 @@ export function Classes() {
 	// const [selectedIndex, setSelectedIndex] = useState<Number>(1);
 	const handleListOfClassesClick = (event: any, classRDF: ClassModel) => {
 		// setContextClassRDF(classRDF.classURI.value)
-		updateGlobalContext({classURI: classRDF.classURI.value})
-		setContextClassRDF(classRDF)
-		navigate(ROUTES.RESOURCES, { state: { classRDF, typeOfClass } })
+		// updateGlobalContext({classURI: classRDF.classURI.value})
+		dispatch(updateClassRDF(classRDF))
+		// setContextClassRDF(classRDF)
+		// navigate(ROUTES.RESOURCES, { state: { classRDF, typeOfClass } })
+		navigate(ROUTES.RESOURCES)
 	};
 
 	const handleSearchClassName = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,41 +184,43 @@ export function Classes() {
 
 
 	const subTitle = () => {
-		let _c_g = selectedLanguage == 'pt' ? "Classes de Generalização" : "Generalization Classes"
-		let _c_e = selectedLanguage == 'pt' ? "Classes Exportadas" : "Exported Classes"
-		let _c_m = selectedLanguage == 'pt' ? "Classes de Generalização" : "Generalization Classes"
-		return `${typeOfClass == "0" ? _c_g : typeOfClass == "1" ? _c_e : _c_m}`
+		let _c_g = global_context.language == 'pt' ? "Classes de Generalização" : "Generalization Classes"
+		let _c_e = global_context.language == 'pt' ? "Classes Exportadas" : "Exported Classes"
+		let _c_m = global_context.language == 'pt' ? "Classes de Generalização" : "Generalization Classes"
+		// return `${typeOfClass == "0" ? _c_g : typeOfClass == "1" ? _c_e : _c_m}`
+		return `${global_context.view == "0" ? _c_g : global_context.view == "1" ? _c_e : _c_m}`
 	}
 
 	return (
 		<div className={stylesGlobal.container}>
 			{/* <div style={{paddingLeft:60}}> */}
 			{/* <MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Class Selection'}`} /> */}
-			<MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Context Selection'}`} />
+			<MHeader title={`${global_context.language == 'pt' ? 'Seleção de Classe' : 'Context Selection'}`} />
 			{/* </div> */}
 
 			<Grid container spacing={0} sx={{ p: '4px 0' }}>
-				{/* RADIO BUTTONS | SELEÇÃO DE VISÃO */}
+				{/* RADIO BUTTONS | SELEÇÃO DE NÍVEL DE VISÃO*/}
 				<Grid item xs={6} sx={{ bgcolor: null }}>
 					<FormControl>
 						<RadioGroup
 							row
 							aria-labelledby="demo-controlled-radio-buttons-group"
 							name="controlled-radio-buttons-group"
-							value={typeOfClass}
-							onChange={handleChange}
+							// value={typeOfClass}
+							value={global_context.view}
+							onChange={handleChangeOfView}
 						>
-							<FormControlLabel value="0" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Visão de Unificação" : 'Unification View'}`} sx={{
+							<FormControlLabel value="0" control={<Radio size="small" />} label={`${global_context.language == 'pt' ? "Visão de Unificação" : 'Unification View'}`} sx={{
 								'.css-ahj2mt-MuiTypography-root': {
 									fontSize: '0.9rem !important',
 								},
 							}} />
-							<FormControlLabel value="1" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Visão Exportada" : 'Exported View'}`} sx={{
+							<FormControlLabel value="1" control={<Radio size="small" />} label={`${global_context.language == 'pt' ? "Visão Exportada" : 'Exported View'}`} sx={{
 								'.css-ahj2mt-MuiTypography-root': {
 									fontSize: '0.9rem !important',
 								},
 							}} />
-							<FormControlLabel value="2" control={<Radio size="small" />} label={`${selectedLanguage == 'pt' ? "Visão de Fusão" : 'Fusion View'}`} sx={{
+							<FormControlLabel value="2" control={<Radio size="small" />} label={`${global_context.language == 'pt' ? "Visão de Fusão" : 'Fusion View'}`} sx={{
 								'.css-ahj2mt-MuiTypography-root': {
 									fontSize: '0.9rem !important',
 								},
@@ -225,7 +231,7 @@ export function Classes() {
 				{/* CAMPO DE PESQUISA */}
 				<Grid item xs={6} sx={{ bgcolor: null }} display={'flex'} justifyContent={'flex-end'}>
 					<TextField sx={{ width: document.body.clientWidth * 0.3 }}
-						id="outlined-basic" label={selectedLanguage == 'pt' ? "Pesquisar pelo nome da classe" : "Search by name"} variant="outlined" size="small"
+						id="outlined-basic" label={global_context.language == 'pt' ? "Pesquisar pelo nome da classe" : "Search by name"} variant="outlined" size="small"
 						value={nameOfClassToFind}
 						onChange={handleSearchClassName}
 						error={nameOfClassToFind.length > 1 && foundClasses.length == 0}
@@ -248,8 +254,9 @@ export function Classes() {
 										variant="contained"
 										onClick={() => {
 											setSelectedExportedView(e.datasource.value)
-											window.localStorage.setItem('classe',e.datasource.value)
-											updateGlobalContext({exportedView:e.datasource.value})
+											// window.localStorage.setItem('classe',e.datasource.value)
+											// updateGlobalContext({exportedView:e.datasource.value})
+											dispatch(updateExportedView(e.datasource.value))
 										}
 										}
 									>

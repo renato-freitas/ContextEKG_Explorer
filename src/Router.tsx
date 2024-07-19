@@ -62,7 +62,7 @@ export default function Router() {
         <Route path={ROUTES.ABOUT} element={<About />} />
         {/* <Route path={ROUTES.METAGRAPHS} element={<MetagraphList />} /> */}
         {/* <Route path={ROUTES.METAGRAPHS_FORM} element={<MetagraphForm />} /> */}
-        <Route path={ROUTES.NAVIGATION} element={<Classes />} />
+        <Route path={ROUTES.CLASSES} element={<Classes />} />
         <Route path={ROUTES.RESOURCES} element={<Resources />} />
         <Route path={ROUTES.PROPERTIES} element={<Properties />} />
         <Route path={ROUTES.TIMELINE} element={<TimelineView />} />
