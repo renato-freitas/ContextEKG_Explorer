@@ -71,12 +71,12 @@ export const menuConsuming = [
     href: ROUTES.COMPETENCE_QUESTIONS_LIST,
     type: [USER_TYPE.ADMIN]
   },
-  // {
-  //   title: 'Visualização',
-  //   icon: Graph,
-  //   href: ROUTES.HOME,
-  //   type: [USER_TYPE.ADMIN]
-  // },
+  {
+    title: {'pt':'Pergune ao Grafo','en':'Ask the Graph'},
+    icon: Graph,
+    href: ROUTES.LLM,
+    type: [USER_TYPE.ADMIN]
+  },
 ];
 
 export const menuConfig = [

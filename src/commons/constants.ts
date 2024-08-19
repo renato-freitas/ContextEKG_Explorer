@@ -3,7 +3,7 @@
 // export const VSKG = "http://www.arida.ufc.br/VSKG/";
 export const TEXTS = {
   APP: "ContextEKG Explorer",
-  DEPLOY: "PRODUTION"
+  DEPLOY: "PRODUCTION"
 }
 
 const ARIDA_URL_BASE = "http://www.arida.ufc.br"
@@ -192,6 +192,8 @@ export const ROUTES = {
   META_MASHUP_SPARQP_QUERY_PARAMS_FORM: '/meta-mashup/sparql-query-params',
 
   METADATA_PROPERTIES: '/metadata-properties',
+  // LLM
+  LLM: '/qa'
 },
 
   USER_TYPE = {

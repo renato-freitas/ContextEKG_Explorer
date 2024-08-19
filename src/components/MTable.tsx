@@ -55,6 +55,7 @@ export function MTable(props: MTable) {
         stickyHeader={false}
         aria-label={"sticky table"}
         sx={{ whiteSpace: 'nowrap', minWidth: PAINEL_LEFT_SIZE }}
+        size='small'
       >
         <TableHead>
           <TableRow sx={{background: props.headerBackColor}}>

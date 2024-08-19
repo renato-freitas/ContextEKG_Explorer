@@ -1,7 +1,6 @@
 export const languages = {
   repository: {
-    title: (lang:any) => { 
-      return lang == "pt" ? "Seleção de Repositório" : "Repostory Selection"}
+    title: (lang:any) => lang == "pt" ? "Seleção de Repositório" : "Repostory Selection"
   },
   home:{
 

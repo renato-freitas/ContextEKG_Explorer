@@ -11,7 +11,7 @@ import { Eye } from "phosphor-react";
 
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updasteResourceURI } from '../../redux/globalContextSlice';
+import { updasteResourceURI, updateInitialResourceOfNavigation } from '../../redux/globalContextSlice';
 
 import { MHeader } from "../../components/MHeader";
 import { MTable } from "../../components/MTable";
@@ -34,7 +34,7 @@ export function Resources() {
   const dispatch = useDispatch();
   const global_context = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const { contextClassRDF } = useContext(ClassRDFContext);
+  // const { contextClassRDF } = useContext(ClassRDFContext);
   const [page, setPage] = useState(0);
   // const [, setSelectedClass] = useState<string>("");
   const [selectedClassRDF, setSelectedClassRDF] = useState<ClassModel>();
@@ -49,10 +49,10 @@ export function Resources() {
 
 
   async function loadResourcesOfSelectedClass(newPage: number) {
+    setIsLoading(true)
     let response: any
     try {
-      setIsLoading(true)
-      console.log('nome procurado:', labelToSearch)
+      // console.log('nome procurado:', labelToSearch)
       // let uri = double_encode_uri(contextClassRDF.classURI.value)
       // let uri = double_encode_uri(classURI)
       let uri = double_encode_uri(global_context.classRDF?.classURI?.value as string)
@@ -66,7 +66,8 @@ export function Resources() {
         // response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
         response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
       }
-      console.log('recursos da classe:', response.data)
+      console.log('recursos:', response.data)
+      getTotalResources()
       setResources(response.data)
       setIsLoading(false)
     } catch (error) {
@@ -105,25 +106,18 @@ export function Resources() {
     function onEdit() {
       try {
         const _repo_in_api_header = api.defaults.headers.common['repo']
-        console.log('repositório no api.header:', _repo_in_api_header)
+        // console.log('repositório no api.header:', _repo_in_api_header)
         if (_repo_in_api_header) {
-          if (location.state) {
-            let _state = location.state as any;
-            console.log('^^', _state)
-            let classURI = _state.classRDF.classURI?.value as string
-            // console.log('classe escolhida:', classRDF.classURI?.value)
-            // setSelectedClass(classURI)
-            setSelectedClassRDF(_state.classRDF)
-            setTypeOfSelectedClass(_state.typeOfClass)
-            // loadResourcesOfSelectedClass(classURI, _state.typeOfClass, page)
-            loadResourcesOfSelectedClass(page)
-            getTotalResources()
-          }
-          else {
-            // console.log('react.context class rdf:', contextClassRDF)
-            loadResourcesOfSelectedClass(page)
-            getTotalResources()
-          }
+          // if (location.state) {
+          //   let _state = location.state as any;
+          //   console.log('^^', _state)
+          //   loadResourcesOfSelectedClass(page)
+          //   getTotalResources()
+          // }
+          // else {
+          loadResourcesOfSelectedClass(page)
+          // getTotalResources()
+          // }
         }
         else {
           navigate(ROUTES.REPOSITORY_LIST)
@@ -143,6 +137,7 @@ export function Resources() {
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
     // updateGlobalContext({resourceURI: resource.uri.value})
     dispatch(updasteResourceURI(resource.uri.value))
+    dispatch(updateInitialResourceOfNavigation(resource.uri.value))
     setSelectedIndex(idx);
     setSelectedResource(resource)
     // navigate(ROUTES.PROPERTIES, { state: { resource_uri: resource.uri.value, typeOfClass: typeOfSelectedClass } })

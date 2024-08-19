@@ -48,6 +48,7 @@ import { MetadataProperties } from './view/metadata/MetadataProperties';
 // import { MetaMashupManage } from './view/mashup/manage/MetaMashupManage';
 // import { SparqlQueryParamsForm } from './view/mashup/manage/SparqlQueryParamsForm';
 
+import { QA } from './view/llm/qa'
 
 import { ROUTES } from './commons/constants';
 
@@ -90,6 +91,8 @@ export default function Router() {
         <Route path={ROUTES.COLUMN_FORM} element={<ColumnForm />} />
         
         <Route path={ROUTES.METADATA_PROPERTIES} element={<MetadataProperties />} />
+        
+        <Route path={ROUTES.LLM} element={<QA />} />
         {/* Build Metadata */}
         {/* <Route path={ROUTES.MANAGE_METAGRAPH} element={<ManageMetagraph />} /> */}
         {/* <Route path={ROUTES.MANAGE_META_DATASOURCES} element={<MetaDataSources />} /> */}

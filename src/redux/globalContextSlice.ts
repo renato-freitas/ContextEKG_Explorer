@@ -13,6 +13,7 @@ export interface GlobalContextState {
   view: string
   exportedView?: string
   resourceURI: string
+  initialResourceOfNavigation: string
   classRDF?: ClassModel
 }
 
@@ -20,6 +21,7 @@ const initialState: GlobalContextState = {
   language: "pt",
   view: NUMBERS.CODE_OF_UNIFICATION_VIEW,
   resourceURI: "",
+  initialResourceOfNavigation: "",
   classRDF: undefined,
   exportedView: ""
 }
@@ -40,6 +42,9 @@ export const contextSlice = createSlice({
     updasteResourceURI: (state, action: PayloadAction<string>) => {
       state.resourceURI = action.payload
     },
+    updateInitialResourceOfNavigation: (state, action: PayloadAction<string>) => {
+      state.initialResourceOfNavigation = action.payload
+    },
     updateClassRDF: (state, action: PayloadAction<ClassModel>) => {
       state.classRDF = action.payload
     },
@@ -51,6 +56,6 @@ export const contextSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { updateLanguage, updateView, updateExportedView, updasteResourceURI, updateClassRDF, updateResourceAndView } = contextSlice.actions
+export const { updateLanguage, updateView, updateExportedView, updasteResourceURI, updateInitialResourceOfNavigation,  updateClassRDF, updateResourceAndView } = contextSlice.actions
 
 export default contextSlice.reducer

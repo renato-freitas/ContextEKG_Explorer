@@ -42,7 +42,7 @@ const FONTSEZE_VALUE_PROPERTY = "0.69rem"
 const WIDTH_OF_P = TEXTS.DEPLOY == "PRODUCTION" ? 3 : 2.5
 const WIDTH_OF_O = TEXTS.DEPLOY == "PRODUCTION" ? 9 : 9.5
 
-const LABEL_MARGIN_WHEN_PRODUCTION = TEXTS.DEPLOY == "PRODUCTION" 
+const LABEL_MARGIN_WHEN_PRODUCTION = TEXTS.DEPLOY == "PRODUCTION"
   ? { background: COLORS.CINZA_01, padding: "0px 10px 0px 10px" }
   : { background: COLORS.CINZA_01, padding: "0px 10px 0px 60px" }
 
@@ -57,7 +57,7 @@ export function Properties() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const global_context = useSelector((state: RootState) => state.globalContext)
+  const global_context: any = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
   const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
@@ -75,9 +75,7 @@ export function Properties() {
     try {
       setIsLoading(true)
       setProperties([])
-      // response = await api.get(`/properties/?resourceURI=${uri}&typeOfView=${typeOfView}&language=${selectedLanguage}`)
       response = await api.get(`/properties/?resourceURI=${global_context.resourceURI}&typeOfView=${global_context.view}&language=${global_context.language}`)
-      // console.log('-----props-----\n', response.data)
       setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
@@ -92,7 +90,6 @@ export function Properties() {
       if (uri) {
         let _uri = double_encode_uri(uri);
         const response = await api.get(`/sameas/?resourceURI=${_uri}`)
-        console.log('--- links sameas ---\n', response.data)
         setLinksSameAs(response.data)
       }
     } catch (error) {
@@ -102,21 +99,15 @@ export function Properties() {
   }
 
   useEffect(() => {
-    console.log('--- global_context ---', global_context)
+    console.log('--- useEffect []---')
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      // if (location?.state) {
-        // let { resource_uri, typeOfClass } = location.state as any;
-        // setTypeOfSelectedView(typeOfClass)
-        setTypeOfSelectedView(global_context.view)
-        loadSameAs(global_context.resourceURI)
-        // loadSameAs(resource_uri)
-        // if (typeOfClass == NUMBERS.CODE_OF_EXPORTED_VIEW) setSelectedIndexOfMenu(0)
-        // if (typeOfClass == NUMBERS.CODE_OF_FUSION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
-        if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) setSelectedIndexOfMenu(0)
-        else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
-        else if (global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
-      // }
+      setTypeOfSelectedView(global_context.view)
+      loadSameAs(global_context.resourceURI)
+      
+      if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) setSelectedIndexOfMenu(0)
+      else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
+      else if (global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
     }
     else {
       navigate(ROUTES.REPOSITORY_LIST)
@@ -124,27 +115,19 @@ export function Properties() {
   }, [])
 
   useEffect(() => {
-    console.log('--- global_context ---', global_context)
+    console.log('--- useEffect 2---')
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      console.log('--- index ---')
-      // if (location?.state) {
-        // let { resource_uri, typeOfClass } = location.state as any;
-
-        // console.log('contexto selecionado: ', resource_uri, typeOfClass)
-        // console.log('prop.globalContext: ', window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT))
-        loadPropertiesOfSelectedResource()
-        // setUriOfSelectedResource(resource_uri)
-        // if (typeOfClass == "0") setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
-        if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
-
-        window.scrollTo(0, 0)
+      loadPropertiesOfSelectedResource()
+      // if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) {
+      //   setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
       // }
+      window.scrollTo(0, 0)
     }
     else {
       navigate(ROUTES.REPOSITORY_LIST)
     }
-  }, [location?.state, selectedIndexOfMenu])
+  }, [location?.state, global_context.resourceURI, selectedIndexOfMenu])
 
 
 
@@ -182,9 +165,12 @@ export function Properties() {
     // event.preventDefault();
     try {
       // updateResourceAndView({ resourceURI: uri })
+      setSelectedIndexOfMenu(0)
+      dispatch(updateResourceAndView({ resource: uri, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
       console.log('===URI DO LINK===', uri)
       setLinkedData({ link: uri, index: selectedIndexOfMenu })
-      navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
+      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
+      navigate(ROUTES.PROPERTIES)
     } catch (error) {
       console.log(error)
     } finally {
@@ -212,6 +198,8 @@ export function Properties() {
         <Grid item xs={7.5} sx={{ bgcolor: null }}>
           <MHeader
             title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
+            hasButtonBack
+          // buttonBackNavigateTo={ROUTES.PROPERTIES}
           />
         </Grid>
         <Grid item xs={2} sx={{ bgcolor: null, display: 'flex', justifyContent: 'flex-end', alignContent: 'flex-end' }}>
@@ -224,9 +212,6 @@ export function Properties() {
         </Grid>
         <Grid item xs={2.5}></Grid>
       </Grid>
-
-      {/* </div> */}
-
 
       <Box sx={{ flexGrow: 1, padding: 0 }}>
         {
@@ -255,7 +240,7 @@ export function Properties() {
 
             <Grid item sm={2.5}>
               <div style={{ background: COLORS.CINZA_02, padding: "0px 10px 0px 10px" }}>
-                <h3>{estaEmPortugues ? "Menu de Contexto" : "Context Menu"}</h3>
+                <h5>{estaEmPortugues ? "Menu de Contexto" : "Context Menu"}</h5>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   .
                 </Typography>
@@ -322,10 +307,10 @@ export function Properties() {
                                 <Stack direction={'row'} spacing={2} justifyContent={'flex-start'} alignItems={"center"} textAlign={'justify'}>
                                   {
                                     agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL].map((fig: any, i: React.Key | null | undefined) => {
-                                      return <Box p={0} width={160} height={140} key={i}>
+                                      return <Box p={0} width={160} height={140} key={i} paddingBottom={2}>
                                         <img src={fig[0]} alt={fig[0]} className={styleNavigation.img_in_properties}></img>
                                         {/* </Box> */}
-                                        <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
+                                        <Typography variant="caption" sx={{ ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
                                           {/* values[1] contém a proveniência do dados (na visão de unificação) */}
                                           {fig[HAS_PROVENANCE]}
                                         </Typography>

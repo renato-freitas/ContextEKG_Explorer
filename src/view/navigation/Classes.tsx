@@ -18,9 +18,11 @@ import type { RootState } from '../../redux/store'
 import { updateView, updateExportedView, updateClassRDF } from '../../redux/globalContextSlice';
 
 import { ROUTES, NUMBERS, COLORS } from "../../commons/constants";
-import { getPropertyFromURI, getsetRepositoryLocalStorage, 
-	getTypeOfClassOnLocalStorage, 
-	setTypeClassLocalStorage as setTypeOfClassOnLocalStorage } from "../../commons/utils";
+import {
+	getPropertyFromURI, getsetRepositoryLocalStorage,
+	getTypeOfClassOnLocalStorage,
+	setTypeClassLocalStorage as setTypeOfClassOnLocalStorage
+} from "../../commons/utils";
 import { api } from "../../services/api";
 import { MHeader } from "../../components/MHeader";
 import { LoadingContext, ClassRDFContext } from "../../App";
@@ -80,12 +82,12 @@ export function Classes() {
 
 	}
 
-	
+
 
 
 	const handleChangeOfView = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if ((event.target as HTMLInputElement).value == NUMBERS.CODE_OF_UNIFICATION_VIEW
-				|| (event.target as HTMLInputElement).value == NUMBERS.CODE_OF_FUSION_VIEW) {
+			|| (event.target as HTMLInputElement).value == NUMBERS.CODE_OF_FUSION_VIEW) {
 			setExportedViews([])
 		}
 		// setTypeOfClass((event.target as HTMLInputElement).value);
@@ -106,7 +108,7 @@ export function Classes() {
 			// if (typeOfClass == NUMBERS.CODE_OF_EXPORTED_VIEW && exportedViews.length == 0) {
 			if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW && exportedViews.length == 0) {
 				loadExportedViews()
-				if(selectedExportedView != "") loadClasses()
+				if (selectedExportedView != "") loadClasses()
 			}
 			else {
 				loadClasses()
@@ -250,62 +252,61 @@ export function Classes() {
 								exportedViews.map((e, i) => <Grid key={i} item xs={12} sm={6} md={3}>
 									<Button
 										sx={{ textTransform: 'none' }}
-										disabled={selectedExportedView == e.datasource.value}
+										size="small"
+										disabled={selectedExportedView == e.datasource?.value}
 										variant="contained"
 										onClick={() => {
 											setSelectedExportedView(e.datasource.value)
-											// window.localStorage.setItem('classe',e.datasource.value)
-											// updateGlobalContext({exportedView:e.datasource.value})
 											dispatch(updateExportedView(e.datasource.value))
 										}
 										}
 									>
-										{e.datasource.value}
+										{e.datasource?.value}
 									</Button>
 								</Grid>)
 							}
 						</Grid>
 						{
 							!isLoading && classes.length > 0 && <Grid container spacing={{ xs: 2, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-							<Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
+								<Grid item xs={12} sx={{ marginBottom: '-10px !important' }}>
+									{
+										!isLoading &&
+										<div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
+											<h5>{subTitle()}{` (${classes.length > 0 ? classes.length : ""})`}</h5>
+										</div>
+									}
+								</Grid>
 								{
-									!isLoading &&
-									<div style={{ background: COLORS.CINZA_01, paddingLeft: '10px' }}>
-										<h4>{subTitle()}{` (${classes.length > 0 ? classes.length : ""})`}</h4>
-									</div>
-								}
-							</Grid>
-							{
-								!isLoading && classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
-									<Paper elevation={3} sx={{ minHeight: 200, justifyContent: "space-between" }} >
-										<Stack
-											direction="column"
-											justifyContent="space-between"
-											alignItems="center"
-											spacing={2}
-											sx={{ minHeight: 200, maxHeight: 250 }}
-										>
-											<Box display='flex' flexDirection="column" p={1} width={220}>
-												<Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
-													<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
-														{getPropertyFromURI(classRDF?.label?.value)}
-													</Typography>
-												</Button>
-												{/* <Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center", whiteSpace: "pre-wrap" }} color="text.primary" gutterBottom>
+									!isLoading && classes.map((classRDF, index) => <Grid item xs={12} sm={6} md={3} key={index}>
+										<Paper elevation={3} sx={{ minHeight: 200, justifyContent: "space-between" }} >
+											<Stack
+												direction="column"
+												justifyContent="space-between"
+												alignItems="center"
+												spacing={2}
+												sx={{ minHeight: 200, maxHeight: 250 }}
+											>
+												<Box display='flex' flexDirection="column" p={1} width={220}>
+													<Button size="small" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
+														<Typography variant="h6" component="div" sx={{ fontSize: ".8rem", fontWeight: '600' }}>
+															{getPropertyFromURI(classRDF?.label?.value)}
+														</Typography>
+													</Button>
+													{/* <Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center", whiteSpace: "pre-wrap" }} color="text.primary" gutterBottom>
 													{classRDF?.classURI.value}
 												</Typography> */}
-												<Typography variant="caption" component="div" color="ActiveCaption" align="center">
-													{classRDF?.comment?.value}
-												</Typography>
-											</Box>
-											<Box p={1} width={200} height={120} display="flex" alignItems="flex-end" justifyContent="flex-end">
-												{classRDF?.image?.value && <img src={classRDF?.image?.value} alt={getPropertyFromURI(classRDF?.label?.value)} className={style.img_responsive}></img>}
-											</Box>
-										</Stack>
-									</Paper>
-								</Grid>)
-							}
-						</Grid>
+													<Typography component="div" color="ActiveCaption" align="center" sx={{ fontSize: ".65rem" }}>
+														{classRDF?.comment?.value}
+													</Typography>
+												</Box>
+												<Box p={1} width={200} height={120} display="flex" alignItems="flex-end" justifyContent="flex-end">
+													{classRDF?.image?.value && <img src={classRDF?.image?.value} alt={getPropertyFromURI(classRDF?.label?.value)} className={style.img_responsive}></img>}
+												</Box>
+											</Stack>
+										</Paper>
+									</Grid>)
+								}
+							</Grid>
 						}
 					</>
 					:
@@ -329,8 +330,8 @@ export function Classes() {
 										sx={{ minHeight: 200, maxHeight: 250 }}
 									>
 										<Box display='flex' flexDirection="column" p={1} width={220}>
-											<Button variant="text" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
-												<Typography variant="h5" component="div" sx={{ fontSize: "1rem", fontWeight: '600' }}>
+											<Button size="small" onClick={(event) => handleListOfClassesClick(event, classRDF)}>
+												<Typography variant="h6" component="div" sx={{ fontSize: ".8rem", fontWeight: '600' }}>
 													{getPropertyFromURI(classRDF?.label?.value)}
 												</Typography>
 											</Button>

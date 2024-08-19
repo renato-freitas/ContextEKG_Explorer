@@ -53,11 +53,11 @@ export function EndpointConfig() {
           </Stack>
         </Grid>
 
-        {/* LINGUAGEM */}
+        {/* IDIOMA */}
         <Grid item xs={12} sx={{ bgcolor: null }}>
           <Stack direction={'row'} spacing={2} alignItems={'center'}>
             <Typography variant="body1">
-              {`${global_context.language == 'pt' ? 'Linguagem de preferência' : 'Language'}`}
+              {`${global_context.language == 'pt' ? 'Idioma' : 'Language'}`}
             </Typography>
 
             <FormControl>

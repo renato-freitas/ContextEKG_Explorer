@@ -6,6 +6,11 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Checkbox from "@mui/material/Checkbox";
 
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../../redux/store'
+import { updateView, updateResourceAndView } from '../../redux/globalContextSlice';
+
+
 import { MHeader } from "../../components/MHeader";
 import { MTable } from "../../components/MTable";
 
@@ -23,6 +28,7 @@ import { RepositoryModel } from "../../models/RepositoryModel";
 
 export function Repositories() {
   const { isLoading, setIsLoading } = useContext(LoadingContext);
+  const global_context = useSelector((state: RootState) => state.globalContext)
   const [page, setPage] = useState(0);
   const [repositories, setRepositories] = useState<RepositoryModel[]>([]);
   const [labelToSearch, setLabelToSearch] = useState<string>("");
@@ -113,7 +119,7 @@ export function Repositories() {
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={6} sx={{ bgcolor: null }}>
           <MHeader
-            title={languages.repository.title(selectedLanguage)}
+            title={languages.repository.title(global_context.language)}
             hasButtonBack
           />
         </Grid>
