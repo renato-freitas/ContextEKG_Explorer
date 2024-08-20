@@ -15,7 +15,7 @@ Suas principais _features_ incluem:
 
 
 ## Demonstração
-Vídeo de demonstração da ferramenta no [Youtube](https://www.youtube.com/watch?v=LrPs3Hh-WfI).
+Vídeo de demonstração da ferramenta no [Youtube](https://www.youtube.com/watch?v=czEKmBoBPzI).
 
 Grafos de dados da visão semântica usado na demo: [grafos-musica-demo.zip](kgs-demo/grafos-musica-demo.zip) 
 
