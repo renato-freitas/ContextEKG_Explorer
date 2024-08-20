@@ -56,6 +56,6 @@ A API da ferramenta desenvolvida como _framework_ FastAPI é disponibilizada no 
 
 Para rodar a api o usuário deve descompactar o arquivo acima e executar o comando shell ```uvicorn main:app --reload```. 
 
-Importante importar as bibliotecas de dependência como _Pytantic_, _Uvicorn_.
+Importante importar as bibliotecas de dependência como _Pydantic_, _Uvicorn_.
 
 
