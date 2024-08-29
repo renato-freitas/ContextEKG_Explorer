@@ -1,13 +1,6 @@
-import React, { useState, useEffect, useContext, Key } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
-import ListItem from '@mui/material/ListItem';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton'
@@ -15,8 +8,11 @@ import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
 import ManageSearchRoundedIcon from '@mui/icons-material/ManageSearchRounded';
-import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table, Star, Play, ArrowSquareOut } from 'phosphor-react';
-import { Link } from "react-router-dom";
+import { Play } from 'phosphor-react';
+
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../../redux/store'
+import { updateView, updateResourceAndView, updasteResourceURI } from '../../redux/globalContextSlice';
 
 import { CompetenceQuestionModel } from '../../models/models';
 import { MHeader } from "../../components/MHeader";
@@ -27,7 +23,6 @@ import { MTable } from '../../components/MTable';
 import { COLORS, ROUTES } from '../../commons/constants';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 import { double_encode_uri } from '../../commons/utils';
-import { Divider } from '@mui/material';
 
 // import spfmt from 'sparql-formatter';
 
@@ -39,19 +34,21 @@ export function CompetenceQuestions() {
   const navigate = useNavigate();
   const [wasDeleted, setWasDeleted] = useState<boolean>(false);
   const { setIsLoading } = useContext(LoadingContext);
+  const global_context: any = useSelector((state: RootState) => state.globalContext)
   const [competenceQuestions, setCompetenceQuestions] = useState<CompetenceQuestionModel[]>([]);
   const [competenceQuestionResult, setCompetenceQuestionResult] = useState([]);
   const [competenceQuestionResulVariables, setCompetenceQuestionResultVariables] = useState<Array<[string, typeAlignOfCell]>>([]);
   const [selectedCompetenceQuestion, setSelectedCompetenceQuestion] = useState<CompetenceQuestionModel>({} as CompetenceQuestionModel);
   const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
   let auxLabelOfClasses = [] as string[];
-  const estaEmPortugues = selectedLanguage == 'pt'
+  // const estaEmPortugues = selectedLanguage == 'pt'
+  const estaEmPortugues = global_context.language == 'pt'
 
 
   async function loadCompetenceQuestions() {
     try {
       setIsLoading(true);
-      const response = await api.get("/competence-questions/");
+      const response = await api.get(`/competence-questions/?language=${global_context.language}`)
       console.log('-------QC---------\n', response.data)
       setCompetenceQuestions(response.data);
       setSelectedCompetenceQuestion(response.data[0])
@@ -69,7 +66,7 @@ export function CompetenceQuestions() {
       // let _sparql = double_encode_uri(sparql)
       // console.log(_sparql)
       // const response = await api.get(`/queries/execute/?uri=${uri}`)
-      const response = await api.get(`/competence-questions/execute/?uri=${uri}`)
+      const response = await api.get(`/competence-questions/execute/?uri=${uri}&language=${global_context.language}`)
       setCompetenceQuestionResult(response.data);
 
       let variables: Array<[string, typeAlignOfCell]> = Object.keys(response.data[0]).map((ele: string) => [ele, "center"])

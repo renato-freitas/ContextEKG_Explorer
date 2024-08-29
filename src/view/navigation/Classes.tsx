@@ -295,7 +295,8 @@ export function Classes() {
 													{/* <Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center", whiteSpace: "pre-wrap" }} color="text.primary" gutterBottom>
 													{classRDF?.classURI.value}
 												</Typography> */}
-													<Typography component="div" color="ActiveCaption" align="center" sx={{ fontSize: ".65rem" }}>
+													{/* <Typography component="div" color="ActiveCaption" align="center"> */}
+													<Typography variant="caption" component="div" color="ActiveCaption" align="center">
 														{classRDF?.comment?.value}
 													</Typography>
 												</Box>

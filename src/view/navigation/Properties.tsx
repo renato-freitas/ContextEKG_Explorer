@@ -12,12 +12,12 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database, Receipt } from 'phosphor-react';
+import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database, Receipt, CaretCircleLeft } from 'phosphor-react';
 import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
 
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updateView, updateResourceAndView } from '../../redux/globalContextSlice';
+import { updateView, updateResourceAndView, updasteResourceURI } from '../../redux/globalContextSlice';
 
 
 import { MHeader } from '../../components/MHeader';
@@ -66,6 +66,7 @@ export function Properties() {
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
   const [selectedIndexOfMenu, setSelectedIndexOfMenu] = useState<Number | undefined>(undefined);
   const [typeOfSelectedView, setTypeOfSelectedView] = useState<string>("");
+  const [comment, setComment] = useState<string>("");
   let auxLabelOfClasses = [] as string[];
   const estaEmPortugues = global_context.language == 'pt'
 
@@ -75,13 +76,32 @@ export function Properties() {
     try {
       setIsLoading(true)
       setProperties([])
-      response = await api.get(`/properties/?resourceURI=${global_context.resourceURI}&typeOfView=${global_context.view}&language=${global_context.language}`)
+      let _uri = encodeURIComponent(global_context.resourceURI)
+      response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
       setAgroupedProperties(response.data)
+      getComment(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
       setIsLoading(false)
     }
+  }
+
+
+  async function getComment(data: any) {
+    let response: any = ""
+    const recurso = Object.keys(data)[0]
+    if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION] != undefined) {
+      response = data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION]
+    }
+    if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined) {
+      response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION]
+    }
+    if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined) {
+      response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT]
+    }
+    setComment(response)
+    return response
   }
 
   /** Carrega os links sameas do recurso selecionado*/
@@ -104,7 +124,7 @@ export function Properties() {
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       setTypeOfSelectedView(global_context.view)
       loadSameAs(global_context.resourceURI)
-      
+
       if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) setSelectedIndexOfMenu(0)
       else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
       else if (global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
@@ -119,6 +139,7 @@ export function Properties() {
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       loadPropertiesOfSelectedResource()
+      // getComment()
       // if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) {
       //   setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
       // }
@@ -166,6 +187,7 @@ export function Properties() {
     try {
       // updateResourceAndView({ resourceURI: uri })
       setSelectedIndexOfMenu(0)
+      // dispath
       dispatch(updateResourceAndView({ resource: uri, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
       console.log('===URI DO LINK===', uri)
       setLinkedData({ link: uri, index: selectedIndexOfMenu })
@@ -187,7 +209,18 @@ export function Properties() {
     return uri_canonica
   }
 
-
+  async function comeBack(event: any) {
+    // event.preventDefault();
+    try {
+      console.log(`comebakc`, global_context.initialResourceOfNavigation)
+      dispatch(updasteResourceURI(global_context.initialResourceOfNavigation))
+      navigate(ROUTES.PROPERTIES)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      window.scrollTo(0, 0)
+    }
+  }
 
   {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */ }
   {/* <div style={{ paddingLeft: 60 }}> */ }
@@ -196,11 +229,19 @@ export function Properties() {
     <div className={stylesGlobal.container}>
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={7.5} sx={{ bgcolor: null }}>
-          <MHeader
-            title={estaEmPortugues ? `Propriedades do recurso` : "Properties of Resource"}
-            hasButtonBack
-          // buttonBackNavigateTo={ROUTES.PROPERTIES}
-          />
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Tooltip title={estaEmPortugues ? "Volta ao recurso inicial!" : "Back to primary resource!"}>
+              <IconButton onClick={comeBack} sx={{ p: "0.2px 0" }}>
+                <CaretCircleLeft size={30} />
+              </IconButton>
+            </Tooltip>
+            <MHeader
+              title={estaEmPortugues ? "Propriedades do recurso" : "Properties of Resource"}
+            // hasButtonBack
+            // buttonBackNavigateTo={ROUTES.PROPERTIES}
+            // state={}
+            />
+          </Stack>
         </Grid>
         <Grid item xs={2} sx={{ bgcolor: null, display: 'flex', justifyContent: 'flex-end', alignContent: 'flex-end' }}>
           <Tooltip title={estaEmPortugues ? "Ir para a lista de recursos no contexto atual" : "Go to resources list in current context"}>
@@ -307,9 +348,8 @@ export function Properties() {
                                 <Stack direction={'row'} spacing={2} justifyContent={'flex-start'} alignItems={"center"} textAlign={'justify'}>
                                   {
                                     agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.THUMBNAIL].map((fig: any, i: React.Key | null | undefined) => {
-                                      return <Box p={0} width={160} height={140} key={i} paddingBottom={2}>
-                                        <img src={fig[0]} alt={fig[0]} className={styleNavigation.img_in_properties}></img>
-                                        {/* </Box> */}
+                                      return <Box p={0} width={170} height={150} key={i} paddingBottom={2}>
+                                        <img src={fig[0]} alt={"Formato inválido"} className={styleNavigation.img_in_properties}></img>
                                         <Typography variant="caption" sx={{ ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
                                           {/* values[1] contém a proveniência do dados (na visão de unificação) */}
                                           {fig[HAS_PROVENANCE]}
@@ -324,11 +364,10 @@ export function Properties() {
                         }
 
 
-                        {/* DESCRIÇÃO OU COMENTÁRIO */}
+                        {/* DESCRIÇÃO */}
                         {
                           (agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION] != undefined
-                            || agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined
-                            || agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined)
+                            || agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined)
                           && <ListItem key={-1}>
                             <Grid container spacing={2}>
                               <Grid item sm={WIDTH_OF_P}>
@@ -338,9 +377,8 @@ export function Properties() {
                               </Grid>
                               <Grid item sm={WIDTH_OF_O}>
                                 {
-                                  agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION].concat(
-                                    agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION],
-                                    agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT]
+                                  agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION]?.concat(
+                                    agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION]
                                   ).map((values: (string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined)[], i: React.Key) => {
                                     return values && <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                       textAlign={'justify'} key={i}>
@@ -352,6 +390,36 @@ export function Properties() {
                                       </Typography>
                                     </Stack>
                                   })
+                                }
+                              </Grid>
+                            </Grid>
+                          </ListItem>
+                        }
+
+                        {/* COMMENT */}
+                        {
+                          agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined
+                          && <ListItem key={-1}>
+                            <Grid container spacing={2}>
+                              <Grid item sm={WIDTH_OF_P}>
+                                <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
+                                  {estaEmPortugues ? 'descrição' : 'description'}
+                                </Typography>
+                              </Grid>
+                              <Grid item sm={WIDTH_OF_O}>
+                                {
+                                  agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT]
+                                    .map((values: (string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined)[], i: React.Key) => {
+                                      return values && <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
+                                        textAlign={'justify'} key={i}>
+                                        <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
+                                          <Circle size={BULLET_SIZE} weight="fill" /> {`${values[0]}`}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: FONTSEZE_VALUE_PROPERTY }} color="text.secondary" gutterBottom>
+                                          {values[HAS_PROVENANCE]}
+                                        </Typography>
+                                      </Stack>
+                                    })
                                 }
                               </Grid>
                             </Grid>
@@ -389,12 +457,13 @@ export function Properties() {
                                     <Stack direction={"column"} key={idx}>
                                       { /** VALORES DAS PROPRIEDADES */
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource].map((values: any, i: React.Key) => {
-                                          // console.log('valores: ', values)
+                                          // console.log('valores: ', values[0])
                                           return <Stack key={i} direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                             textAlign={'justify'}>
-                                            { /** values[0] contém o valor literal da propriedade */
+                                            { /** values[0] contém o valor literal ou objeto da propriedade */
+                                              // console.log('----values----', values[0])
                                               values[0].toLowerCase().includes("http") && values[0].toLowerCase().includes("resource")
-                                                && linksSameAs?.every((ele: string) => values[0].includes(getContextFromURI(ele[0])))
+                                                && linksSameAs?.every((ele: string) => values[0].includes(getContextFromURI(ele[0])) || values[0].includes("ontologies/music#"))
                                                 ? <><Link
                                                   align='left'
                                                   underline="none"
@@ -415,7 +484,7 @@ export function Properties() {
                                                   {" " + values[0]}
                                                 </Typography>
                                                   {
-                                                    // Link externo
+                                                    // Link ULR externo
                                                     values[0].toLowerCase().includes("http") &&
                                                     <Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                                       <a href={values[0]} target='_blank'><ArrowSquareOut size={14} /></a>
@@ -428,7 +497,7 @@ export function Properties() {
                                                   </Typography>
                                                   <Typography variant="caption" sx={{ mb: 2, ml: 0, fontSize: "0.50rem" }} color="text.secondary" gutterBottom>
                                                     {/* values[2] == true siginifica que há divergência nos valores da propriedade */}
-                                                    {values[HAS_DIVERGENCY] == true && <Chip label={estaEmPortugues ? "divergência" : "divergence"} size="small" icon={<Asterisk size={12} color='#ed0215' />} style={{ backgroundColor: '#d7c84b22', fontSize: FONTSEZE_VALUE_PROPERTY }} />}
+                                                    {values[HAS_DIVERGENCY] == true && <Chip label={estaEmPortugues ? "divergência" : "divergence"} size="small" icon={<Asterisk size={12} color='#ed0215' />} style={{ backgroundColor: '#d7c94b8f', fontSize: FONTSEZE_VALUE_PROPERTY }} />}
                                                   </Typography>
                                                 </>
                                             }
