@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Key } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -17,19 +17,20 @@ import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
 
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updateView, updateResourceAndView, updasteResourceURI } from '../../redux/globalContextSlice';
+import { pushResourceInStackOfResourcesNavigated, updateResourceAndView, updasteResourceURI, updateClassRDF } from '../../redux/globalContextSlice';
 
 
 import { MHeader } from '../../components/MHeader';
 import { api } from "../../services/api";
 import { LoadingContext, ClassRDFContext } from "../../App";
-import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI } from "../../commons/utils";
+import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI, getPatternsClassRDF2GlobalContext } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES, TEXTS } from '../../commons/constants';
 
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from './navigation.module.css'
 import { IconButton, Tooltip } from '@mui/material';
+import { TitleOfProperties } from '../../components/TitleOfProperties';
 
 
 const HAS_LABEL = 1
@@ -56,6 +57,7 @@ export interface stateProps {
 export function Properties() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { uri } = useParams()
   const dispatch = useDispatch();
   const global_context: any = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
@@ -65,6 +67,7 @@ export function Properties() {
   const [linkedData, setLinkedData] = useState<any>({});
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
   const [selectedIndexOfMenu, setSelectedIndexOfMenu] = useState<Number | undefined>(undefined);
+  const [selectedObjectProperty, setSelectedObjectProperty] = useState<string>("");
   const [typeOfSelectedView, setTypeOfSelectedView] = useState<string>("");
   const [comment, setComment] = useState<string>("");
   let auxLabelOfClasses = [] as string[];
@@ -73,13 +76,17 @@ export function Properties() {
 
   async function loadPropertiesOfSelectedResource() {
     let response: any
+    console.log('', uri)
     try {
       setIsLoading(true)
       setProperties([])
-      let _uri = encodeURIComponent(global_context.resourceURI)
+      // let _uri = encodeURIComponent(global_context.resourceURI)
+      let _uri = encodeURIComponent(uri as string)
       response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
       setAgroupedProperties(response.data)
-      getComment(response.data)
+      console.log('RESPOSNE.DATA', response.data)
+      // setClassOfSelectedESV(response.data)
+      // getComment(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
@@ -87,22 +94,36 @@ export function Properties() {
     }
   }
 
-
-  async function getComment(data: any) {
-    let response: any = ""
-    const recurso = Object.keys(data)[0]
-    if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION] != undefined) {
-      response = data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION]
-    }
-    if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined) {
-      response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION]
-    }
-    if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined) {
-      response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT]
-    }
-    setComment(response)
-    return response
+  /** Quando uma VSE é selecionada no menu de contexto, deve setar a classe especifica do recurso no redux.
+   * Caso quando vem da VU, não tava mudando a classe da VSE..
+   */
+  async function setClassOfSelectedESV(data:any){
+    let resource_uri = Object.keys(data)[0]
+    let props_of_resource_uri = data[resource_uri]
+    let vse = props_of_resource_uri["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]
+    let array_of_new_class = vse.filter((classe:any) => classe[0] != global_context.classRDF.classURI.value)
+    let new_class_to_global_context = getPatternsClassRDF2GlobalContext(array_of_new_class[0])
+    dispatch(updateClassRDF(new_class_to_global_context))
   }
+  // async function getComment(data: any) {
+  //   let response: any = ""
+    // const recurso = Object.keys(data)[0]
+    // console.log('recurso', recurso)
+    // console.log('data[recurso]', data[recurso])
+    // if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION] != undefined ||
+    //   data[recurso]["descrição"] != undefined
+    // ) {
+    //   response = data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION]
+    // }
+    // if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined) {
+    //   response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION]
+    // }
+    // if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined) {
+    //   response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT]
+    // }
+  //   setComment(response)
+  //   return response
+  // }
 
   /** Carrega os links sameas do recurso selecionado*/
   async function loadSameAs(uri: string) {
@@ -120,6 +141,7 @@ export function Properties() {
 
   useEffect(() => {
     console.log('--- useEffect []---')
+    console.log('PILHA', global_context.stack_of_resource_navigated)
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       setTypeOfSelectedView(global_context.view)
@@ -136,6 +158,7 @@ export function Properties() {
 
   useEffect(() => {
     console.log('--- useEffect 2---')
+    console.log('PILHA', global_context.stack_of_resource_navigated)
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       loadPropertiesOfSelectedResource()
@@ -151,6 +174,18 @@ export function Properties() {
   }, [location?.state, global_context.resourceURI, selectedIndexOfMenu])
 
 
+  useEffect(() => {
+    console.log('--- useEffect 2---')
+    const _repo_in_api_header = api.defaults.headers.common['repo']
+    if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
+      loadPropertiesOfSelectedResource()
+      loadSameAs(global_context.resourceURI)
+      window.scrollTo(0, 0)
+    }
+    else {
+      navigate(ROUTES.REPOSITORY_LIST)
+    }
+  }, [location?.state, selectedObjectProperty, global_context])
 
 
   // const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW && index != NUMBERS.IDX_FUSION_VIEW
@@ -186,13 +221,16 @@ export function Properties() {
     // event.preventDefault();
     try {
       // updateResourceAndView({ resourceURI: uri })
-      setSelectedIndexOfMenu(0)
+      // setSelectedIndexOfMenu(0)
+      setSelectedObjectProperty(uri)
       // dispath
       dispatch(updateResourceAndView({ resource: uri, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
+      dispatch(pushResourceInStackOfResourcesNavigated(uri))
       console.log('===URI DO LINK===', uri)
       setLinkedData({ link: uri, index: selectedIndexOfMenu })
       // navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
-      navigate(ROUTES.PROPERTIES)
+      // navigate(ROUTES.PROPERTIES)
+      navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(uri)}`)
     } catch (error) {
       console.log(error)
     } finally {
@@ -230,16 +268,9 @@ export function Properties() {
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={7.5} sx={{ bgcolor: null }}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Tooltip title={estaEmPortugues ? "Volta ao recurso inicial!" : "Back to primary resource!"}>
-              <IconButton onClick={comeBack} sx={{ p: "0.2px 0" }}>
-                <CaretCircleLeft size={30} />
-              </IconButton>
-            </Tooltip>
-            <MHeader
+            <TitleOfProperties 
               title={estaEmPortugues ? "Propriedades do recurso" : "Properties of Resource"}
-            // hasButtonBack
-            // buttonBackNavigateTo={ROUTES.PROPERTIES}
-            // state={}
+              hasButtonBack
             />
           </Stack>
         </Grid>
@@ -430,6 +461,7 @@ export function Properties() {
                         {/* DEMAIS PROPRIEDADES */}
                         {
                           Object.keys(agroupedProperties[Object.keys(agroupedProperties)[0]]).map((propOfResource, idx) => {
+                            // console.log('<<<<', agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource])
                             return (propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.RDF_TYPE &&
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.LABEL &&
                               propOfResource != "http://www.bigdatafortaleza.com/ontology#uri" &&
@@ -446,7 +478,7 @@ export function Properties() {
                                   <Grid item sm={WIDTH_OF_P}>
                                     <Typography sx={{ fontSize: FONTSIZE_PROPERTY, fontWeight: FONTWEIGHT_PROPERTY, textAlign: "end" }} color="text.primary" gutterBottom>
                                       {
-                                        agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource][0][HAS_LABEL] == ""
+                                        agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource] == null
                                           ? getPropertyFromURI(propOfResource)
                                           : agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource][0][HAS_LABEL]
                                       }
@@ -522,7 +554,7 @@ export function Properties() {
 
 
 
-            {/* MENU DE CONTEXTOS (LADO DIREITO) */}
+            {/* MENU DE CONTEXTOS (PAINEL DIREITO) */}
             <Grid item sm={2.5}>
               {
                 linksSameAs.length > 1 ? <List sx={{
@@ -545,8 +577,6 @@ export function Properties() {
                     </ListItemButton>
                   </ListItem>
 
-
-
                   <ListItem key={NUMBERS.IDX_UNIFICATION_VIEW} disablePadding>
                     <ListItemButton
                       selected={selectedIndexOfMenu === NUMBERS.IDX_UNIFICATION_VIEW}
@@ -560,10 +590,8 @@ export function Properties() {
                     </ListItemButton>
                   </ListItem>
 
-
                   {
                     linksSameAs.map((row: any, idx: Key) => {
-                      // console.log('--', row)
                       const _sameas_context = getContextFromURI(row.sameas.value)
                       return (
                         <ListItem key={idx} disablePadding>
@@ -581,8 +609,6 @@ export function Properties() {
                       )
                     })
                   }
-
-
 
                 </List>
                   : <List>
@@ -610,7 +636,6 @@ export function Properties() {
 
                     {
                       linksSameAs.map((row: any, idx: Key) => {
-                        console.log('--', row)
                         const _sameas_context = getContextFromURI(row.sameas.value)
                         return (
                           <ListItem key={idx} disablePadding>
@@ -635,6 +660,7 @@ export function Properties() {
               }
               <List>
                 {
+                /** VISÃO DE TIMELINE */
                   agroupedProperties[Object.keys(agroupedProperties)[0]] && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
                   && <ListItem key={-4} disablePadding>
                     <ListItemButton
@@ -643,7 +669,6 @@ export function Properties() {
                       onClick={() => navigate(ROUTES.TIMELINE, {
                         state: {
                           resourceURI: Object.keys(agroupedProperties)[0],
-                          // contextos: [Object.keys(agroupedProperties)[0]].concat(agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.SAMEAS]?.map((same: string[]) => same[0]))
                         } as stateProps
                       })}
                     >
@@ -654,6 +679,7 @@ export function Properties() {
                     </ListItemButton>
                   </ListItem>
                 }
+                {/* VISUALIZAÇÃO GRÁFICA */}
                 <ListItem key={-5} disablePadding>
                   <ListItemButton
                     href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(agroupedProperties)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
@@ -668,148 +694,10 @@ export function Properties() {
                   </ListItemButton>
                 </ListItem>
               </List>
-            </Grid>
-          </Grid> /**container 2 */
+            </Grid> {/* FIM MENU DE CONTEXTOS */}
+          </Grid> 
         }
       </Box>
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// useEffect(() => {
-//   const _repo_in_api_header = api.defaults.headers.common['repo']
-//   if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-//     if (location?.state) {
-
-//       let { resource_uri, typeOfClass } = location.state as any;
-
-//       setTypeOfSelectedClass(typeOfClass)
-
-//       loadPropertiesOfSelectedResource(resource_uri, typeOfClass)
-
-//       if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
-//         setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
-//         setUriOfSelectedResource(obtemURICanonica(resource_uri))
-
-//         // NÃO CARREGAR NOVAMENTE A LISTA DE CONTEXTOS (EXPORTED VIEW)
-//         // if (Object.keys(contextos).length == 0) loadSameAs(resource_uri, typeOfClass);
-//       } else if (typeOfClass == NUMBERS.EXPORTED_CLASS_NUMBER) {
-//         setSelectedIndex(selectedIndex)
-//       }
-//       else {
-//         /** QUANDO CLICAR EM UM LINK HREF */
-//         // setSelectedIndex(-1)
-//         // setUriOfSelectedResource(resource_uri);
-//         // loadPropertiesOfSelectedResource(resource_uri)
-//         // loadSameAs(resource_uri, typeOfClass)
-//       }
-//       window.scrollTo(0, 0)
-//     }
-//   }
-//   else {
-//     navigate(ROUTES.REPOSITORY_LIST)
-//   }
-// }, [location?.state])
-
-
-
-// useEffect(() => {
-//   const _repo_in_api_header = api.defaults.headers.common['repo']
-//   if (_repo_in_api_header) {
-//     if (location?.state) {
-//       let { resource_uri, typeOfClass } = location.state as any;
-//       setTypeOfSelectedClass(typeOfClass)
-//       if (typeOfClass != NUMBERS.GENERALIZATION_CLASS_NUMBER) {
-//         console.log('INDEX NÃO É UNIFICAÇÃO', selectedIndex)
-//         loadPropertiesOfSelectedResource(resource_uri, typeOfClass)
-//         setUriOfSelectedResource(resource_uri);
-//         // loadSameAs(resource_uri, typeOfClass);
-//         // NÃO CARREGAR NOVAMENTE A LISTA DE CONTEXTOS (EXPORTED VIEW)
-//         if (Object.keys(contextos).length == 0) loadSameAs(resource_uri, typeOfClass);
-//       } else if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
-//         console.log('É UNIFICAÇÃO', selectedIndex)
-//         // setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
-//         setUriOfSelectedResource(obtemURICanonica(resource_uri));
-//         // loadUnification(selectedCon)
-//         // NÃO CARREGAR NOVAMENTE A LISTA DE CONTEXTOS (EXPORTED VIEW)
-//         loadSameAs(resource_uri, typeOfClass);
-//         // if (Object.keys(contextos).length == 0) loadSameAs(resource_uri, typeOfClass);
-//       }
-//       // window.scrollTo(0, 0)
-//     }
-//   }
-// }, [selectedIndex])
-
-
-
-// useEffect(() => {
-//   const _repo_in_api_header = api.defaults.headers.common['repo']
-//   if (_repo_in_api_header) {
-//     let { link, index } = linkedData;
-//     if (link) {
-//       setContextos({})
-//       if (index == NUMBERS.IDX_UNIFICATION_VIEW) {
-//         console.log('===IF====\n')
-//         setTypeOfSelectedClass(NUMBERS.GENERALIZATION_CLASS_NUMBER)
-//         setUriOfSelectedResource(link);
-//         loadSameAs(link, NUMBERS.GENERALIZATION_CLASS_NUMBER)
-//       } else {
-//         console.log('===ELSE====\n')
-//         loadPropertiesOfSelectedResource(link)
-//         loadSameAs(link, NUMBERS.EXPORTED_CLASS_NUMBER)
-//       }
-//     }
-//   }
-//   /**linkedata é para o objectProperties */
-// }, [linkedData])
-
-
-/** Carrega os links semas e as propriedade unificadas se for uma classe de Generealização */
-// async function loadSameAs(uri: string, typeOfClass: string) {
-//   try {
-//     if (uri) {
-//       setProperties([])
-//       let _uri = double_encode_uri(uri);
-//       const response = await api.get(`/links/?sameas=${_uri}`)
-//       console.log('===LOAD SAMEAS===\n', response.data)
-
-//       if (Object.keys(contextos).length == 0) setContextos(response.data)
-
-//       if (typeOfClass == NUMBERS.GENERALIZATION_CLASS_NUMBER) {
-//         loadUnification(response.data)
-//       }
-//     }
-//   } catch (error) {
-//     alert(JSON.stringify(error));
-//   } finally {
-//   }
-// }
-
-// async function loadUnification(object: any) {
-//   let response: any
-//   try {
-//     setIsLoading(true)
-//     setProperties([])
-//     response = await api.post(`/properties/unification/`, { resources: object })
-//     console.log('====PROPRIEDADES UNIFICADAS===', response.data)
-//   } catch (error) {
-//     alert(JSON.stringify(error));
-//   } finally {
-//     setTimeout(() => {
-//       setAgroupedProperties(response.data)
-//       setIsLoading(false)
-//     }, NUMBERS.TIME_OUT_FROM_REQUEST)
-//   }
-// }

@@ -66,6 +66,7 @@ export default function Router() {
         <Route path={ROUTES.CLASSES} element={<Classes />} />
         <Route path={ROUTES.RESOURCES} element={<Resources />} />
         <Route path={ROUTES.PROPERTIES} element={<Properties />} />
+        <Route path={ROUTES.PROPERTIES_URI} element={<Properties />} />
         <Route path={ROUTES.TIMELINE} element={<TimelineView />} />
 
         <Route path={ROUTES.ORGANIZATION_LIST} element={<OrganizationList />} />
@@ -82,7 +83,6 @@ export default function Router() {
         <Route path={ROUTES.COMPETENCE_QUESTIONS_LIST} element={<CompetenceQuestions />} />
 
         <Route path={ROUTES.DATASOURCE_LIST} element={<DataSources />} />
-        {/* <Route path={ROUTES.DATASOURCE_LIST} element={<DataSourceList />} /> */}
         <Route path={ROUTES.DATASOURCE_FORM} element={<DataSourceForm />} />
 
         <Route path={ROUTES.TABLE_LIST} element={<TablesOrFiles />} />
@@ -93,6 +93,7 @@ export default function Router() {
         <Route path={ROUTES.METADATA_PROPERTIES} element={<MetadataProperties />} />
         
         <Route path={ROUTES.LLM} element={<QA />} />
+        <Route path={"*"} element={<h1>Page Not Found</h1>} />
         {/* Build Metadata */}
         {/* <Route path={ROUTES.MANAGE_METAGRAPH} element={<ManageMetagraph />} /> */}
         {/* <Route path={ROUTES.MANAGE_META_DATASOURCES} element={<MetaDataSources />} /> */}

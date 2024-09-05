@@ -20,7 +20,7 @@ import { api } from '../../services/api';
 import { LoadingContext } from "../../App";
 import styles from '../../styles/global.module.css'
 import { MTable } from '../../components/MTable';
-import { COLORS, ROUTES } from '../../commons/constants';
+import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 import { double_encode_uri } from '../../commons/utils';
 
@@ -32,9 +32,10 @@ type typeAlignOfCell = "right" | "left" | "inherit" | "center" | "justify" | und
 
 export function CompetenceQuestions() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const global_context: any = useSelector((state: RootState) => state.globalContext)
   const [wasDeleted, setWasDeleted] = useState<boolean>(false);
   const { setIsLoading } = useContext(LoadingContext);
-  const global_context: any = useSelector((state: RootState) => state.globalContext)
   const [competenceQuestions, setCompetenceQuestions] = useState<CompetenceQuestionModel[]>([]);
   const [competenceQuestionResult, setCompetenceQuestionResult] = useState([]);
   const [competenceQuestionResulVariables, setCompetenceQuestionResultVariables] = useState<Array<[string, typeAlignOfCell]>>([]);
@@ -82,6 +83,7 @@ export function CompetenceQuestions() {
   }
 
   useEffect(() => {
+    dispatch(updateView(NUMBERS.CODE_OF_EXPORTED_VIEW))
     loadCompetenceQuestions();
   }, [])
 
@@ -124,6 +126,11 @@ export function CompetenceQuestions() {
   }
 
 
+  const handleResultToExplore = (r: string) => {
+    dispatch(updasteResourceURI(r))
+    dispatch(updateView(NUMBERS.CODE_OF_EXPORTED_VIEW))
+    navigate(ROUTES.PROPERTIES)
+  };
 
   return (
     <div className={styles.container}>
@@ -207,16 +214,14 @@ export function CompetenceQuestions() {
                     {
                       Object.keys(row).map((key: string) => {
                         return <TableCell align='center'>
-                          {/* <Stack direction={'row'} gap={1}> */}
                           {
                             (row[key]["value"] as string).toLowerCase().includes("http")
                               ? <IconButton color='primary' size="small"
-                              onClick={() => navigate(ROUTES.PROPERTIES, { state: { resource_uri: row[key]["value"], typeOfClass: "1"}})}>
+                              onClick={() => handleResultToExplore(row[key]["value"])}>
                                 <ManageSearchRoundedIcon />
                               </IconButton>
                               : <Typography>{row[key]["value"]}</Typography>
                           }
-                          {/* </Stack> */}
                         </TableCell>
                       })
                     }

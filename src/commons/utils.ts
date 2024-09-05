@@ -183,3 +183,13 @@ export function getDateFromInstantTimelin(instantURI: string): string {
   }
   return "";
 }
+
+
+export function getPatternsClassRDF2GlobalContext(arrayNewClass:any[]){
+  let pattern_object_classRDF = {
+    classURI: { type: 'url', value: arrayNewClass[0]},
+    comment: { 'xml:lang': 'pt', type: 'literal', value: ''},
+    label: { 'xml:lang': 'pt', type: 'literal', value: arrayNewClass[3]},
+  }
+  return pattern_object_classRDF
+}

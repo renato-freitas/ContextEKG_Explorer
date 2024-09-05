@@ -20,6 +20,10 @@ import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import { Asterisk, ClockCounterClockwise, Database, Link as LinkIcon } from 'phosphor-react';
 import { LinkSimpleBreak, Graph, ArrowRight } from '@phosphor-icons/react';
 
+import { useSelector, useDispatch } from 'react-redux'
+import type { RootState } from '../../redux/store'
+import { updateView, updateResourceAndView, updasteResourceURI } from '../../redux/globalContextSlice';
+
 import { MHeader } from "../../components/MHeader";
 
 import { ResourceModel } from "../../models/ResourceModel";
@@ -39,7 +43,9 @@ import { InstantComponent } from "./InstantComponent";
 export function TimelineView() {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
+  const global_context: any = useSelector((state: RootState) => state.globalContext)
   const { contextClassRDF, setContextClassRDF } = useContext(ClassRDFContext);
   const [page, setPage] = useState(0);
   const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
@@ -53,18 +59,36 @@ export function TimelineView() {
   const [owlProperties, setOwlProperties] = useState<any>([]);
   const [colorsToDataSources, setColorsToDataSources] = useState<any>({})
   // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
-  const estaEmPortugues = window.localStorage.getItem('LANGUAGE') == 'pt'
+  // const estaEmPortugues = window.localStorage.getItem('LANGUAGE') == 'pt'
+  const estaEmPortugues = global_context.language == 'pt'
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
 
 
   /** Carrega os links sameas do recurso selecionado*/
-  async function loadSameAs(uri: string) {
+  // async function loadSameAs(uri: string) {
+  //   try {
+  //     if (uri) {
+  //       let _uri = double_encode_uri(uri);
+  //       const response = await api.get(`/sameas/?resourceURI=${_uri}`)
+  //       setLinksSameAs(response.data)
+  //     }
+  //   } catch (error) {
+  //     alert(JSON.stringify(error));
+  //   } finally {
+  //   }
+  // }
+
+  /** Carrega os links sameas do recurso selecionado*/
+  // async function loadSameAs(uri: string) {
+  async function loadSameAs() {
     try {
-      if (uri) {
-        let _uri = double_encode_uri(uri);
-        const response = await api.get(`/sameas/?resourceURI=${_uri}`)
-        // console.log('-------links sameas-----\n', response.data)
+      if (global_context.resourceURI) {
+        // let _uri = double_encode_uri(global_context.resourceURI);
+        console.log('loadSameas()', `/sameas/?resourceURI=${global_context.resourceURI}`)
+        const response = await api.get(`/sameas/?resourceURI=${global_context.resourceURI}`)
+        console.log('loadSameAs.response', response.data)
         setLinksSameAs(response.data)
+        return response.data
       }
     } catch (error) {
       alert(JSON.stringify(error));
@@ -97,7 +121,7 @@ export function TimelineView() {
     Object.keys(instants).forEach((inst: any) => {
       instants[inst].forEach((ins: any) => {
         if (_owlProps[ins.property.value] == undefined) {
-           _owlProps[ins.property.value] = ins.propertyRDF.value
+          _owlProps[ins.property.value] = ins.propertyRDF.value
         }
       })
     })
@@ -108,9 +132,12 @@ export function TimelineView() {
     let response: any
     try {
       setIsLoading(true)
-      setUriOfSelectedResource(resourceURI)
-      response = await api.get(`/timeline/?resourceURI=${resourceURI}&owlProperty=${selectedOwlProperty}`)
-      // console.log('*** TIMELINE -', response.data)
+      // setUriOfSelectedResource(resourceURI)
+      // response = await api.get(`/timeline/?resourceURI=${resourceURI}&owlProperty=${selectedOwlProperty}`)
+      // setUriOfSelectedResource(global_context.resourceURI)
+      console.log('global_context.resourceURI', global_context.resourceURI)
+      response = await api.get(`/timeline/?resourceURI=${global_context.resourceURI}&owlProperty=${selectedOwlProperty}`)
+      console.log('*** TIMELINE -', response.data)
       setIsLoading(false)
       setInstants(response.data)
       getLabelOfResource(response.data)
@@ -120,7 +147,7 @@ export function TimelineView() {
     } finally {
       window.scrollTo(0, 0)
       // setTimeout(() => {
-        
+
       // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
@@ -131,10 +158,13 @@ export function TimelineView() {
     try {
       // console.log('**** TIMELINE UNIFICATION ****', object)
       setIsLoading(true)
-      // setProperties([])
-      response = await api.post(`/timeline/unification?owlProperty=${selectedOwlProperty}`, { resources: linksSameAs.map((same) => same.sameas.value) })
-      console.log('RESPONSE', response.data)
+      let sameas:any[] = await loadSameAs()
+      console.log('--- LINKS SAMEAS', sameas)
+      // response = await api.post(`/timeline/unification?owlProperty=${selectedOwlProperty}`, { resources: linksSameAs.map((same) => same.sameas.value) })
+      response = await api.post(`/timeline/unification?owlProperty=${selectedOwlProperty}`, { resources: sameas.map((same) => same.sameas.value) })
+      console.log('---TIMELINE UNIFICATION', response.data)
       setInstants(response.data)
+      getLabelOfResource(response.data)
       putBackgroundColorInCardByDataSource(response.data)
       getOwlProperties(response.data)
       setIsLoading(false)
@@ -151,10 +181,16 @@ export function TimelineView() {
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       if (location?.state) {
-        let { resourceURI } = location.state as stateProps;
-        // console.log('R', resourceURI)
-        loadSameAs(resourceURI)
-        setSelectedIndex(0)
+        // let { resourceURI } = location.state as stateProps;
+        console.log('useEffect.01')
+        loadSameAs()
+        if (selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
+          loadTimelineUnification()
+          setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
+        } else {
+          loadTimeline(global_context.resourceURI)
+          setSelectedIndex(0)
+        }
       }
     }
     else {
@@ -164,12 +200,13 @@ export function TimelineView() {
 
   useEffect(() => {
     if (location?.state) {
-      // console.log('STATE', location.state)
-      let { resourceURI } = location.state as stateProps
-      if (selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
+      // let { resourceURI } = location.state as stateProps
+      if (selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
+        console.log('useEffect.02')
         loadTimelineUnification()
       } else {
-        loadTimeline(resourceURI)
+        // loadTimeline(resourceURI)
+        loadTimeline(global_context.resourceURI)
         // setContextos(contextos)
         // setLinksSameAs(linksSameAs)
       }
@@ -182,6 +219,13 @@ export function TimelineView() {
     // console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
     setSelectedIndex(index);
     // setSelectedContext(contextoSelecionado)
+    dispatch(updasteResourceURI(contextoSelecionado))
+    console.log('--- INDEX SELECIONAOD:', index)
+    if (index ==  NUMBERS.IDX_UNIFICATION_VIEW) { 
+      dispatch(updateView(NUMBERS.CODE_OF_UNIFICATION_VIEW))
+    } else {
+      dispatch(updateView(NUMBERS.CODE_OF_EXPORTED_VIEW))
+    }
     navigate(ROUTES.TIMELINE, {
       state: {
         resourceURI: contextoSelecionado,
@@ -206,7 +250,7 @@ export function TimelineView() {
           />
         </Grid>
 
-        <Grid item xs={3} sx={{ bgcolor: null, display: 'flex', justifyContent:'flex-end', alignContent:'flex-end', paddingRight:1 }}>
+        <Grid item xs={3} sx={{ bgcolor: null, display: 'flex', justifyContent: 'flex-end', alignContent: 'flex-end', paddingRight: 1 }}>
           <FormControl sx={{ m: 0, minWidth: 300 }} size="small">
             <InputLabel id="demo-simple-select-label">Filtrar Propriedade</InputLabel>
             <Select
@@ -235,7 +279,7 @@ export function TimelineView() {
 
                 <h3>{labelOfResource}</h3>
                 <Typography sx={{ fontSize: 10, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
-                  {uriOfselectedResource}
+                  {global_context.resourceURI}
                 </Typography>
               </div>
 

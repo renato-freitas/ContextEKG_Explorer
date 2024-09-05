@@ -170,6 +170,7 @@ export const ROUTES = {
   CLASSES: "/classes",
   RESOURCES: "/resources",
   PROPERTIES: "/properties",
+  PROPERTIES_URI: "/properties/:uri",
   TIMELINE: "/timeline",
 
   // KG DE METADADOS

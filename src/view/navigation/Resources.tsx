@@ -11,7 +11,7 @@ import { Eye } from "phosphor-react";
 
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updasteResourceURI, updateInitialResourceOfNavigation } from '../../redux/globalContextSlice';
+import { cleanStackOfResourcesNavigated, pushResourceInStackOfResourcesNavigated, updasteResourceURI, updateInitialResourceOfNavigation } from '../../redux/globalContextSlice';
 
 import { MHeader } from "../../components/MHeader";
 import { MTable } from "../../components/MTable";
@@ -66,7 +66,7 @@ export function Resources() {
         // response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
         response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
       }
-      console.log('recursos:', response.data)
+      // console.log('recursos:', response.data)
       getTotalResources()
       setResources(response.data)
       setIsLoading(false)
@@ -86,8 +86,8 @@ export function Resources() {
       // let uri = double_encode_uri(contextClassRDF.classURI.value)
       // let if_sameas = typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW ? true : false
       let if_sameas = global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW ? true : false
-      response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}&sameas=${if_sameas}`)
-      console.log(`total:`, response.data)
+      response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}&sameas=${if_sameas}&language=${global_context.language}`)
+      // console.log(`total:`, response.data)
       setTotalOfResources(response.data)
     } catch (error) {
       console.log(`><`, error);
@@ -102,12 +102,14 @@ export function Resources() {
 
 
   useEffect(() => {
-    console.log('--- global_context ---', global_context)
+    // console.log('--- global_context ---', global_context)
+    console.log('--- classe global ---', global_context.classRDF?.classURI.value)
     function onEdit() {
       try {
         const _repo_in_api_header = api.defaults.headers.common['repo']
         // console.log('repositório no api.header:', _repo_in_api_header)
         if (_repo_in_api_header) {
+          dispatch(cleanStackOfResourcesNavigated())
           // if (location.state) {
           //   let _state = location.state as any;
           //   console.log('^^', _state)
@@ -138,10 +140,12 @@ export function Resources() {
     // updateGlobalContext({resourceURI: resource.uri.value})
     dispatch(updasteResourceURI(resource.uri.value))
     dispatch(updateInitialResourceOfNavigation(resource.uri.value))
+    dispatch(pushResourceInStackOfResourcesNavigated(resource.uri.value))
     setSelectedIndex(idx);
     setSelectedResource(resource)
     // navigate(ROUTES.PROPERTIES, { state: { resource_uri: resource.uri.value, typeOfClass: typeOfSelectedClass } })
-    navigate(ROUTES.PROPERTIES)
+    // navigate(`/properties/`)
+    navigate(`/properties/${encodeURIComponent(resource.uri.value)}`)
   };
 
 
@@ -212,7 +216,7 @@ export function Resources() {
 
       {/* CONTENT */}
       {
-        !isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
+        !isLoading && resources && <Grid container spacing={4} sx={{ mb: 1 }}>
           <Grid item sm={12} justifyContent={'center'}>
             <MTable
               header={[[global_context.language == 'pt' ? "Recursos" : "Resources", "left"], [global_context.language == 'pt' ? "Proveniência" : "Provenance", "left"]]}

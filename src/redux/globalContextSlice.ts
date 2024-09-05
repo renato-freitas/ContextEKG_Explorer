@@ -14,6 +14,7 @@ export interface GlobalContextState {
   exportedView?: string
   resourceURI: string
   initialResourceOfNavigation: string
+  stack_of_resource_navigated: string[]
   classRDF?: ClassModel
 }
 
@@ -22,6 +23,7 @@ const initialState: GlobalContextState = {
   view: NUMBERS.CODE_OF_UNIFICATION_VIEW,
   resourceURI: "",
   initialResourceOfNavigation: "",
+  stack_of_resource_navigated: [],
   classRDF: undefined,
   exportedView: ""
 }
@@ -45,6 +47,16 @@ export const contextSlice = createSlice({
     updateInitialResourceOfNavigation: (state, action: PayloadAction<string>) => {
       state.initialResourceOfNavigation = action.payload
     },
+    pushResourceInStackOfResourcesNavigated: (state, action: PayloadAction<string>) => {
+      console.log('PUSH STACK:',action.payload)
+      state.stack_of_resource_navigated.push(action.payload)
+    },
+    removeResourceOfStackOfResourcesNavigated: (state) => {
+      state.stack_of_resource_navigated.pop()
+    },
+    cleanStackOfResourcesNavigated: (state) => {
+      state.stack_of_resource_navigated = []
+    },
     updateClassRDF: (state, action: PayloadAction<ClassModel>) => {
       state.classRDF = action.payload
     },
@@ -56,6 +68,16 @@ export const contextSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { updateLanguage, updateView, updateExportedView, updasteResourceURI, updateInitialResourceOfNavigation,  updateClassRDF, updateResourceAndView } = contextSlice.actions
+export const { 
+  updateLanguage, 
+  updateView, 
+  updateExportedView, 
+  updasteResourceURI, 
+  updateInitialResourceOfNavigation, 
+  pushResourceInStackOfResourcesNavigated,
+  removeResourceOfStackOfResourcesNavigated, 
+  cleanStackOfResourcesNavigated,
+  updateClassRDF, 
+  updateResourceAndView } = contextSlice.actions
 
 export default contextSlice.reducer
