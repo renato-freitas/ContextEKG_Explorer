@@ -37,8 +37,8 @@ export const TitleOfProperties = ({ title, hasButtonBack, buttonBackNavigateTo, 
     } else{
       console.log('NAVEGANDO PARA AS PROPRIEDADES DO RECURSO ANTERIOR')
       console.log('REMOVIDO', global_context.stack_of_resource_navigated[stack_length - 2])
-      let uri = global_context.stack_of_resource_navigated[stack_length - 2]
-      navigate(`/properties/${encodeURIComponent(uri)}`)
+      let resource_uri = global_context.stack_of_resource_navigated[stack_length - 2]
+      navigate(`/properties/${encodeURIComponent(resource_uri)}`)
     }
     dispatch(removeResourceOfStackOfResourcesNavigated())
 

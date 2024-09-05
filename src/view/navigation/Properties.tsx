@@ -84,7 +84,7 @@ export function Properties() {
       let _uri = encodeURIComponent(uri as string)
       response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
       setAgroupedProperties(response.data)
-      console.log('RESPOSNE.DATA', response.data)
+      // console.log('RESPOSNE.DATA', response.data)
       // setClassOfSelectedESV(response.data)
       // getComment(response.data)
     } catch (error) {
@@ -158,9 +158,10 @@ export function Properties() {
 
   useEffect(() => {
     console.log('--- useEffect 2---')
-    console.log('PILHA', global_context.stack_of_resource_navigated)
+    // console.log('PILHA', global_context.stack_of_resource_navigated)
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
+      // loadSameAs(uri as string)
       loadPropertiesOfSelectedResource()
       // getComment()
       // if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) {
@@ -171,15 +172,16 @@ export function Properties() {
     else {
       navigate(ROUTES.REPOSITORY_LIST)
     }
-  }, [location?.state, global_context.resourceURI, selectedIndexOfMenu])
+  }, [location?.state, selectedIndexOfMenu])
 
 
   useEffect(() => {
-    console.log('--- useEffect 2---')
+    console.log('--- useEffect 3---')
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       loadPropertiesOfSelectedResource()
-      loadSameAs(global_context.resourceURI)
+      // loadSameAs(global_context.resourceURI)
+      loadSameAs(uri as string)
       window.scrollTo(0, 0)
     }
     else {
@@ -197,19 +199,15 @@ export function Properties() {
     setSelectedIndexOfMenu(index);
     if (ehVisaoExportada(index)) {
       dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
-      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_OF_EXPORTED_VIEW } })
-      // navigate(ROUTES.PROPERTIES)
     }
     else if (ehVisaoUnificacao(index)) {
       dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_UNIFICATION_VIEW }))
-      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_OF_UNIFICATION_VIEW } })
-      // navigate(ROUTES.PROPERTIES)
     }
     else {
       dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_FUSION_VIEW }))
-      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: contextoSelecionado, typeOfClass: NUMBERS.CODE_OF_FUSION_VIEW } })
     }
-    navigate(ROUTES.PROPERTIES)
+    // navigate(ROUTES.PROPERTIES)
+    navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(contextoSelecionado)}`)
   };
 
 
@@ -218,18 +216,15 @@ export function Properties() {
 
   /** Clicar em um ObjectProperty */
   async function handleObjectPropertiesClick(event: any, uri: string) {
-    // event.preventDefault();
+    event.preventDefault();
     try {
-      // updateResourceAndView({ resourceURI: uri })
-      // setSelectedIndexOfMenu(0)
+      console.log('GLOBAL VIEW', global_context.view)
       setSelectedObjectProperty(uri)
-      // dispath
-      dispatch(updateResourceAndView({ resource: uri, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
+      // dispatch(updateResourceAndView({ resource: uri, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
+      dispatch(updasteResourceURI(uri))
       dispatch(pushResourceInStackOfResourcesNavigated(uri))
-      console.log('===URI DO LINK===', uri)
+      console.log('===URI DO LINK (OBJECT-PROPERTY)===', uri)
       setLinkedData({ link: uri, index: selectedIndexOfMenu })
-      // navigate(ROUTES.PROPERTIES, { state: { resource_uri: uri, typeOfClass: "1" } })
-      // navigate(ROUTES.PROPERTIES)
       navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(uri)}`)
     } catch (error) {
       console.log(error)
