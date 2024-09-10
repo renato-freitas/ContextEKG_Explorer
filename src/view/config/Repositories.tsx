@@ -6,9 +6,8 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Checkbox from "@mui/material/Checkbox";
 
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updateView, updateResourceAndView } from '../../redux/globalContextSlice';
 
 
 import { MHeader } from "../../components/MHeader";
@@ -33,7 +32,7 @@ export function Repositories() {
   const [repositories, setRepositories] = useState<RepositoryModel[]>([]);
   const [labelToSearch, setLabelToSearch] = useState<string>("");
   const [runingSearch, setRuningSearch] = useState<boolean>(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("pt");
+  const estaEmPortugues = global_context.language == 'pt'
 
 
   async function loadRepositories() {
@@ -41,35 +40,22 @@ export function Repositories() {
     try {
       setIsLoading(true)
       response = await api.get(`/repositories`)
-      console.log(`2. RECURSOS DA CLASSE`, response.data)
+      setRepositories(response.data)
+      setIsLoading(false)
     } catch (error) {
-      console.log(`><`, error);
+      console.log('ERROR', error);
     } finally {
       window.scrollTo(0, 0)
-      setTimeout(() => {
-        setIsLoading(false)
-        setRepositories(response.data)
-        // setPage(0)
-      }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
-
-  useEffect(() => {
-    let b:string = window.localStorage.getItem('LANGUAGE') as string
-    setSelectedLanguage(b)
-  }, []);
 
 
   useEffect(() => {
     loadRepositories()
     let localstorageRepository = getsetRepositoryLocalStorage()
     setChecked(localstorageRepository)
-
   }, [runingSearch]);
 
-
-  const [selectedIndex, setSelectedIndex] = useState<Number>(1);
-  
 
 
   /**Pagination */
@@ -80,7 +66,6 @@ export function Repositories() {
 
   const [rowsPerPage, setRowsPerPage] = useState(NUMBERS.INICIAL_ROWS_PER_PAGE);
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
     setRuningSearch(!runingSearch)
   };
@@ -89,7 +74,6 @@ export function Repositories() {
 
   const handleSearchResourceLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLabelToSearch((event.target as HTMLInputElement).value);
-    console.log((event.target as HTMLInputElement).value)
   };
   const handleSearchEscape = (event: KeyboardEvent) => {
     if (event.key == 'Escape') {
@@ -107,7 +91,6 @@ export function Repositories() {
 
   const [checked, setChecked] = useState("");
   const handleChangeRepository = (event: React.ChangeEvent<HTMLInputElement>, repository:string) => {
-    console.log('-----repositório-----', repository)
     setChecked(repository);
     setRepositoryLocalStorage(repository)
     api.defaults.headers.common['repo'] = repository
@@ -126,7 +109,7 @@ export function Repositories() {
 
         <Grid item xs={6} display='flex' justifyContent='flex-end' sx={{ bgcolor: null }}>
           <TextField sx={{ width: 450 }}
-            id="outlined-basic" label="Pesquisar somente pelo nome do recurso" variant="outlined" size="small"
+            id="outlined-basic" label={estaEmPortugues ? "Pesquisar somente pelo nome do recurso" : "Search only by name"} variant="outlined" size="small"
             value={labelToSearch}
             onChange={handleSearchResourceLabel}
             helperText={(labelToSearch.length > 1 && repositories.length == 0) ? "Sem corespondência." : false}
@@ -138,10 +121,10 @@ export function Repositories() {
 
       {
         !isLoading && <Grid container spacing={4} sx={{ mb: 1 }}>
-          {/* DATA SOURCES */}
+          {/* REPOSITORIES IN THE TRIPLE STORE */}
           <Grid item sm={12} justifyContent={'center'}>
             <MTable
-              header={[["Repositórios", "left"], ["Descrição", "left"]]}
+              header={[[estaEmPortugues ? "Repositórios" : "Repositories", "left"], [estaEmPortugues ? "Descrição" : "Description", "left"]]}
               size={repositories.length}
               rowsPerPage={rowsPerPage}
               page={page}

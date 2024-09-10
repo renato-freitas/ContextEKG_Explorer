@@ -9,9 +9,7 @@ import { Avatar, DialogActions, DialogContent, DialogContentText, Divider, List,
 import WarningIcon from "@mui/icons-material/Warning"
 import { PersonPinCircleOutlined } from "@mui/icons-material";
 import { blue } from '@mui/material/colors';
-import PersonIcon from '@mui/icons-material/Person';
-import AddIcon from '@mui/icons-material/Add';
-import { getContextFromURI, printt } from "../commons/utils";
+import { getContextFromURI } from "../commons/utils";
 import { PropertyObjectEntity } from "../models/PropertyObjectEntity";
 
 interface MDailogProps {
@@ -25,10 +23,8 @@ interface MDailogProps {
 interface IMDailogToConfirmDelete {
   openConfirmDeleteDialog: boolean,
   setOpenConfirmDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>,
-  // deleteInstance: (uri: string, type: string ) => void,
   deleteInstance: (uri: string) => void,
   instance: any,
-  // type: string
 }
 
 export function MDialog(props: MDailogProps) {
@@ -106,7 +102,6 @@ export const MDialogToConfirmDelete = (props: IMDailogToConfirmDelete) => {
             fontWeight="00"
           >
             "{props.instance?.label?.value}" ?
-            {/* "{props.instance?.uri_l?.value}" ? */}
           </Typography>
         </DialogContentText>
       </DialogContent>
@@ -155,7 +150,6 @@ export function ContextsDialog(props: ContextsDialogProps) {
   const handleListItemClick = (value: PropertyObjectEntity) => {
     onClose(value);
   };
-  // console.log(`contextos`, props.contexts)
   let visao_contexto = ''
 
   return (

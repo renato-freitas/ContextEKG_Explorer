@@ -118,16 +118,6 @@ export const WIKIDATA = {
   ORGANIZATION: "wd:Q43229"
 }
 
-// A list with URIs of highlighted classes
-export const HIGHLIGHT_CLASSES = [
-  'http://xmlns.com/foaf/0.1/Organization',
-  'http://www.sefaz.ma.gov.br/ontology/Estabelecimento',
-  'http://xmlns.com/foaf/0.1/Person',
-  'http://www.sefaz.ma.gov.br/ontology/Sociedade'
-]
-
-
-
 
 
 /**APPLICATION */
@@ -172,11 +162,11 @@ export const ROUTES = {
   PROPERTIES: "/properties",
   PROPERTIES_URI: "/properties/:uri",
   TIMELINE: "/timeline",
-
+  TIMELINE_URI: "/timeline/:uri",
+  TIMELINE_RESOURCE: "/timeline?resource",
   // KG DE METADADOS
   MANAGE_METAGRAPH: '/manage-metagraph',
   MANAGE_META_DATASOURCES: '/manage-meta-datasources',
-  
   
   SEMANTIC_VIEW: '/semantic-view',
   LOCAL_GRAPH_CONSTRUCT: '/localgraph-construct',
@@ -294,6 +284,7 @@ export const NUMBERS = {
   IDX_FUSION_VIEW: -3,
   IDX_UNIFICATION_VIEW: -2,
   IDX_SELECTED_VIEW: -1,
+  IDX_EXPORTED_VIEW: 0,
   CODE_OF_UNIFICATION_VIEW: "0",
   CODE_OF_EXPORTED_VIEW: "1",
   CODE_OF_FUSION_VIEW: "2",

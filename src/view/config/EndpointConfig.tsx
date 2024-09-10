@@ -22,12 +22,8 @@ export function EndpointConfig() {
   const dispatch = useDispatch();
 	const global_context = useSelector((state: RootState) => state.globalContext)
 
-  console.log('--- global_context ---', global_context)
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(updateLanguage((event.target as HTMLInputElement).value))
-    // window.localStorage.setItem('LANGUAGE', (event.target as HTMLInputElement).value)
-    // window.location.reload();
   };
 
   return (
@@ -39,17 +35,6 @@ export function EndpointConfig() {
         <Grid item xs={12}>
           <Stack direction={'column'} spacing={1}>
             <Link to="/">Home</Link>
-            <Stack direction={'row'} spacing={2} alignItems={'center'}>
-              <Typography variant="body1">
-                Endpoint
-              </Typography>
-              <Chip
-                label={getsetRepositoryLocalStorage()}
-                size="small"
-                onClick={() => { navigate(ROUTES.REPOSITORY_LIST) }}
-              />
-            </Stack>
-
           </Stack>
         </Grid>
 
@@ -86,5 +71,3 @@ export function EndpointConfig() {
     </div>
   );
 }
-
-// https://freerangestock.com/sample/39701/group-of-kids.jpg

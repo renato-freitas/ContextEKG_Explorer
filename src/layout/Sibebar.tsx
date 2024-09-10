@@ -9,25 +9,17 @@ import { SidebarContainer } from './Sidebar.styles'
 import { menuEvolve, menuConsuming, menuConfig } from './menu';
 import { NavLink } from 'react-router-dom';
 import { Paper, Stack } from '@mui/material';
-import { Component, Key } from 'react';
+import { Key } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../redux/store'
 const MENU_FONTE_SIZE = "0.7rem"
 const MENU_ICON_SIZE = 20
 const PADDING_LEFT_ITEMS = 1.3
-const SIDEBAR_MARGIN_WHEN_FOR_PAPER_IMAGE = {position: 'absolute', ml: 8, mt:0, width:90}
 const SIDEBAR_MARGIN_WHEN_PRODUCTION = {position: 'absolute', ml: 0.3, mt:0, width:100}
 
-interface itemProps {
-  title: {},
-  icon: Component,
-  href: string[],
-  type: string[]
-}
 
 export function Sidebar() {
   const { pathname } = useLocation();
-	const dispatch = useDispatch();
 	const global_context = useSelector((state: RootState) => state.globalContext)
   return (
     <Paper elevation={3} sx={SIDEBAR_MARGIN_WHEN_PRODUCTION}>

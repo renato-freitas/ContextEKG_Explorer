@@ -48,7 +48,6 @@ export const contextSlice = createSlice({
       state.initialResourceOfNavigation = action.payload
     },
     pushResourceInStackOfResourcesNavigated: (state, action: PayloadAction<string>) => {
-      console.log('PUSH STACK:',action.payload)
       state.stack_of_resource_navigated.push(action.payload)
     },
     removeResourceOfStackOfResourcesNavigated: (state) => {

@@ -1,4 +1,3 @@
-import { TableEntity } from "./TableEntity";
 import { RDF_Node } from "./RDF_Node";
 
 export interface ResourceModel {

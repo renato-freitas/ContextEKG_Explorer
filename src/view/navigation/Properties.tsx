@@ -12,21 +12,16 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database, Receipt, CaretCircleLeft } from 'phosphor-react';
+import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database, Receipt } from 'phosphor-react';
 import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
-
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
 import { pushResourceInStackOfResourcesNavigated, updateResourceAndView, updasteResourceURI, updateClassRDF } from '../../redux/globalContextSlice';
-
-
-import { MHeader } from '../../components/MHeader';
 import { api } from "../../services/api";
-import { LoadingContext, ClassRDFContext } from "../../App";
+import { LoadingContext } from "../../App";
 import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI, getPatternsClassRDF2GlobalContext } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES, TEXTS } from '../../commons/constants';
-
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from './navigation.module.css'
 import { IconButton, Tooltip } from '@mui/material';
@@ -48,45 +43,50 @@ const LABEL_MARGIN_WHEN_PRODUCTION = TEXTS.DEPLOY == "PRODUCTION"
   : { background: COLORS.CINZA_01, padding: "0px 10px 0px 60px" }
 
 
-// https://medium.com/@lucas_pinheiro/como-adicionar-internacionaliza%C3%A7%C3%A3o-i18n-na-sua-aplica%C3%A7%C3%A3o-react-a1ac4aea109d
 
 export interface stateProps {
   resourceURI: string;
-  // contextos: {};
 }
 export function Properties() {
-  const location = useLocation();
+  // const location = useLocation();
   const navigate = useNavigate();
   const { uri } = useParams()
   const dispatch = useDispatch();
   const global_context: any = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
-  const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
+  // const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
-  const [linkedData, setLinkedData] = useState<any>({});
+  // const [linkedData, setLinkedData] = useState<any>({});
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
   const [selectedIndexOfMenu, setSelectedIndexOfMenu] = useState<Number | undefined>(undefined);
   const [selectedObjectProperty, setSelectedObjectProperty] = useState<string>("");
-  const [typeOfSelectedView, setTypeOfSelectedView] = useState<string>("");
-  const [comment, setComment] = useState<string>("");
   let auxLabelOfClasses = [] as string[];
   const estaEmPortugues = global_context.language == 'pt'
 
 
-  async function loadPropertiesOfSelectedResource() {
+  /** Carrega os links sameas do recurso selecionado*/
+  async function loadSameAs() {
+    try {
+      if (uri) {
+        let _uri = double_encode_uri(uri);
+        const response = await api.get(`/sameas/?resourceURI=${_uri}`)
+        setLinksSameAs(response.data)
+        return response.data
+      }
+    } catch (error) {
+      alert(JSON.stringify(error));
+    }
+  }
+
+  async function loadSameAsAndPropertiesOfSelectedResource() {
     let response: any
-    console.log('', uri)
     try {
       setIsLoading(true)
-      setProperties([])
-      // let _uri = encodeURIComponent(global_context.resourceURI)
+      // setProperties([])
+      await loadSameAs()
       let _uri = encodeURIComponent(uri as string)
       response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
       setAgroupedProperties(response.data)
-      // console.log('RESPOSNE.DATA', response.data)
-      // setClassOfSelectedESV(response.data)
-      // getComment(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
@@ -94,108 +94,118 @@ export function Properties() {
     }
   }
 
-  /** Quando uma VSE é selecionada no menu de contexto, deve setar a classe especifica do recurso no redux.
-   * Caso quando vem da VU, não tava mudando a classe da VSE..
-   */
-  async function setClassOfSelectedESV(data:any){
-    let resource_uri = Object.keys(data)[0]
-    let props_of_resource_uri = data[resource_uri]
-    let vse = props_of_resource_uri["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]
-    let array_of_new_class = vse.filter((classe:any) => classe[0] != global_context.classRDF.classURI.value)
-    let new_class_to_global_context = getPatternsClassRDF2GlobalContext(array_of_new_class[0])
-    dispatch(updateClassRDF(new_class_to_global_context))
-  }
-  // async function getComment(data: any) {
-  //   let response: any = ""
-    // const recurso = Object.keys(data)[0]
-    // console.log('recurso', recurso)
-    // console.log('data[recurso]', data[recurso])
-    // if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION] != undefined ||
-    //   data[recurso]["descrição"] != undefined
-    // ) {
-    //   response = data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DC_DESCRIPTION]
-    // }
-    // if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION] != undefined) {
-    //   response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.DCTERMS_DESCRIPTION]
-    // }
-    // if (data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT] != undefined) {
-    //   response += data[recurso][EKG_CONTEXT_VOCABULARY.PROPERTY.COMMENT]
-    // }
-  //   setComment(response)
-  //   return response
-  // }
-
-  /** Carrega os links sameas do recurso selecionado*/
-  async function loadSameAs(uri: string) {
+  async function loadOnlyPropertiesOfSelectedResource() {
+    let response: any
     try {
-      if (uri) {
-        let _uri = double_encode_uri(uri);
-        const response = await api.get(`/sameas/?resourceURI=${_uri}`)
-        setLinksSameAs(response.data)
-      }
+      setIsLoading(true)
+      // setProperties([])
+      let _uri = encodeURIComponent(uri as string)
+      response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
+      setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } finally {
+      setIsLoading(false)
     }
+  }
+  /** Quando uma VSE é selecionada no menu de contexto, deve setar a classe especifica do recurso no redux.
+   * Caso quando vem da VU, não tava mudando a classe da VSE..
+   */
+  async function setClassOfSelectedESV(data: any) {
+    let resource_uri = Object.keys(data)[0]
+    let props_of_resource_uri = data[resource_uri]
+    let vse = props_of_resource_uri["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]
+    let array_of_new_class = vse.filter((classe: any) => classe[0] != global_context.classRDF.classURI.value)
+    let new_class_to_global_context = getPatternsClassRDF2GlobalContext(array_of_new_class[0])
+    dispatch(updateClassRDF(new_class_to_global_context))
+  }
+
+
+
+  async function loadSameAsAndPropertiesOfSelectedResourceInUnificationView() {
+    let response: any
+    try {
+      setIsLoading(true)
+      // setProperties([])
+      let resources_with_sameas = await loadSameAs()
+      response = await api.post(`/properties/unification?language=${global_context.language}`, { resources: resources_with_sameas })
+      setAgroupedProperties(response.data)
+      setIsLoading(false)
+    } catch (error) {
+      alert(JSON.stringify(error));
+    } 
+  }
+
+
+  async function loadOnlyPropertiesOfSelectedResourceInUnificationView() {
+    let response: any
+    try {
+      setIsLoading(true)
+      // setProperties([])
+      response = await api.post(`/properties/unification?language=${global_context.language}`, { resources: linksSameAs })
+      setAgroupedProperties(response.data)
+      setIsLoading(false)
+    } catch (error) {
+      alert(JSON.stringify(error));
+    } 
+  }
+
+  async function loadOnlyPropertiesOfSelectedResourceIn_fusionView() {
+    let response: any
+    try {
+      setIsLoading(true)
+      // setProperties([])
+      response = await api.post(`/properties/fusion?language=${global_context.language}`, { resources: linksSameAs })
+      setAgroupedProperties(response.data)
+      setIsLoading(false)
+    } catch (error) {
+      alert(JSON.stringify(error));
+    } 
   }
 
   useEffect(() => {
-    console.log('--- useEffect []---')
-    console.log('PILHA', global_context.stack_of_resource_navigated)
     const _repo_in_api_header = api.defaults.headers.common['repo']
-    if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      setTypeOfSelectedView(global_context.view)
-      loadSameAs(global_context.resourceURI)
-
-      if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) setSelectedIndexOfMenu(0)
-      else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
-      else if (global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
+    if (_repo_in_api_header) {
+      if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) {
+        loadSameAsAndPropertiesOfSelectedResource()
+        setSelectedIndexOfMenu(0)
+      }
+      else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) {
+        loadSameAsAndPropertiesOfSelectedResourceInUnificationView()
+        setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
+      }
     }
     else {
       navigate(ROUTES.REPOSITORY_LIST)
     }
   }, [])
 
+
   useEffect(() => {
-    console.log('--- useEffect 2---')
-    // console.log('PILHA', global_context.stack_of_resource_navigated)
     const _repo_in_api_header = api.defaults.headers.common['repo']
-    if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      // loadSameAs(uri as string)
-      loadPropertiesOfSelectedResource()
-      // getComment()
-      // if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) {
-      //   setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
-      // }
-      window.scrollTo(0, 0)
+    if (_repo_in_api_header) {
+      if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) {
+        loadOnlyPropertiesOfSelectedResource()
+      }
+      else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) {
+        loadOnlyPropertiesOfSelectedResourceInUnificationView()
+      }
+      else if (global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) {
+        loadOnlyPropertiesOfSelectedResourceIn_fusionView()
+      }
     }
     else {
       navigate(ROUTES.REPOSITORY_LIST)
     }
-  }, [location?.state, selectedIndexOfMenu])
+  }, [selectedIndexOfMenu])
 
 
-  useEffect(() => {
-    console.log('--- useEffect 3---')
-    const _repo_in_api_header = api.defaults.headers.common['repo']
-    if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      loadPropertiesOfSelectedResource()
-      // loadSameAs(global_context.resourceURI)
-      loadSameAs(uri as string)
-      window.scrollTo(0, 0)
-    }
-    else {
-      navigate(ROUTES.REPOSITORY_LIST)
-    }
-  }, [location?.state, selectedObjectProperty, global_context])
 
-
-  // const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW && index != NUMBERS.IDX_FUSION_VIEW
   const ehVisaoExportada = (index: Number) => index != NUMBERS.IDX_UNIFICATION_VIEW && index != NUMBERS.IDX_FUSION_VIEW
   const ehVisaoUnificacao = (index: Number) => index == NUMBERS.IDX_UNIFICATION_VIEW
 
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
-    console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
+    /** QUANDO MEXE NO MENU DE CONTEXTO NÃO CHAMA O SAMEAS */
     setSelectedIndexOfMenu(index);
     if (ehVisaoExportada(index)) {
       dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
@@ -206,7 +216,6 @@ export function Properties() {
     else {
       dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_FUSION_VIEW }))
     }
-    // navigate(ROUTES.PROPERTIES)
     navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(contextoSelecionado)}`)
   };
 
@@ -218,16 +227,13 @@ export function Properties() {
   async function handleObjectPropertiesClick(event: any, uri: string) {
     event.preventDefault();
     try {
-      console.log('GLOBAL VIEW', global_context.view)
       setSelectedObjectProperty(uri)
-      // dispatch(updateResourceAndView({ resource: uri, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
       dispatch(updasteResourceURI(uri))
       dispatch(pushResourceInStackOfResourcesNavigated(uri))
-      console.log('===URI DO LINK (OBJECT-PROPERTY)===', uri)
-      setLinkedData({ link: uri, index: selectedIndexOfMenu })
+      // setLinkedData({ link: uri, index: selectedIndexOfMenu })
       navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(uri)}`)
     } catch (error) {
-      console.log(error)
+      console.log('ERROR',error)
     } finally {
       window.scrollTo(0, 0)
     }
@@ -236,34 +242,18 @@ export function Properties() {
 
   const obtemURICanonica = (uri: string) => {
     let uri_separada = uri.split("resource")
-    // console.log('uri separada', uri_separada)
     const _class = uri_separada[1].split("/")[1]
     let uri_canonica = uri_separada[0] + "resource/canonical/" + _class + "/" + getIdentifierFromURI(uri)
     return uri_canonica
   }
 
-  async function comeBack(event: any) {
-    // event.preventDefault();
-    try {
-      console.log(`comebakc`, global_context.initialResourceOfNavigation)
-      dispatch(updasteResourceURI(global_context.initialResourceOfNavigation))
-      navigate(ROUTES.PROPERTIES)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      window.scrollTo(0, 0)
-    }
-  }
-
-  {/* essa div foi colocada para os prints dos artigos. analisar sua remoção ou ajuste */ }
-  {/* <div style={{ paddingLeft: 60 }}> */ }
 
   return (
     <div className={stylesGlobal.container}>
       <Grid container spacing={1} sx={{ p: '2px 0' }}>
         <Grid item xs={7.5} sx={{ bgcolor: null }}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <TitleOfProperties 
+            <TitleOfProperties
               title={estaEmPortugues ? "Propriedades do recurso" : "Properties of Resource"}
               hasButtonBack
             />
@@ -296,7 +286,6 @@ export function Properties() {
                 </h3>
                 <Typography sx={{ fontSize: 11, fontWeight: 400, textAlign: "start" }} color="text.primary" gutterBottom>
                   {
-                    /** A URI canonical deveria vir do backend */
                     global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_FUSION_VIEW
                       ? obtemURICanonica(global_context.resourceURI)
                       : global_context.resourceURI
@@ -456,7 +445,6 @@ export function Properties() {
                         {/* DEMAIS PROPRIEDADES */}
                         {
                           Object.keys(agroupedProperties[Object.keys(agroupedProperties)[0]]).map((propOfResource, idx) => {
-                            // console.log('<<<<', agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource])
                             return (propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.RDF_TYPE &&
                               propOfResource != EKG_CONTEXT_VOCABULARY.PROPERTY.LABEL &&
                               propOfResource != "http://www.bigdatafortaleza.com/ontology#uri" &&
@@ -484,11 +472,9 @@ export function Properties() {
                                     <Stack direction={"column"} key={idx}>
                                       { /** VALORES DAS PROPRIEDADES */
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource].map((values: any, i: React.Key) => {
-                                          // console.log('valores: ', values[0])
                                           return <Stack key={i} direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
                                             textAlign={'justify'}>
                                             { /** values[0] contém o valor literal ou objeto da propriedade */
-                                              // console.log('----values----', values[0])
                                               values[0].toLowerCase().includes("http") && values[0].toLowerCase().includes("resource")
                                                 && linksSameAs?.every((ele: string) => values[0].includes(getContextFromURI(ele[0])) || values[0].includes("ontologies/music#"))
                                                 ? <><Link
@@ -507,7 +493,6 @@ export function Properties() {
                                                 </>
                                                 : <><Typography variant="body2" sx={{ mb: 2, ml: 0 }} color="text.primary" gutterBottom>
                                                   <Circle size={BULLET_SIZE} weight="fill" />
-                                                  {/* {propOfResource == "http://purl.org/dc/elements/1.1/date" ? " "+new Date("1998").toLocaleDateString("pt-BR") : " "+values[0]} */}
                                                   {" " + values[0]}
                                                 </Typography>
                                                   {
@@ -655,17 +640,18 @@ export function Properties() {
               }
               <List>
                 {
-                /** VISÃO DE TIMELINE */
+                  /** VISÃO DE TIMELINE */
                   agroupedProperties[Object.keys(agroupedProperties)[0]] && agroupedProperties[Object.keys(agroupedProperties)[0]]["http://www.arida.ufc.br/ontologies/timeline#has_timeline"]
                   && <ListItem key={-4} disablePadding>
-                    <ListItemButton
-                      selected={selectedIndexOfMenu === -4}
-                      sx={{ bgcolor: selectedIndexOfMenu === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
-                      onClick={() => navigate(ROUTES.TIMELINE, {
-                        state: {
-                          resourceURI: Object.keys(agroupedProperties)[0],
-                        } as stateProps
-                      })}
+                      <ListItemButton
+                        selected={selectedIndexOfMenu === -4}
+                        sx={{ bgcolor: selectedIndexOfMenu === -4 ? `${COLORS.AMARELO_01} !important` : "#fff" }}
+                        // onClick={() => navigate(ROUTES.TIMELINE, {
+                        //   state: {
+                        //     resourceURI: Object.keys(agroupedProperties)[0],
+                        //   } as stateProps
+                        // })}
+                        onClick={() => navigate(`${ROUTES.TIMELINE_RESOURCE}=${encodeURIComponent(Object.keys(agroupedProperties)[0])}`) }
                     >
                       <ListItemIcon sx={{ minWidth: '30px' }}>
                         <ClockCounterClockwise size={NUMBERS.SIZE_ICONS_MENU_CONTEXT} />
@@ -690,7 +676,7 @@ export function Properties() {
                 </ListItem>
               </List>
             </Grid> {/* FIM MENU DE CONTEXTOS */}
-          </Grid> 
+          </Grid>
         }
       </Box>
     </div>

@@ -2,17 +2,11 @@ import React, { useState } from 'react';
 import {
   Typography,
   TableHead, Table, TableBody, TableCell, TablePagination, TableRow, TableFooter, TableContainer, Paper,
-  IconButton,
-  TextField,
-  Stack,
-  Pagination,
 } from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
 import { TablePaginationActions } from '../commons/pagination';
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../redux/store'
-import { updateView, updateExportedView, updateClassRDF } from '../redux/globalContextSlice';
-import { CaretLeft, CaretRight } from 'phosphor-react';
 
 type typeAlignOfCell = "right" | "left" | "inherit" | "center" | "justify" | undefined
 
@@ -32,22 +26,13 @@ interface MTable {
 }
 
 let widthOfBody = document.body.clientWidth;
-// const PAINEL_LEFT_SIZE = window.screen.width * 0.2
 const PAINEL_LEFT_SIZE = widthOfBody * 0.2
-// const element = document.getElementById("body");
-// console.log("Width: " + element?.offsetWidth + "px"); 
 
 export function MTable(props: MTable) {
-  const dispatch = useDispatch();
 	const global_context = useSelector((state: RootState) => state.globalContext)
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
   const estaEmPortugues = global_context.language == 'pt'
-  // const [page, setPage] = React.useState(1);
-  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value); console.log(value)
-  };
+  
 
   return (
     <TableContainer component={Paper}>
@@ -85,8 +70,6 @@ export function MTable(props: MTable) {
         {
           props.noFooter ? false : <TableFooter>
             <TableRow>
-              {/* <TableCell align="ri" colSpan={(props.header.length + 1)}> */}
-              {/* <TableCell align='right'> */}
               <TablePagination
                 rowsPerPageOptions={[6, 12, 24, 48, { label: 'Todas', value: -1 }]}
                 colSpan={props.hasActions ? props.header.length + 1 : props.header.length}
@@ -104,11 +87,9 @@ export function MTable(props: MTable) {
                 onRowsPerPageChange={props.handleChangeRowsPerPage}
                 ActionsComponent={TablePaginationActions}
               />
-              {/* </TableCell> */}
             </TableRow>
           </TableFooter>
         }
-
       </Table>
     </TableContainer>
   )

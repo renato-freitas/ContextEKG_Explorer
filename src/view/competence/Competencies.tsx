@@ -12,7 +12,7 @@ import { Play } from 'phosphor-react';
 
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updateView, updateResourceAndView, updasteResourceURI } from '../../redux/globalContextSlice';
+import { updasteResourceURI } from '../../redux/globalContextSlice';
 
 import { CompetenceQuestionModel } from '../../models/models';
 import { MHeader } from "../../components/MHeader";
@@ -20,13 +20,9 @@ import { api } from '../../services/api';
 import { LoadingContext } from "../../App";
 import styles from '../../styles/global.module.css'
 import { MTable } from '../../components/MTable';
-import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
+import { COLORS, ROUTES } from '../../commons/constants';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 import { double_encode_uri } from '../../commons/utils';
-
-// import spfmt from 'sparql-formatter';
-
-// import spfmt from 'sparql-formatter';
 
 type typeAlignOfCell = "right" | "left" | "inherit" | "center" | "justify" | undefined
 
@@ -40,9 +36,7 @@ export function CompetenceQuestions() {
   const [competenceQuestionResult, setCompetenceQuestionResult] = useState([]);
   const [competenceQuestionResulVariables, setCompetenceQuestionResultVariables] = useState<Array<[string, typeAlignOfCell]>>([]);
   const [selectedCompetenceQuestion, setSelectedCompetenceQuestion] = useState<CompetenceQuestionModel>({} as CompetenceQuestionModel);
-  const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
   let auxLabelOfClasses = [] as string[];
-  // const estaEmPortugues = selectedLanguage == 'pt'
   const estaEmPortugues = global_context.language == 'pt'
 
 
@@ -50,13 +44,12 @@ export function CompetenceQuestions() {
     try {
       setIsLoading(true);
       const response = await api.get(`/competence-questions/?language=${global_context.language}`)
-      console.log('-------QC---------\n', response.data)
       setCompetenceQuestions(response.data);
       setSelectedCompetenceQuestion(response.data[0])
+      setIsLoading(false);
     } catch (error) {
       console.error("load saved queries", error)
     } finally {
-      setIsLoading(false);
       setWasDeleted(false)
     }
   }
@@ -64,34 +57,23 @@ export function CompetenceQuestions() {
   async function executeSavedQuery(uri: string, idx: number) {
     try {
       setIsLoading(true);
-      // let _sparql = double_encode_uri(sparql)
-      // console.log(_sparql)
-      // const response = await api.get(`/queries/execute/?uri=${uri}`)
       const response = await api.get(`/competence-questions/execute/?uri=${uri}&language=${global_context.language}`)
       setCompetenceQuestionResult(response.data);
 
       let variables: Array<[string, typeAlignOfCell]> = Object.keys(response.data[0]).map((ele: string) => [ele, "center"])
       setCompetenceQuestionResultVariables(variables)
-      console.log('excute result', response.data)
-      console.log('variaveis', variables)
-    } catch (error) {
-      console.error("load saved queries", error)
-    } finally {
       setIsLoading(false);
       setSelectedIndex(idx)
-    }
+    } catch (error) {
+      console.error("load saved queries", error)
+    } 
   }
 
   useEffect(() => {
-    dispatch(updateView(NUMBERS.CODE_OF_EXPORTED_VIEW))
     loadCompetenceQuestions();
   }, [])
 
 
-  const openForm = () => {
-    // console.log("*** call: Abrir formulário de Fonte de Dados ***")
-    navigate(ROUTES.SAVED_QUERY_FORM);
-  }
 
   /**Pagination */
   const [page, setPage] = useState(0);
@@ -101,9 +83,7 @@ export function CompetenceQuestions() {
 
   const [rowsPerPage, setRowsPerPage] = useState(6);
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
-    // setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
@@ -121,31 +101,17 @@ export function CompetenceQuestions() {
     } catch (error) {
       alert(error)
     }
-
-    // await loadSavedQueries();
   }
 
 
   const handleResultToExplore = (r: string) => {
     dispatch(updasteResourceURI(r))
-    dispatch(updateView(NUMBERS.CODE_OF_EXPORTED_VIEW))
-    navigate(ROUTES.PROPERTIES)
+    navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(r)}`)
   };
 
   return (
     <div className={styles.container}>
       <MHeader title={`${estaEmPortugues ? "Questões de Competência" : "Competence Questions"}`} />
-
-      {/* HEADER */}
-      {/* <Grid container spacing={1} sx={{ p: '10px 0' }}>
-        <Grid item xs={4}>
-        </Grid>
-        <Grid item xs={8} gap={1} display='flex' justifyContent='flex-end'
-          sx={{ pt: '0px !important' }}>
-          <TextField id="outlined-basic" label="Pesquisar pelo nome" variant="outlined" size="small" sx={{ width: 400 }} />
-          <Button variant="contained" onClick={openForm}>+ Nova Consulta</Button>
-        </Grid>
-      </Grid> */}
 
 
       <Grid container spacing={2} sx={{ mb: 1 }}>
@@ -179,7 +145,6 @@ export function CompetenceQuestions() {
                   <TableCell align='right'>
 
                     <Tooltip title="Executar">
-                      {/* <IconButton onClick={() => executeSavedQuery(selectedCompetenceQuestion.uri.value, selectedCompetenceQuestion?.sparql?.value)} sx={{ p: "4px 6px 0 0 !important" }}> */}
                       <IconButton onClick={() => executeSavedQuery(query.uri.value, idx)} sx={{ p: "4px 6px 0 0 !important" }}>
                         <Play size={22} weight="fill" />
                       </IconButton>

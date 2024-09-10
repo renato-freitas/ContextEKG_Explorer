@@ -2,7 +2,6 @@ import { useEffect, useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as zod from 'zod';
-import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
@@ -13,15 +12,11 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
 import Tabs from '@mui/material/Tabs';
-import Autocomplete from "@mui/material/Autocomplete";
-
-
 import { RDF_Node } from "../../models/RDF_Node";
 import { SavedQueryModel } from "../../models/SavedQueryModel";
 import { api } from "../../services/api";
 import { LoadingContext } from "../../App";
 import { double_encode_uri } from "../../commons/utils";
-import { VSKG_TBOX, DATASOURCE_TYPES } from "../../commons/constants";
 import styles from '../../styles/global.module.css'
 import { MHeader } from "../../components/MHeader";
 
@@ -35,11 +30,6 @@ interface ISavedQuery {
   generalizationClass: RDF_Node;
   
 }
-
-// enum DataSourceTypeEnum {
-//   Banco_Dados_Relacional = "http://rdbs-o#Relational_Database",
-//   CSV = "https://www.ntnu.no/ub/ontologies/csv#CsvDocument"
-// }
 
 interface ISavedQueryForm {
   identifier: string,
@@ -65,25 +55,12 @@ const DataSourceSchema = zod.object({
   sparql: zod.string().optional(),
 });
 
-/**Tenho que decidir como fazer a anotação das tabelas/csv das fontes de dados
- * i) Atualizar globalmente, tal que reflita em todos os GM
- * ii) Ou atualizar individualmente cada GM
- */
 
-const options = ['Option 1', 'Option 2'];
 
 export function SavedQueryForm() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-
-  // const [selectecDataSourceType, setSelectecDataSourceType] = useState<DataSourceTypeEnum>();
-
-  const [tables, setTables] = useState([]);
-  const [tableNames, setTableNames] = useState<string[]>([]);
-
-  const [value, setValuei] = useState<string | null>(null);
-  const [inputValuei, setInputValue] = useState('');
 
 
   const { register, control, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ISavedQueryForm>({
@@ -100,25 +77,18 @@ export function SavedQueryForm() {
   });
 
   const handleSubmit_SavedQuery: SubmitHandler<ISavedQueryForm> = async (data) => {
-    console.log("*** Enviando dados de uma saved query***")
 
     try {
       const _repo_in_api_header = api.defaults.headers.common['repo']
       data = { ...data, repository: _repo_in_api_header }
-      console.log(data);
       setIsLoading(true);
-      // if (location?.state) {
       let uri = location?.state as SavedQueryModel
 
-      console.log('*** Dados para atualizar ***', uri)
       if (uri) {
         let uri_enc = double_encode_uri(uri.uri.value)
         await api.put(`/queries/?uri=${uri_enc}`, data)
       } else {
-        console.log("*** Criando ***")
         const response = await api.post(`/queries`, data)
-        console.log("*** RESPOSTA DO INSERT ***")
-        // console.log(response)
       }
       reset();
     } catch (error) {
@@ -134,17 +104,12 @@ export function SavedQueryForm() {
     async function onEdit() {
       try {
         if (location.state) {
-          // setIsLoading(true);
           let state = location.state as ISavedQuery;
-          console.log("*** Colocando a consulta salva Selecionada no Formulário ***")
-          console.log(state)
           setValue("identifier", state.identifier.value)
           setValue("name", state.name.value)
           setValue("description", state.description.value)
           setValue("sparql", state.sparql.value)
           setValue("generalizationClass", state.generalizationClass.value)
-
-
         }
       } catch (err) {
         console.log(err);
@@ -198,7 +163,6 @@ export function SavedQueryForm() {
     <div className={styles.container}>
       <MHeader title={`${'Cadastrar'} Consulta`} />
 
-      {/* <h3>{`${'Cadastrar'} Consulta`}</h3> */}
       <Grid container spacing={0}>
         <Grid item xs={12}>
           <Card
@@ -247,8 +211,6 @@ export function SavedQueryForm() {
                   </Grid>
 
 
-
-
                   <Grid item sm={7}>
                     <FormControl fullWidth>
                       <FormLabel htmlFor="title">Consulta SPARQL*</FormLabel>
@@ -294,6 +256,4 @@ export function SavedQueryForm() {
       </Grid>
     </div>
   )
-
-
 }

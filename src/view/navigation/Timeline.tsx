@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Key } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
@@ -16,90 +16,64 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
-import LaptopMacIcon from '@mui/icons-material/LaptopMac';
-import { Asterisk, ClockCounterClockwise, Database, Link as LinkIcon } from 'phosphor-react';
-import { LinkSimpleBreak, Graph, ArrowRight } from '@phosphor-icons/react';
-
+import { Database, Link as LinkIcon } from 'phosphor-react';
+import { Graph, ArrowRight } from '@phosphor-icons/react';
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updateView, updateResourceAndView, updasteResourceURI } from '../../redux/globalContextSlice';
-
-import { MHeader } from "../../components/MHeader";
-
-import { ResourceModel } from "../../models/ResourceModel";
-import { ClassModel } from "../../models/ClassModel";
-
-import { LoadingContext, ClassRDFContext } from "../../App";
-import { double_encode_uri, getContextFromURI, getDateFromInstantTimelin, getPropertyFromURI } from "../../commons/utils";
-
+import { updateView, updasteResourceURI } from '../../redux/globalContextSlice';
+import { LoadingContext } from "../../App";
+import { getContextFromURI } from "../../commons/utils";
 import stylesGlobal from '../../styles/global.module.css';
 import { COLORS, NUMBERS, ROUTES } from "../../commons/constants";
 import { api } from "../../services/api";
-import { stateProps } from "./Properties";
-import { Button, Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, StepTypeMap } from "@mui/material";
+import { Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { InstantComponent } from "./InstantComponent";
+import { TitleOfTimeline } from "../../components/TitleOfTimeline";
 
 
 export function TimelineView() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { uri } = useParams()
   const dispatch = useDispatch();
+  let [searchParams, setSearchParams] = useSearchParams();
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   const global_context: any = useSelector((state: RootState) => state.globalContext)
-  const { contextClassRDF, setContextClassRDF } = useContext(ClassRDFContext);
-  const [page, setPage] = useState(0);
-  const [uriOfselectedResource, setUriOfSelectedResource] = useState<string>("");
   const [instants, setInstants] = useState<any>({})
   const [labelOfResource, setLabelOfResource] = useState<string>("");
-  // const [contextos, setContextos] = useState<any>({})
-  const [contextos, setContextos] = useState<any>([])
   const [selectedIndex, setSelectedIndex] = useState<Number>(NUMBERS.IDX_SELECTED_VIEW);
-  const [selectedContext, setSelectedContext] = useState<string>();
+  const [selectedResourceURI, setSelectedResourceURI] = useState<string>(searchParams.get("resource") as string);
   const [selectedOwlProperty, setSelectedOwlProperty] = useState<string>('');
   const [owlProperties, setOwlProperties] = useState<any>([]);
   const [colorsToDataSources, setColorsToDataSources] = useState<any>({})
-  // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
-  // const estaEmPortugues = window.localStorage.getItem('LANGUAGE') == 'pt'
   const estaEmPortugues = global_context.language == 'pt'
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
 
 
-  /** Carrega os links sameas do recurso selecionado*/
-  // async function loadSameAs(uri: string) {
-  //   try {
-  //     if (uri) {
-  //       let _uri = double_encode_uri(uri);
-  //       const response = await api.get(`/sameas/?resourceURI=${_uri}`)
-  //       setLinksSameAs(response.data)
-  //     }
-  //   } catch (error) {
-  //     alert(JSON.stringify(error));
-  //   } finally {
-  //   }
-  // }
 
   /** Carrega os links sameas do recurso selecionado*/
-  // async function loadSameAs(uri: string) {
   async function loadSameAs() {
     try {
       if (global_context.resourceURI) {
-        // let _uri = double_encode_uri(global_context.resourceURI);
-        console.log('loadSameas()', `/sameas/?resourceURI=${global_context.resourceURI}`)
-        const response = await api.get(`/sameas/?resourceURI=${global_context.resourceURI}`)
-        console.log('loadSameAs.response', response.data)
+        const response = await api.get(`/sameas/?resourceURI=${encodeURIComponent(global_context.resourceURI)}`)
         setLinksSameAs(response.data)
         return response.data
       }
     } catch (error) {
-      alert(JSON.stringify(error));
-    } finally {
+      console.error(JSON.stringify(error));
     }
   }
 
   function getLabelOfResource(instants: any) {
-    const firstKey = Object.keys(instants)[0]
-    const firstValue = instants[firstKey][0]
-    setLabelOfResource(firstValue.label.value)
+    if (instants) {
+      const firstKey = Object.keys(instants)[0]
+      const firstValue = Object.keys(instants).length > 0 ? instants[firstKey][0] : estaEmPortugues ? {
+        "label": { "value": "sem histórico" }
+      } : {
+        "label": { "value": "no timeline" }
+      }
+      setLabelOfResource(firstValue.label.value)
+    }
   }
 
   function putBackgroundColorInCardByDataSource(instants: any) {
@@ -128,69 +102,81 @@ export function TimelineView() {
     setOwlProperties(_owlProps)
   }
 
-  async function loadTimeline(resourceURI: string) {
+  // async function loadTimeline(resourceURI: string) {
+  async function loadSameAsAndTimeline() {
     let response: any
     try {
       setIsLoading(true)
-      // setUriOfSelectedResource(resourceURI)
-      // response = await api.get(`/timeline/?resourceURI=${resourceURI}&owlProperty=${selectedOwlProperty}`)
-      // setUriOfSelectedResource(global_context.resourceURI)
-      console.log('global_context.resourceURI', global_context.resourceURI)
+      await loadSameAs()
       response = await api.get(`/timeline/?resourceURI=${global_context.resourceURI}&owlProperty=${selectedOwlProperty}`)
-      console.log('*** TIMELINE -', response.data)
       setIsLoading(false)
       setInstants(response.data)
       getLabelOfResource(response.data)
       getOwlProperties(response.data)
     } catch (error) {
-      console.log(`><`, error);
+      console.log(`ERROR`, error);
     } finally {
       window.scrollTo(0, 0)
-      // setTimeout(() => {
-
-      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
     }
   }
 
 
-  async function loadTimelineUnification() {
+  async function loadSameAsAndTimelineOfSelectedResourceInUnificationView() {
     let response: any
     try {
-      // console.log('**** TIMELINE UNIFICATION ****', object)
       setIsLoading(true)
-      let sameas:any[] = await loadSameAs()
-      console.log('--- LINKS SAMEAS', sameas)
-      // response = await api.post(`/timeline/unification?owlProperty=${selectedOwlProperty}`, { resources: linksSameAs.map((same) => same.sameas.value) })
+      let sameas: any[] = await loadSameAs()
       response = await api.post(`/timeline/unification?owlProperty=${selectedOwlProperty}`, { resources: sameas.map((same) => same.sameas.value) })
-      console.log('---TIMELINE UNIFICATION', response.data)
+      setIsLoading(false)
       setInstants(response.data)
       getLabelOfResource(response.data)
       putBackgroundColorInCardByDataSource(response.data)
       getOwlProperties(response.data)
-      setIsLoading(false)
     } catch (error) {
-      alert(JSON.stringify(error));
+      console.error(JSON.stringify(error));
+    }
+  }
+
+  async function loadOnlyTimelineOfSelectedResourceInUnificationView() {
+    let response: any
+    try {
+      setIsLoading(true)
+      response = await api.post(`/timeline/unification?owlProperty=${selectedOwlProperty}`, { resources: linksSameAs.map((same) => same.sameas.value) })
+      setIsLoading(false)
+      setInstants(response.data)
+      getLabelOfResource(response.data)
+      putBackgroundColorInCardByDataSource(response.data)
+      getOwlProperties(response.data)
+    } catch (error) {
+      console.error(JSON.stringify(error));
+    }
+  }
+
+  async function loadOnlyTimeline() {
+    let response: any
+    try {
+      setIsLoading(true)
+      response = await api.get(`/timeline/?resourceURI=${global_context.resourceURI}&owlProperty=${selectedOwlProperty}`)
+      setIsLoading(false)
+      setInstants(response.data)
+      getLabelOfResource(response.data)
+      getOwlProperties(response.data)
+    } catch (error) {
+      console.log(`ERROR`, error);
     } finally {
-      // setTimeout(() => {
-      // setAgroupedProperties(response.data)
-      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
+      window.scrollTo(0, 0)
     }
   }
 
   useEffect(() => {
     const _repo_in_api_header = api.defaults.headers.common['repo']
-    if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
-      if (location?.state) {
-        // let { resourceURI } = location.state as stateProps;
-        console.log('useEffect.01')
-        loadSameAs()
-        if (selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
-          loadTimelineUnification()
-          setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
-        } else {
-          loadTimeline(global_context.resourceURI)
-          setSelectedIndex(0)
-        }
+    if (_repo_in_api_header) {
+      if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW || selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW) {
+        loadSameAsAndTimelineOfSelectedResourceInUnificationView()
+        setSelectedIndex(NUMBERS.IDX_UNIFICATION_VIEW)
+      } else {
+        loadSameAsAndTimeline()
+        setSelectedIndex(0)
       }
     }
     else {
@@ -199,44 +185,33 @@ export function TimelineView() {
   }, [])
 
   useEffect(() => {
-    if (location?.state) {
-      // let { resourceURI } = location.state as stateProps
-      if (selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
-        console.log('useEffect.02')
-        loadTimelineUnification()
-      } else {
-        // loadTimeline(resourceURI)
-        loadTimeline(global_context.resourceURI)
-        // setContextos(contextos)
-        // setLinksSameAs(linksSameAs)
+    const _repo_in_api_header = api.defaults.headers.common['repo']
+    if (_repo_in_api_header) {
+      if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) { /**-2 = Visão de Unificação */
+        loadOnlyTimelineOfSelectedResourceInUnificationView()
       }
+      else if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) {
+        loadOnlyTimeline()
+      }
+      window.scrollTo(0, 0)
     }
-    window.scrollTo(0, 0)
-  }, [location.state, selectedOwlProperty])
+  }, [selectedIndex, selectedOwlProperty])
+
 
 
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
-    // console.log(`*** ÍNDICE DO CONTEXTO: `, index, contextoSelecionado)
     setSelectedIndex(index);
-    // setSelectedContext(contextoSelecionado)
     dispatch(updasteResourceURI(contextoSelecionado))
-    console.log('--- INDEX SELECIONAOD:', index)
-    if (index ==  NUMBERS.IDX_UNIFICATION_VIEW) { 
+    if (index == NUMBERS.IDX_UNIFICATION_VIEW) {
       dispatch(updateView(NUMBERS.CODE_OF_UNIFICATION_VIEW))
     } else {
       dispatch(updateView(NUMBERS.CODE_OF_EXPORTED_VIEW))
     }
-    navigate(ROUTES.TIMELINE, {
-      state: {
-        resourceURI: contextoSelecionado,
-        // contextos: contextos
-      }
-    })
+    navigate(`${ROUTES.TIMELINE_RESOURCE}=${encodeURIComponent(contextoSelecionado)}`)
   };
 
 
   const handleSelectedOwlProperty = (event: SelectChangeEvent) => {
-    console.log('qual prop selec', event.target.value as string)
     setSelectedOwlProperty(event.target.value as string)
   };
 
@@ -244,7 +219,7 @@ export function TimelineView() {
     <div className={stylesGlobal.container}>
       <Grid container spacing={0}>
         <Grid item xs={6.5} sx={{ bgcolor: null }}>
-          <MHeader
+          <TitleOfTimeline
             title={estaEmPortugues ? "Histórico do recurso" : "Timeline of Resource"}
             hasButtonBack
           />
@@ -252,7 +227,7 @@ export function TimelineView() {
 
         <Grid item xs={3} sx={{ bgcolor: null, display: 'flex', justifyContent: 'flex-end', alignContent: 'flex-end', paddingRight: 1 }}>
           <FormControl sx={{ m: 0, minWidth: 300 }} size="small">
-            <InputLabel id="demo-simple-select-label">Filtrar Propriedade</InputLabel>
+            <InputLabel id="demo-simple-select-label">{estaEmPortugues ? "Filtrar Propriedade" : "Filter by Property"}</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
@@ -260,16 +235,13 @@ export function TimelineView() {
               label="Filtrar Propriedade"
               onChange={handleSelectedOwlProperty}
             >
-              <MenuItem value={''}></MenuItem>
+              {selectedOwlProperty && <MenuItem value={''}><em>{estaEmPortugues ? "limpar filtro" : "clean filter"}</em></MenuItem>}
               {Object.keys(owlProperties).map((_key: any, idx: Key) => <MenuItem key={idx} value={owlProperties[_key]}>{_key}</MenuItem>)}
             </Select>
           </FormControl>
         </Grid>
         <Grid item xs={2.5}></Grid>
       </Grid>
-
-
-
 
       <Box sx={{ flexGrow: 1, padding: 1 }}>
         { /** LABEL DO RECURSO */
@@ -301,7 +273,7 @@ export function TimelineView() {
             <Grid item sm={9.5}>
               <Timeline position="alternate-reverse">
                 {
-                  Object.keys(instants).map((instant: string, idx: Key) => {
+                  Object.keys(instants).length > 0 ? Object.keys(instants).map((instant: string, idx: Key) => {
                     return <TimelineItem key={idx}>
                       <TimelineSeparator>
                         <TimelineConnector />
@@ -313,7 +285,6 @@ export function TimelineView() {
                         <TimelineConnector />
                       </TimelineSeparator>
                       <TimelineContent sx={{ py: '8px', px: 2 }}>
-                        {/* <Card key={idx} sx={{ padding: 1, background:`${selectedIndex == NUMBERS.IDX_UNIFICATION_VIEW ? colorsToDataSources[getContextFromURI(instant)] : false}` }}> */}
                         <Card key={idx} sx={{ padding: 1 }}>
                           <InstantComponent instant={instant} />
                           {
@@ -328,19 +299,15 @@ export function TimelineView() {
                                 }} />
                               : false
                           }
-                          {/* </Stack> */}
                           {
                             instants[instant].map((update: any, _idx: Key) => {
                               return <Stack key={_idx} direction={"row"} spacing={1} textAlign={'center'}>
                                 <Typography variant="caption" component="div" color="gray">
                                   {update.property.value}
                                 </Typography>
-                                {/* <Stack direction={"row"} alignItems={'center'} spacing={1}> */}
                                 <Typography color={'secondary'} variant="caption">{update.va.value}</Typography>
-                                {/* <Typography color={'GrayText'} variant="caption"><span>&rarr;</span></Typography> */}
                                 <ArrowRight size={12} />
                                 <Typography color="primary" variant="caption">{update.vn.value}</Typography>
-                                {/* </Stack> */}
                               </Stack>
 
                             })
@@ -349,6 +316,10 @@ export function TimelineView() {
                       </TimelineContent>
                     </TimelineItem>
                   })
+                    : <Typography variant="caption" component="div" color="gray">
+                      {estaEmPortugues ? "Nada para mostrar" : "Nothing to show"}
+                    </Typography>
+
                 }
               </Timeline>
             </Grid>
@@ -380,7 +351,6 @@ export function TimelineView() {
 
                     {
                       linksSameAs.map((row: any, idx: Key) => {
-                        // console.log('--', row)
                         const _sameas_context = getContextFromURI(row.sameas.value)
                         return (
                           <ListItem key={idx} disablePadding>
@@ -405,7 +375,6 @@ export function TimelineView() {
               <List>
                 <ListItem key={-5} disablePadding>
                   <ListItemButton
-                    // href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(contextos)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
                     href={`http://localhost:7200/graphs-visualizations?uri=${encodeURI(Object.keys(instants)[0])}${NUMBERS.GRAPHDB_BROWSER_CONFIG}&embedded`}
                     target='_blank'
                     selected={selectedIndex === -5}

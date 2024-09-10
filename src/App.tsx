@@ -5,9 +5,6 @@ import Router from './Router';
 import { GlobalStyle } from './styles/global';
 import { ClassModel } from './models/ClassModel';
 
-{/* <a href="https://www.flaticon.com/free-icons/pyramid" title="pyramid icons">Pyramid icons created by bearicons - Flaticon</a> */}
-{/* <a href="https://www.flaticon.com/free-icons/pyramid" title="pyramid icons">Pyramid icons created by bearicons - Flaticon</a> */}
-
 interface LoadingContextData {
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>

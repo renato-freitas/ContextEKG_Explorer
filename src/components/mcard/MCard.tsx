@@ -1,6 +1,5 @@
 import React from "react";
-import { Card, CardContent, Grid } from "@mui/material";
-import styles from "MCard.modules.css";
+import { CardContent } from "@mui/material";
 import { CardContainer, CardGridItem } from "./MCard.styles";
 
 interface MCardProps {

@@ -1,27 +1,21 @@
-import React, { useState, useEffect, useContext, Key, useDebugValue } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import { Asterisk, ClockCounterClockwise, Link as LinkIcon, Circle, ArrowSquareOut, Database } from 'phosphor-react';
-import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
-
+import { Asterisk, Circle, ArrowSquareOut } from 'phosphor-react';
 import { MHeader } from '../../components/MHeader';
 import { api } from "../../services/api";
 import { LoadingContext, ClassRDFContext } from "../../App";
-import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI } from "../../commons/utils";
+import { getPropertyFromURI, getContextFromURI } from "../../commons/utils";
 import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES } from '../../commons/constants';
-
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from '../navigation/navigation.module.css'
 
@@ -35,11 +29,9 @@ const FONTSEZE_VALUE_PROPERTY = "0.69rem"
 const WIDTH_OF_P = 2.5
 const WIDTH_OF_O = 9.5
 
-// https://medium.com/@lucas_pinheiro/como-adicionar-internacionaliza%C3%A7%C3%A3o-i18n-na-sua-aplica%C3%A7%C3%A3o-react-a1ac4aea109d
 
 export interface stateProps {
   resourceURI: string;
-  // contextos: {};
 }
 export function MetadataProperties() {
   const navigate = useNavigate();
@@ -51,7 +43,6 @@ export function MetadataProperties() {
   const [instants, setInstants] = useState<any[]>([] as any[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
   const [linkedData, setLinkedData] = useState<any>({});
-  const [contextos, setContextos] = useState<any>({})
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
   const [selectedIndex, setSelectedIndex] = useState<Number | undefined>(undefined);
   const [typeOfSelectedView, setTypeOfSelectedView] = useState<string>("");
@@ -81,12 +72,8 @@ export function MetadataProperties() {
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) { /** Verificar se tem reposiótio no header da axios */
       if (location?.state) {
-        let { resource_uri, typeOfClass } = location.state as any;
-        console.log('OBTER AS PROPRIEDADES DO METADADO', resource_uri)
+        let { resource_uri } = location.state as any;
         loadPropertiesOfSelectedResource(resource_uri, "1")
-        // setTypeOfSelectedView(typeOfClass)
-        // if (typeOfClass == NUMBERS.CODE_EXPORTED_VIEW) setSelectedIndex(0)
-        // if (typeOfClass == NUMBERS.CODE_FUSION_VIEW) setSelectedIndex(NUMBERS.IDX_FUSION_VIEW)
       }
     }
     else {
@@ -288,7 +275,7 @@ export function MetadataProperties() {
                                         agroupedProperties[Object.keys(agroupedProperties)[0]][propOfResource].map((values: any, i: React.Key) => {
                                           // console.log('valores: ', values)
                                           return <Stack direction={'row'} spacing={1} justifyContent={'flex-start'} alignItems={"center"}
-                                            textAlign={'justify'}>
+                                            textAlign={'justify'} key={i}>
                                             { /** values[0] contém o valor literal da propriedade */
                                               values[0].toLowerCase().includes("http") && values[0].toLowerCase().includes("resource")
                                                 && linksSameAs?.every((ele: string) => values[0].includes(getContextFromURI(ele[0])))

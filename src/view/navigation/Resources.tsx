@@ -8,19 +8,14 @@ import Tooltip from '@mui/material/Tooltip'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { Eye } from "phosphor-react";
-
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
 import { cleanStackOfResourcesNavigated, pushResourceInStackOfResourcesNavigated, updasteResourceURI, updateInitialResourceOfNavigation } from '../../redux/globalContextSlice';
-
 import { MHeader } from "../../components/MHeader";
 import { MTable } from "../../components/MTable";
-
 import { api } from "../../services/api";
 import { ResourceModel } from "../../models/ResourceModel";
-import { ClassModel } from "../../models/ClassModel";
-
-import { LoadingContext, ClassRDFContext } from "../../App";
+import { LoadingContext } from "../../App";
 import { double_encode_uri, getContextFromURI, printt } from "../../commons/utils";
 import { COLORS, NAMESPACES, NUMBERS, ROUTES } from "../../commons/constants";
 import stylesGlobal from '../../styles/global.module.css';
@@ -34,44 +29,29 @@ export function Resources() {
   const dispatch = useDispatch();
   const global_context = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  // const { contextClassRDF } = useContext(ClassRDFContext);
   const [page, setPage] = useState(0);
-  // const [, setSelectedClass] = useState<string>("");
-  const [selectedClassRDF, setSelectedClassRDF] = useState<ClassModel>();
-  const [selectedResource, setSelectedResource] = useState<ResourceModel>();
   const [resources, setResources] = useState<ResourceModel[]>([]);
   const [labelToSearch, setLabelToSearch] = useState<string>("");
-  const [typeOfSelectedClass, setTypeOfSelectedClass] = useState<string>("");
   const [runingSearch, setRuningSearch] = useState<boolean>(false);
   const [totalOfResources, setTotalOfResources] = useState<number>(0);
-  // const [selectedLanguage, setSelectedLanguage] = useState(window.localStorage.getItem('LANGUAGE'));
-  // const [globalContext, setGlobalContext] = useState(JSON.parse(window.localStorage.getItem(LOCAL_STORAGE.GLOBAL_CONTEXT) as string));
 
 
   async function loadResourcesOfSelectedClass(newPage: number) {
     setIsLoading(true)
     let response: any
     try {
-      // console.log('nome procurado:', labelToSearch)
-      // let uri = double_encode_uri(contextClassRDF.classURI.value)
-      // let uri = double_encode_uri(classURI)
       let uri = double_encode_uri(global_context.classRDF?.classURI?.value as string)
-      // if (typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW || typeOfClass == NUMBERS.CODE_FUSION_VIEW) {
-      // if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW || global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) {
       if ([NUMBERS.CODE_OF_UNIFICATION_VIEW, NUMBERS.CODE_OF_FUSION_VIEW].includes(global_context.view)) {
-        // response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${selectedLanguage}`)
         response = await api.get(`/resources/generalization?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
       }
       else {
-        // response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
         response = await api.get(`/resources/?classRDF=${uri}&page=${newPage}&rowPerPage=${rowsPerPage}&label=${labelToSearch}&language=${global_context.language}`)
       }
-      // console.log('recursos:', response.data)
       getTotalResources()
       setResources(response.data)
       setIsLoading(false)
     } catch (error) {
-      console.log(`><`, error);
+      console.log(`ERROR`, error);
     } finally {
       window.scrollTo(0, 0)
     }
@@ -81,45 +61,24 @@ export function Resources() {
   async function getTotalResources() {
     let response: any
     try {
-      // let uri = double_encode_uri(classURI)
       let uri = double_encode_uri(global_context?.classRDF?.classURI.value as string)
-      // let uri = double_encode_uri(contextClassRDF.classURI.value)
-      // let if_sameas = typeOfClass == NUMBERS.CODE_UNIFICATION_VIEW ? true : false
       let if_sameas = global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW ? true : false
       response = await api.get(`/resources/count/?classURI=${uri}&label=${labelToSearch.toLowerCase()}&sameas=${if_sameas}&language=${global_context.language}`)
-      // console.log(`total:`, response.data)
       setTotalOfResources(response.data)
     } catch (error) {
-      console.log(`><`, error);
-    } finally {
-      // setTimeout(() => {
-      // console.log(`total: `, typeof response.data)
-      // setPage(0);
-      // }, NUMBERS.TIME_OUT_FROM_REQUEST)
-    }
+      console.log(`ERROR`, error);
+    } 
   }
 
 
 
   useEffect(() => {
-    // console.log('--- global_context ---', global_context)
-    console.log('--- classe global ---', global_context.classRDF?.classURI.value)
     function onEdit() {
       try {
         const _repo_in_api_header = api.defaults.headers.common['repo']
-        // console.log('repositório no api.header:', _repo_in_api_header)
         if (_repo_in_api_header) {
           dispatch(cleanStackOfResourcesNavigated())
-          // if (location.state) {
-          //   let _state = location.state as any;
-          //   console.log('^^', _state)
-          //   loadResourcesOfSelectedClass(page)
-          //   getTotalResources()
-          // }
-          // else {
           loadResourcesOfSelectedClass(page)
-          // getTotalResources()
-          // }
         }
         else {
           navigate(ROUTES.REPOSITORY_LIST)
@@ -137,15 +96,11 @@ export function Resources() {
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
-    // updateGlobalContext({resourceURI: resource.uri.value})
     dispatch(updasteResourceURI(resource.uri.value))
     dispatch(updateInitialResourceOfNavigation(resource.uri.value))
     dispatch(pushResourceInStackOfResourcesNavigated(resource.uri.value))
     setSelectedIndex(idx);
-    setSelectedResource(resource)
-    // navigate(ROUTES.PROPERTIES, { state: { resource_uri: resource.uri.value, typeOfClass: typeOfSelectedClass } })
-    // navigate(`/properties/`)
-    navigate(`/properties/${encodeURIComponent(resource.uri.value)}`)
+    navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(resource.uri.value)}`)
   };
 
 
@@ -158,17 +113,14 @@ export function Resources() {
 
   const [rowsPerPage, setRowsPerPage] = useState(6);
   const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
     setRuningSearch(!runingSearch)
-    // setPage(0);
   };
 
 
 
   const handleSearchResourceLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLabelToSearch((event.target as HTMLInputElement).value);
-    console.log((event.target as HTMLInputElement).value)
   };
   const handleSearchEscape = (event: KeyboardEvent) => {
     if (event.key == 'Escape') {
@@ -184,11 +136,7 @@ export function Resources() {
 
 
   const handleProvenanceClick = (event: any, classRDF: any) => {
-    // setContextClassRDF(classRDF.classURI.value)
-    console.log('provenance', classRDF)
-    console.log('provenance', NAMESPACES.ARIDA_RESOURCE_METADATA + "ESV_" + classRDF)
-    // navigate(ROUTES.PROPERTIES, { state: { classRDF, typeOfClass: NUMBERS.CODE_EXPORTED_VIEW } })
-    navigate(ROUTES.METADATA_PROPERTIES, { state: { resource_uri: NAMESPACES.ARIDA_RESOURCE_METADATA + "ESV_" + classRDF, typeOfClass: typeOfSelectedClass } })
+    navigate(ROUTES.METADATA_PROPERTIES, { state: { resource_uri: NAMESPACES.ARIDA_RESOURCE_METADATA + "ESV_" + classRDF } })
   };
 
   return (
@@ -207,7 +155,6 @@ export function Resources() {
             id="outlined-basic" label={global_context.language == 'pt' ? "Pesquisar somente pelo nome do recurso" : "Search by name"} variant="outlined" size="small"
             value={labelToSearch}
             onChange={handleSearchResourceLabel}
-            // error={labelToSearch.length > 1 && foundClasses.length == 0}
             helperText={(labelToSearch.length > 1 && resources.length == 0) ? "Sem corespondência." : false}
             onKeyUp={handleSearchEscape}
           />
@@ -221,7 +168,6 @@ export function Resources() {
             <MTable
               header={[[global_context.language == 'pt' ? "Recursos" : "Resources", "left"], [global_context.language == 'pt' ? "Proveniência" : "Provenance", "left"]]}
               size={totalOfResources}
-              // size={ ((page +1) * rowsPerPage) < totalOfResources ? totalOfResources : resources.length}
               rowsPerPage={rowsPerPage}
               page={page}
               handleChangePage={handleChangePage}

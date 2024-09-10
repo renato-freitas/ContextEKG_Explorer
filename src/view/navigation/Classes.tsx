@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, KeyboardEvent } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Paper from '@mui/material/Paper';
@@ -12,26 +11,19 @@ import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
 import { updateView, updateExportedView, updateClassRDF } from '../../redux/globalContextSlice';
-
 import { ROUTES, NUMBERS, COLORS } from "../../commons/constants";
 import {
-	getPropertyFromURI, getsetRepositoryLocalStorage,
-	getTypeOfClassOnLocalStorage,
-	setTypeClassLocalStorage as setTypeOfClassOnLocalStorage
-} from "../../commons/utils";
+	getPropertyFromURI, getsetRepositoryLocalStorage} from "../../commons/utils";
 import { api } from "../../services/api";
 import { MHeader } from "../../components/MHeader";
-import { LoadingContext, ClassRDFContext } from "../../App";
+import { LoadingContext } from "../../App";
 import { ClassModel } from "../../models/ClassModel";
 import stylesGlobal from '../../styles/global.module.css';
 import style from './navigation.module.css'
 
-// https://medium.com/@lucas_pinheiro/como-adicionar-internacionaliza%C3%A7%C3%A3o-i18n-na-sua-aplica%C3%A7%C3%A3o-react-a1ac4aea109d
-// const NUMBER_OF_GENERALIZATION_CLASS = "0"
 export function Classes() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
@@ -42,7 +34,6 @@ export function Classes() {
 	const [selectedExportedView, setSelectedExportedView] = useState<string>("");
 	const [copyAllclasses, setCopyAllClasses] = useState<ClassModel[]>([]);
 	const [foundClasses, setFoundClasses] = useState<ClassModel[]>([]);
-	// const [typeOfClass, setTypeOfClass] = useState<String>(getTypeOfClassOnLocalStorage());
 	const [nameOfClassToFind, setNameOfClassToFind] = useState('');
 
 
@@ -50,18 +41,15 @@ export function Classes() {
 		let response: any
 		try {
 			setIsLoading(true)
-			// response = await api.get(`/classes/?type=${globalContext.view}&exported_view=${selectedExportedView}&language=${selectedLanguage}`);
 			response = await api.get(`/classes/?view=${global_context.view}&exported_view=${global_context.exportedView}&language=${global_context.language}`);
-			// console.log('*** CLASSES ***', response.data)
 			setClasses(response.data)
 			setCopyAllClasses(response.data)
 			setIsLoading(false)
 		} catch (error) {
-			console.error(`---catch---`, error);
+			console.error('ERROR', error);
 		} finally {
 			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
 		}
-
 	}
 
 
@@ -72,14 +60,12 @@ export function Classes() {
 			setIsLoading(true)
 			response = await api.get('/classes/exported-views');
 			setExportedViews(response.data)
-			console.log('-----visões exportadas-----', response.data)
+			setIsLoading(false)
 		} catch (error) {
-			console.log(`><`, error);
+			console.log('ERROR', error);
 		} finally {
 			window.scrollTo(0, NUMBERS.SCROOL_WINDOWS_Y)
-			setIsLoading(false)
 		}
-
 	}
 
 
@@ -90,22 +76,13 @@ export function Classes() {
 			|| (event.target as HTMLInputElement).value == NUMBERS.CODE_OF_FUSION_VIEW) {
 			setExportedViews([])
 		}
-		// setTypeOfClass((event.target as HTMLInputElement).value);
-		// setTypeOfClassOnLocalStorage((event.target as HTMLInputElement).value)
-
-		/** REDUX TOOLKIT */
 		dispatch(updateView((event.target as HTMLInputElement).value))
 	};
 
 	useEffect(() => {
-		console.log('--- use effect type of class ---')
-		console.log('--- global_context ---', global_context)
-
-		// console.log('** REPOSITÓRIO NO API.HEADER **', api.defaults.headers.common['repo'])
 		setClasses([])
 		const _repo_in_api_header = api.defaults.headers.common['repo']
 		if (_repo_in_api_header) {
-			// if (typeOfClass == NUMBERS.CODE_OF_EXPORTED_VIEW && exportedViews.length == 0) {
 			if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW && exportedViews.length == 0) {
 				loadExportedViews()
 				if (selectedExportedView != "") loadClasses()
@@ -118,41 +95,12 @@ export function Classes() {
 			api.defaults.headers.common['repo'] = getsetRepositoryLocalStorage()
 			navigate(ROUTES.REPOSITORY_LIST)
 		}
-		// }, [typeOfClass, selectedExportedView])
 	}, [global_context.view, selectedExportedView])
 
 
-	// useEffect(() => {
-	// 	console.log('-----buscar classes da visão exportada selecionada-----\n')
-	// 	console.log('SEV', selectedExportedView)
-	// 	console.log('state', location.state)
-	// 	console.log('local', window.localStorage.getItem("classe"))
-	// 	setClasses([])
-	// 	const _repo_in_api_header = api.defaults.headers.common['repo']
-	// 	if (_repo_in_api_header) {
-	// 		if(classes.length <= 0) loadClasses()
-	// 	}
-	// 	else navigate(ROUTES.REPOSITORY_LIST)
-	// }, [selectedExportedView])
 
-	// useEffect(() => {
-	// 	setClasses([])
-	// 	console.log('*** CLASSE NO LOCAL STORAGE ***', window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS))
-	// 	const _type_of_class_in_local_storage = window.localStorage.getItem(LOCAL_STORAGE.TYPE_OF_CLASS)
-	// 	// if (_type_of_class_in_local_storage) setTypeOfClass(_type_of_class_in_local_storage)
-	// 	// else setTypeOfClass(NUMBERS.GENERALIZATION_CLASS_NUMBER)
-	// 	setTypeOfClass(NUMBERS.GENERALIZATION_CLASS_NUMBER)
-	// }, [])
-
-
-
-	// const [selectedIndex, setSelectedIndex] = useState<Number>(1);
 	const handleListOfClassesClick = (event: any, classRDF: ClassModel) => {
-		// setContextClassRDF(classRDF.classURI.value)
-		// updateGlobalContext({classURI: classRDF.classURI.value})
 		dispatch(updateClassRDF(classRDF))
-		// setContextClassRDF(classRDF)
-		// navigate(ROUTES.RESOURCES, { state: { classRDF, typeOfClass } })
 		navigate(ROUTES.RESOURCES)
 	};
 
@@ -173,7 +121,6 @@ export function Classes() {
 					let class_lower_case = _class?.label?.value.toLowerCase()
 					return class_lower_case?.includes(name_lower_case) == true ? _class : null
 				})
-				// console.log(_foundClasses)
 				_foundClasses.length > 0 ? setClasses(_foundClasses) : setClasses(copyAllclasses)
 				setFoundClasses(_foundClasses)
 			}
@@ -189,16 +136,12 @@ export function Classes() {
 		let _c_g = global_context.language == 'pt' ? "Classes de Generalização" : "Generalization Classes"
 		let _c_e = global_context.language == 'pt' ? "Classes Exportadas" : "Exported Classes"
 		let _c_m = global_context.language == 'pt' ? "Classes de Generalização" : "Generalization Classes"
-		// return `${typeOfClass == "0" ? _c_g : typeOfClass == "1" ? _c_e : _c_m}`
 		return `${global_context.view == "0" ? _c_g : global_context.view == "1" ? _c_e : _c_m}`
 	}
 
 	return (
 		<div className={stylesGlobal.container}>
-			{/* <div style={{paddingLeft:60}}> */}
-			{/* <MHeader title={`${window.localStorage.getItem('LANGUAGE') == 'pt' ? 'Seleção de Classe' : 'Class Selection'}`} /> */}
 			<MHeader title={`${global_context.language == 'pt' ? 'Seleção de Classe' : 'Context Selection'}`} />
-			{/* </div> */}
 
 			<Grid container spacing={0} sx={{ p: '4px 0' }}>
 				{/* RADIO BUTTONS | SELEÇÃO DE NÍVEL DE VISÃO*/}
@@ -208,7 +151,6 @@ export function Classes() {
 							row
 							aria-labelledby="demo-controlled-radio-buttons-group"
 							name="controlled-radio-buttons-group"
-							// value={typeOfClass}
 							value={global_context.view}
 							onChange={handleChangeOfView}
 						>
@@ -292,10 +234,7 @@ export function Classes() {
 															{getPropertyFromURI(classRDF?.label?.value)}
 														</Typography>
 													</Button>
-													{/* <Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center", whiteSpace: "pre-wrap" }} color="text.primary" gutterBottom>
-													{classRDF?.classURI.value}
-												</Typography> */}
-													{/* <Typography component="div" color="ActiveCaption" align="center"> */}
+													
 													<Typography variant="caption" component="div" color="ActiveCaption" align="center">
 														{classRDF?.comment?.value}
 													</Typography>
@@ -336,16 +275,11 @@ export function Classes() {
 													{getPropertyFromURI(classRDF?.label?.value)}
 												</Typography>
 											</Button>
-											{/* <Box width={220}>
-												<Typography sx={{ fontSize: ".55rem", fontWeight: 400, textAlign: "center", whiteSpace: "pre-wrap" }} color="text.primary" gutterBottom>
-													{classRDF?.classURI.value}
-												</Typography>
-											</Box> */}
+											
 											<Typography variant="caption" component="div" color="ActiveCaption" align="center">
 												{classRDF?.comment?.value}
 											</Typography>
 										</Box>
-										{/* <Box p={1} width={200} height={120} display="flex" alignItems="flex-end" justifyContent="flex-end"> */}
 										<Box p={1} width={200} height={50} display="flex" alignItems="flex-end" justifyContent="flex-end">
 											{classRDF?.image?.value && <img src={classRDF?.image?.value} alt={getPropertyFromURI(classRDF?.label?.value)} className={style.img_responsive}></img>}
 										</Box>
@@ -355,6 +289,6 @@ export function Classes() {
 						}
 					</Grid>
 			}
-		</div >
+		</div>
 	);
 }

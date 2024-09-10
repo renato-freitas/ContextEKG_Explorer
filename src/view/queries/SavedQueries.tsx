@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext, Key } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
 import ListItem from '@mui/material/ListItem';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -14,28 +13,19 @@ import IconButton from '@mui/material/IconButton'
 import TableCell from '@mui/material/TableCell'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
-import { Database, FileCsv, Eye, Trash, PencilSimpleLine, Table, Star } from 'phosphor-react';
-import { Link } from "react-router-dom";
-
-// import { DataSourceModel } from '../../models/DataSourceModel';
+import { Eye, Trash, PencilSimpleLine } from 'phosphor-react';
 import { SavedQueryModel } from '../../models/SavedQueryModel';
 import { MHeader } from "../../components/MHeader";
 import { api } from '../../services/api';
 import { LoadingContext } from "../../App";
 import styles from '../../styles/global.module.css'
 import { MTable } from '../../components/MTable';
-import { COLORS, ROUTES } from '../../commons/constants';
+import { ROUTES } from '../../commons/constants';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 import { double_encode_uri } from '../../commons/utils';
 import { Divider } from '@mui/material';
 
-// import spfmt from 'sparql-formatter';
-
-// import spfmt from 'sparql-formatter';
-
-const PAINEL_LEFT_SIZE = window.screen.width * 0.356
 const PAINEL_RIGHT_SIZE = window.screen.width * 0.5
-const DATASOURCE_TYPES_ICONS_SIZE = 20
 const PAPER_ELEVATION = 2
 
 export function SavedQueries() {
@@ -53,27 +43,23 @@ export function SavedQueries() {
       const response = await api.get("/queries/");
       setSavedQueries(response.data);
       setSelectedSavedQuery(response.data[0])
-    } catch (error) {
-      console.error("load saved queries", error)
-    } finally {
       setIsLoading(false);
       setWasDeleted(false)
-    }
+    } catch (error) {
+      console.error("load saved queries", error)
+    } 
   }
 
   async function executeSavedQuery(uri: string, sparql: string) {
     try {
       setIsLoading(true);
       let _sparql = double_encode_uri(sparql)
-      console.log(_sparql)
       const response = await api.get(`/queries/execute/?uri=${uri}`)
       setSavedQueriesResult(response.data);
-      console.log('excute result', response.data)
+      setIsLoading(false);
     } catch (error) {
       console.error("load saved queries", error)
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   }
 
   useEffect(() => {
@@ -82,7 +68,6 @@ export function SavedQueries() {
 
 
   const openForm = () => {
-    // console.log("*** call: Abrir formulário de Fonte de Dados ***")
     navigate(ROUTES.SAVED_QUERY_FORM);
   }
 
@@ -94,9 +79,7 @@ export function SavedQueries() {
 
   const [rowsPerPage, setRowsPerPage] = useState(6);
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
     setRowsPerPage(parseInt(event.target.value, 10));
-    // setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
@@ -112,7 +95,6 @@ export function SavedQueries() {
   /**Dialog to Delete */
   const [openDialogToConfirmDelete, setOpenDialogToConfirmDelete] = useState(false);
   const handleClickOpenDialogToConfirmDelete = (row: SavedQueryModel) => {
-    console.log(row)
     setSelectedSavedQuery(row)
     setOpenDialogToConfirmDelete(true);
   };
@@ -124,8 +106,6 @@ export function SavedQueries() {
     } catch (error) {
       alert(error)
     }
-
-    // await loadSavedQueries();
   }
 
 

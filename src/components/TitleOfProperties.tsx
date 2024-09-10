@@ -5,10 +5,9 @@ import TextField from "@mui/material/TextField"
 import Button from "@mui/material/Button"
 import IconButton from "@mui/material/IconButton"
 import { CaretCircleLeft } from "phosphor-react"
-
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../redux/store'
-import { pushResourceInStackOfResourcesNavigated, removeResourceOfStackOfResourcesNavigated } from '../redux/globalContextSlice';
+import { removeResourceOfStackOfResourcesNavigated } from '../redux/globalContextSlice';
 import { ROUTES } from '../commons/constants';
 
 
@@ -28,15 +27,11 @@ export const TitleOfProperties = ({ title, hasButtonBack, buttonBackNavigateTo, 
   const dispatch = useDispatch();
   const global_context: any = useSelector((state: RootState) => state.globalContext)
   async function action(){
-    console.log('BUTTON BACK, REMOVER RECURSO DA PILHA', global_context.stack_of_resource_navigated)
     const stack_length = global_context.stack_of_resource_navigated.length
     
     if(stack_length < 2){
-      console.log('NAVEGANDO PARA OS RECURSOS')
       navigate(ROUTES.RESOURCES)
     } else{
-      console.log('NAVEGANDO PARA AS PROPRIEDADES DO RECURSO ANTERIOR')
-      console.log('REMOVIDO', global_context.stack_of_resource_navigated[stack_length - 2])
       let resource_uri = global_context.stack_of_resource_navigated[stack_length - 2]
       navigate(`/properties/${encodeURIComponent(resource_uri)}`)
     }
