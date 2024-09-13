@@ -1,11 +1,11 @@
 # Use the Node.js 20 image as the base image
-FROM node:20
+FROM node:20 As Production
 
 # Set the working directory inside the container
-WORKDIR /usr/src/app
+WORKDIR /temp/contextekg/frontend
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY package*.json .
 
 # Install dependencies
 RUN yarn install
@@ -17,7 +17,7 @@ COPY . .
 RUN yarn run build
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 8080
 
 # Command to run the app
-CMD ["yarn", "dev"]
+CMD ["yarn", "run", "dev"]

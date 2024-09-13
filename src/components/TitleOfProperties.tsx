@@ -26,17 +26,21 @@ export const TitleOfProperties = ({ title, hasButtonBack, buttonBackNavigateTo, 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const global_context: any = useSelector((state: RootState) => state.globalContext)
-  async function action(){
+  async function action() {
     const stack_length = global_context.stack_of_resource_navigated.length
-    
-    if(stack_length < 2){
-      navigate(ROUTES.RESOURCES)
-    } else{
-      let resource_uri = global_context.stack_of_resource_navigated[stack_length - 2]
-      navigate(`/properties/${encodeURIComponent(resource_uri)}`)
-    }
-    dispatch(removeResourceOfStackOfResourcesNavigated())
+    console.log('---STACK---', stack_length)
+    if (stack_length > 0) {
+      dispatch(removeResourceOfStackOfResourcesNavigated())
 
+      if (stack_length < 2) {
+        navigate(ROUTES.RESOURCES)
+      } else {
+        console.log('---2.STACK---',global_context.stack_of_resource_navigated.length)
+        let resource_uri = global_context.stack_of_resource_navigated[stack_length - 2]
+        // navigate(`/properties/${encodeURIComponent(resource_uri)}`)
+        navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(resource_uri)}`)
+      }
+    }
   }
   return (
     <Grid container>

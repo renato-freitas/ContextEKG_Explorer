@@ -20,7 +20,6 @@ import { pushResourceInStackOfResourcesNavigated, updateResourceAndView, updaste
 import { api } from "../../services/api";
 import { LoadingContext } from "../../App";
 import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI, getPatternsClassRDF2GlobalContext } from "../../commons/utils";
-import { PropertyObjectEntity } from "../../models/PropertyObjectEntity";
 import { COLORS, EKG_CONTEXT_VOCABULARY, NUMBERS, ROUTES, TEXTS } from '../../commons/constants';
 import stylesGlobal from '../../styles/global.module.css';
 import styleNavigation from './navigation.module.css'
@@ -48,15 +47,13 @@ export interface stateProps {
   resourceURI: string;
 }
 export function Properties() {
-  // const location = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
   const { uri } = useParams()
   const dispatch = useDispatch();
   const global_context: any = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
-  // const [properties, setProperties] = useState<PropertyObjectEntity[]>([] as PropertyObjectEntity[])
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
-  // const [linkedData, setLinkedData] = useState<any>({});
   const [linksSameAs, setLinksSameAs] = useState<any[]>([])
   const [selectedIndexOfMenu, setSelectedIndexOfMenu] = useState<Number | undefined>(undefined);
   const [selectedObjectProperty, setSelectedObjectProperty] = useState<string>("");
@@ -197,7 +194,7 @@ export function Properties() {
     else {
       navigate(ROUTES.REPOSITORY_LIST)
     }
-  }, [selectedIndexOfMenu])
+  }, [selectedIndexOfMenu, global_context])
 
 
 
@@ -206,6 +203,7 @@ export function Properties() {
 
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     /** QUANDO MEXE NO MENU DE CONTEXTO NÃO CHAMA O SAMEAS */
+    dispatch(pushResourceInStackOfResourcesNavigated(contextoSelecionado))
     setSelectedIndexOfMenu(index);
     if (ehVisaoExportada(index)) {
       dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
@@ -634,7 +632,7 @@ export function Properties() {
                       })
                     }
                     <ListItem key={linksSameAs.length + 1} disablePadding sx={{ pt: 1 }}>
-                      <Chip label={estaEmPortugues ? 'Sem link owl:sameAs' : 'No owl:sameAs link'} color='warning' />
+                      <Chip label={estaEmPortugues ? 'Sem link semântico' : 'No semantic link'} color='warning' />
                     </ListItem>
                   </List>
               }

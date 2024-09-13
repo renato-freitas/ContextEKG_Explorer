@@ -93,6 +93,7 @@ export function Resources() {
   }, [location.state, runingSearch]);
 
 
+  
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {

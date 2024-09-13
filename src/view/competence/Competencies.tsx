@@ -12,7 +12,7 @@ import { Play } from 'phosphor-react';
 
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
-import { updasteResourceURI } from '../../redux/globalContextSlice';
+import { cleanStackOfResourcesNavigated, pushResourceInStackOfResourcesNavigated, updasteResourceURI } from '../../redux/globalContextSlice';
 
 import { CompetenceQuestionModel } from '../../models/models';
 import { MHeader } from "../../components/MHeader";
@@ -106,6 +106,8 @@ export function CompetenceQuestions() {
 
   const handleResultToExplore = (r: string) => {
     dispatch(updasteResourceURI(r))
+    dispatch(cleanStackOfResourcesNavigated())
+    dispatch(pushResourceInStackOfResourcesNavigated(r))
     navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(r)}`)
   };
 

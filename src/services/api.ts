@@ -1,7 +1,8 @@
 import axios from "axios";
 export const api = axios.create({
   // withCredentials: true,
-  baseURL: "http://127.0.0.1:8000",
+  // baseURL: "http://127.0.0.1:8000"
+  baseURL: "http://localhost:3000"
 });
 api.defaults.headers.common["repo"] =  localStorage.getItem("repository") as string;
 api.defaults.headers.common["Authorization"] = "Bearer " + localStorage.getItem("token");
