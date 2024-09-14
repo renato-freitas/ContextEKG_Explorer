@@ -13,14 +13,14 @@ import { Play } from 'phosphor-react';
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
 import { cleanStackOfResourcesNavigated, pushResourceInStackOfResourcesNavigated, updasteResourceURI } from '../../redux/globalContextSlice';
-
+import { cleanStack_ResourcesNavigated, pushResourceInStack_ResourcesNavigated } from '../../redux/globalContextSlice';
 import { CompetenceQuestionModel } from '../../models/models';
 import { MHeader } from "../../components/MHeader";
 import { api } from '../../services/api';
 import { LoadingContext } from "../../App";
 import styles from '../../styles/global.module.css'
 import { MTable } from '../../components/MTable';
-import { COLORS, ROUTES } from '../../commons/constants';
+import { COLORS, NUMBERS, ROUTES } from '../../commons/constants';
 import { MDialogToConfirmDelete } from '../../components/MDialog';
 import { double_encode_uri } from '../../commons/utils';
 
@@ -106,8 +106,13 @@ export function CompetenceQuestions() {
 
   const handleResultToExplore = (r: string) => {
     dispatch(updasteResourceURI(r))
-    dispatch(cleanStackOfResourcesNavigated())
-    dispatch(pushResourceInStackOfResourcesNavigated(r))
+    dispatch(cleanStack_ResourcesNavigated())
+    let idx = global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW 
+      ? NUMBERS.IDX_UNIFICATION_VIEW
+      : global_context.view == NUMBERS.CODE_OF_FUSION_VIEW
+        ? NUMBERS.IDX_FUSION_VIEW
+        : NUMBERS.IDX_EXPORTED_VIEW
+    dispatch(pushResourceInStack_ResourcesNavigated({ resource: r, idx_menu_context: idx}))
     navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(r)}`)
   };
 
@@ -180,7 +185,7 @@ export function CompetenceQuestions() {
                   return <TableRow key={idx}>
                     {
                       Object.keys(row).map((key: string) => {
-                        return <TableCell align='center'>
+                        return <TableCell align='center' key={key}>
                           {
                             (row[key]["value"] as string).toLowerCase().includes("http")
                               ? <IconButton color='primary' size="small"

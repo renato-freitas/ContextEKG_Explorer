@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '../../redux/store'
 import { MHeader } from "../../components/MHeader";
 import styles from '../../styles/global.module.css'
-import logo from '../../commons/logo-context-ekg-explorer.png'
+import logo from '../../../src/commons/logo-context-ekg-explorer.png'
 
 export function Home() {
   const global_context = useSelector((state: RootState) => state.globalContext)

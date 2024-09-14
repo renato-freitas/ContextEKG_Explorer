@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { ClassModel } from '../models/ClassModel'
 import { NUMBERS } from '../commons/constants'
+import { I_Resources_Navigated } from './type'
 
 export interface GlobalContextState {
   // A aplicação precisa dos seguintes atributos para identificar o atual contexto de exploração:
@@ -15,6 +16,8 @@ export interface GlobalContextState {
   resourceURI: string
   initialResourceOfNavigation: string
   stack_of_resource_navigated: string[]
+  stack_of_resources_navigated: I_Resources_Navigated[]
+  index_of_context_menu: Number
   classRDF?: ClassModel
 }
 
@@ -24,6 +27,8 @@ const initialState: GlobalContextState = {
   resourceURI: "",
   initialResourceOfNavigation: "",
   stack_of_resource_navigated: [],
+  stack_of_resources_navigated: [],
+  index_of_context_menu: 0,
   classRDF: undefined,
   exportedView: ""
 }
@@ -47,14 +52,26 @@ export const contextSlice = createSlice({
     updateInitialResourceOfNavigation: (state, action: PayloadAction<string>) => {
       state.initialResourceOfNavigation = action.payload
     },
+    update_index_context_menu: (state, action: PayloadAction<Number>) => {
+      state.index_of_context_menu = action.payload
+    },
     pushResourceInStackOfResourcesNavigated: (state, action: PayloadAction<string>) => {
       state.stack_of_resource_navigated.push(action.payload)
+    },
+    pushResourceInStack_ResourcesNavigated: (state, action: PayloadAction<I_Resources_Navigated>) => {
+      state.stack_of_resources_navigated.push(action.payload)
     },
     removeResourceOfStackOfResourcesNavigated: (state) => {
       state.stack_of_resource_navigated.pop()
     },
+    removeResourceOfStack_ResourcesNavigated: (state) => {
+      state.stack_of_resources_navigated.pop()
+    },
     cleanStackOfResourcesNavigated: (state) => {
       state.stack_of_resource_navigated = []
+    },
+    cleanStack_ResourcesNavigated: (state) => {
+      state.stack_of_resources_navigated = []
     },
     updateClassRDF: (state, action: PayloadAction<ClassModel>) => {
       state.classRDF = action.payload
@@ -73,9 +90,13 @@ export const {
   updateExportedView, 
   updasteResourceURI, 
   updateInitialResourceOfNavigation, 
+  update_index_context_menu,
   pushResourceInStackOfResourcesNavigated,
   removeResourceOfStackOfResourcesNavigated, 
   cleanStackOfResourcesNavigated,
+  pushResourceInStack_ResourcesNavigated,
+  removeResourceOfStack_ResourcesNavigated,
+  cleanStack_ResourcesNavigated,
   updateClassRDF, 
   updateResourceAndView } = contextSlice.actions
 

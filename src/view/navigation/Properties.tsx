@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Key } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -17,6 +17,7 @@ import { LinkSimpleBreak, Graph } from '@phosphor-icons/react';
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
 import { pushResourceInStackOfResourcesNavigated, updateResourceAndView, updasteResourceURI, updateClassRDF } from '../../redux/globalContextSlice';
+import { pushResourceInStack_ResourcesNavigated } from '../../redux/globalContextSlice';
 import { api } from "../../services/api";
 import { LoadingContext } from "../../App";
 import { getPropertyFromURI, double_encode_uri, getIdentifierFromURI, getContextFromURI, getPatternsClassRDF2GlobalContext } from "../../commons/utils";
@@ -51,6 +52,8 @@ export function Properties() {
   const navigate = useNavigate();
   const { uri } = useParams()
   const dispatch = useDispatch();
+  let [searchParams, setSearchParams] = useSearchParams();
+  const [selectedResourceURI, setSelectedResourceURI] = useState<string>(searchParams.get("resource") as string);
   const global_context: any = useSelector((state: RootState) => state.globalContext)
   const { isLoading, setIsLoading } = useContext(LoadingContext);
   const [agroupedProperties, setAgroupedProperties] = useState<any>({});
@@ -67,6 +70,7 @@ export function Properties() {
       if (uri) {
         let _uri = double_encode_uri(uri);
         const response = await api.get(`/sameas/?resourceURI=${_uri}`)
+        console.log('SAMEAS', response.data)
         setLinksSameAs(response.data)
         return response.data
       }
@@ -83,6 +87,7 @@ export function Properties() {
       await loadSameAs()
       let _uri = encodeURIComponent(uri as string)
       response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
+      console.log('recurso', response.data)
       setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
@@ -147,6 +152,20 @@ export function Properties() {
     } 
   }
 
+  async function loadSameAsAndPropertiesOfSelectedResourceInFusionView() {
+    let response: any
+    try {
+      setIsLoading(true)
+      // setProperties([])
+      let resources_with_sameas = await loadSameAs()
+      response = await api.post(`/properties/fusion?language=${global_context.language}`, { resources: resources_with_sameas })
+      setAgroupedProperties(response.data)
+      setIsLoading(false)
+    } catch (error) {
+      alert(JSON.stringify(error));
+    } 
+  }
+
   async function loadOnlyPropertiesOfSelectedResourceIn_fusionView() {
     let response: any
     try {
@@ -161,24 +180,32 @@ export function Properties() {
   }
 
   useEffect(() => {
+    console.log('', global_context.stack_of_resources_navigated)
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) {
       if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) {
         loadSameAsAndPropertiesOfSelectedResource()
-        setSelectedIndexOfMenu(0)
+        setSelectedIndexOfMenu(NUMBERS.IDX_EXPORTED_VIEW)
       }
       else if (global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW) {
         loadSameAsAndPropertiesOfSelectedResourceInUnificationView()
         setSelectedIndexOfMenu(NUMBERS.IDX_UNIFICATION_VIEW)
       }
+      else if (global_context.view == NUMBERS.CODE_OF_FUSION_VIEW) {
+        loadSameAsAndPropertiesOfSelectedResourceInFusionView()
+        setSelectedIndexOfMenu(NUMBERS.IDX_FUSION_VIEW)
+      }
     }
     else {
       navigate(ROUTES.REPOSITORY_LIST)
     }
-  }, [])
+  }, [selectedObjectProperty])
 
 
   useEffect(() => {
+    let tam = global_context.stack_of_resources_navigated.length
+    let last_resource_in_stack = global_context.stack_of_resources_navigated[tam -1]
+    setSelectedIndexOfMenu(last_resource_in_stack.idx_menu_context)
     const _repo_in_api_header = api.defaults.headers.common['repo']
     if (_repo_in_api_header) {
       if (global_context.view == NUMBERS.CODE_OF_EXPORTED_VIEW) {
@@ -204,6 +231,7 @@ export function Properties() {
   const handleSelectedContextClick = (index: Number, contextoSelecionado: string) => {
     /** QUANDO MEXE NO MENU DE CONTEXTO NÃO CHAMA O SAMEAS */
     dispatch(pushResourceInStackOfResourcesNavigated(contextoSelecionado))
+    dispatch(pushResourceInStack_ResourcesNavigated({ resource: contextoSelecionado, idx_menu_context: index }))
     setSelectedIndexOfMenu(index);
     if (ehVisaoExportada(index)) {
       dispatch(updateResourceAndView({ resource: contextoSelecionado, view: NUMBERS.CODE_OF_EXPORTED_VIEW }))
@@ -222,14 +250,15 @@ export function Properties() {
 
 
   /** Clicar em um ObjectProperty */
-  async function handleObjectPropertiesClick(event: any, uri: string) {
-    event.preventDefault();
+  async function handleObjectPropertiesClick(event: any, uri_of_resource: string) {
+    // event.preventDefault();
     try {
-      setSelectedObjectProperty(uri)
-      dispatch(updasteResourceURI(uri))
-      dispatch(pushResourceInStackOfResourcesNavigated(uri))
+      setSelectedObjectProperty(uri_of_resource)
+      dispatch(updasteResourceURI(uri_of_resource))
+      // dispatch(pushResourceInStackOfResourcesNavigated(uri_of_resource))
+      dispatch(pushResourceInStack_ResourcesNavigated({ resource: uri_of_resource, idx_menu_context: selectedIndexOfMenu as Number}))
       // setLinkedData({ link: uri, index: selectedIndexOfMenu })
-      navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(uri)}`)
+      navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(uri_of_resource)}`)
     } catch (error) {
       console.log('ERROR',error)
     } finally {
@@ -331,7 +360,7 @@ export function Properties() {
                                 textAlign={'justify'}>
                                 {
                                   Object.keys(agroupedProperties).length > 0
-                                    ? agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.RDF_TYPE].map((arrayOfValues: any, idx: React.Key) => {
+                                    ? agroupedProperties[Object.keys(agroupedProperties)[0]][EKG_CONTEXT_VOCABULARY.PROPERTY.RDF_TYPE]?.map((arrayOfValues: any, idx: React.Key) => {
                                       if (!auxLabelOfClasses.includes(arrayOfValues[0])) {
                                         auxLabelOfClasses.push(arrayOfValues[0])
                                         return <Chip
@@ -516,13 +545,10 @@ export function Properties() {
                                       }
                                     </Stack>
                                   </Grid>
-
-
                                 </Grid>
                               </ListItem>
                           })
                         }
-
                       </List >
                     </Paper>
                   </Box>

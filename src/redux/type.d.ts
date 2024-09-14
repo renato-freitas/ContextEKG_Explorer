@@ -12,3 +12,9 @@ type ArticleAction = {
 }
 
 type DispatchType = (args: ArticleAction) => ArticleAction
+
+
+export interface I_Resources_Navigated {
+  resource: string;
+  idx_menu_context: Number;
+}

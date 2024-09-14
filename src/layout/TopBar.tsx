@@ -45,7 +45,7 @@ export function TopBar() {
             size="small"
             label={getsetRepositoryLocalStorage()}
             sx={{ bgcolor: `${COLORS.AMARELO_01}` }}
-            // onClick={() => navigate(ROUTES.REPOSITORY_LIST)}
+            onClick={() => navigate(ROUTES.REPOSITORY_LIST)}
           />
           <Button color="inherit" sx={{ mr: 10 }}>Login</Button>
         </Toolbar>

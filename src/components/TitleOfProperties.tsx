@@ -7,7 +7,8 @@ import IconButton from "@mui/material/IconButton"
 import { CaretCircleLeft } from "phosphor-react"
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../redux/store'
-import { removeResourceOfStackOfResourcesNavigated } from '../redux/globalContextSlice';
+import { removeResourceOfStackOfResourcesNavigated, update_index_context_menu } from '../redux/globalContextSlice';
+import { removeResourceOfStack_ResourcesNavigated } from '../redux/globalContextSlice';
 import { ROUTES } from '../commons/constants';
 
 
@@ -27,18 +28,21 @@ export const TitleOfProperties = ({ title, hasButtonBack, buttonBackNavigateTo, 
   const dispatch = useDispatch();
   const global_context: any = useSelector((state: RootState) => state.globalContext)
   async function action() {
-    const stack_length = global_context.stack_of_resource_navigated.length
+    // const stack_length = global_context.stack_of_resource_navigated.length
+    const stack_length = global_context.stack_of_resources_navigated.length
     console.log('---STACK---', stack_length)
     if (stack_length > 0) {
-      dispatch(removeResourceOfStackOfResourcesNavigated())
+      // dispatch(removeResourceOfStackOfResourcesNavigated())
+      dispatch(removeResourceOfStack_ResourcesNavigated())
 
       if (stack_length < 2) {
         navigate(ROUTES.RESOURCES)
       } else {
-        console.log('---2.STACK---',global_context.stack_of_resource_navigated.length)
-        let resource_uri = global_context.stack_of_resource_navigated[stack_length - 2]
+        console.log('1. TITLE OF PROPERTY - STACK:',global_context.stack_of_resources_navigated)
+        let resource_uri = global_context.stack_of_resources_navigated[stack_length - 2]
         // navigate(`/properties/${encodeURIComponent(resource_uri)}`)
-        navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(resource_uri)}`)
+        dispatch(update_index_context_menu(resource_uri.index_of_context_menu))
+        navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(resource_uri.resource)}`)
       }
     }
   }

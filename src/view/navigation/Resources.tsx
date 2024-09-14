@@ -11,6 +11,7 @@ import { Eye } from "phosphor-react";
 import { useSelector, useDispatch } from 'react-redux'
 import type { RootState } from '../../redux/store'
 import { cleanStackOfResourcesNavigated, pushResourceInStackOfResourcesNavigated, updasteResourceURI, updateInitialResourceOfNavigation } from '../../redux/globalContextSlice';
+import { pushResourceInStack_ResourcesNavigated, update_index_context_menu } from '../../redux/globalContextSlice';
 import { MHeader } from "../../components/MHeader";
 import { MTable } from "../../components/MTable";
 import { api } from "../../services/api";
@@ -67,7 +68,7 @@ export function Resources() {
       setTotalOfResources(response.data)
     } catch (error) {
       console.log(`ERROR`, error);
-    } 
+    }
   }
 
 
@@ -93,14 +94,18 @@ export function Resources() {
   }, [location.state, runingSearch]);
 
 
-  
+
 
   const [selectedIndex, setSelectedIndex] = useState<Number>(1);
   const handleListOfResourcesClick = (event: any, idx: Number, resource: ResourceModel) => {
     dispatch(updasteResourceURI(resource.uri.value))
     dispatch(updateInitialResourceOfNavigation(resource.uri.value))
     dispatch(pushResourceInStackOfResourcesNavigated(resource.uri.value))
+
+    dispatch(pushResourceInStack_ResourcesNavigated({ resource: resource.uri.value, idx_menu_context: idx }))
+    dispatch(update_index_context_menu(idx))
     setSelectedIndex(idx);
+    // navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(resource.uri.value)}`)
     navigate(`${ROUTES.PROPERTIES}/${encodeURIComponent(resource.uri.value)}`)
   };
 
@@ -178,27 +183,34 @@ export function Resources() {
               loading={false}
             >
               {
-                resources.map((resource, idx) => (
-                  <TableRow key={idx} >
-                    <TableCell>
-                      <Typography sx={{ whiteSpace: 'pre-line' }}>{resource.label.value}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="text" onClick={(event) => handleProvenanceClick(event, getContextFromURI(resource?.uri?.value))}>
-                        <Typography variant="caption" component="div" color="gray">
-                          {[NUMBERS.CODE_OF_UNIFICATION_VIEW, NUMBERS.CODE_OF_FUSION_VIEW].includes(global_context.view) ? global_context.language == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
-                        </Typography>
-                      </Button>
-                    </TableCell>
-                    <TableCell align='right'>
-                      <Tooltip title={global_context.language == 'pt' ? "Propriedades" : "Properties"}>
-                        <IconButton onClick={(event) => handleListOfResourcesClick(event, idx, resource)} sx={{ p: "4px !important" }}>
-                          <Eye size={22} color={COLORS.AZUL_04} />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                resources.map((resource, idx) => {
+                  let idx_menu_context = global_context.view == NUMBERS.CODE_OF_UNIFICATION_VIEW
+                    ? NUMBERS.IDX_UNIFICATION_VIEW 
+                    : global_context.view == NUMBERS.CODE_OF_FUSION_VIEW
+                      ? NUMBERS.IDX_FUSION_VIEW
+                      : NUMBERS.IDX_EXPORTED_VIEW
+                  return (
+                    <TableRow key={idx} >
+                      <TableCell>
+                        <Typography sx={{ whiteSpace: 'pre-line' }}>{resource.label.value}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="text" onClick={(event) => handleProvenanceClick(event, getContextFromURI(resource?.uri?.value))}>
+                          <Typography variant="caption" component="div" color="gray">
+                            {[NUMBERS.CODE_OF_UNIFICATION_VIEW, NUMBERS.CODE_OF_FUSION_VIEW].includes(global_context.view) ? global_context.language == 'pt' ? "Visão de Unificação" : "Unification View" : getContextFromURI(resource?.uri?.value)}
+                          </Typography>
+                        </Button>
+                      </TableCell>
+                      <TableCell align='right'>
+                        <Tooltip title={global_context.language == 'pt' ? "Propriedades" : "Properties"}>
+                          <IconButton onClick={(event) => handleListOfResourcesClick(event, idx_menu_context, resource)} sx={{ p: "4px !important" }}>
+                            <Eye size={22} color={COLORS.AZUL_04} />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
             </MTable>
           </Grid>
         </Grid>

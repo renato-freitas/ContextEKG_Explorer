@@ -161,6 +161,7 @@ export const ROUTES = {
   RESOURCES: "/resources",
   PROPERTIES: "/properties",
   PROPERTIES_URI: "/properties/:uri",
+  PROPERTIES_RESOURCE: "/properties?resource",
   TIMELINE: "/timeline",
   TIMELINE_URI: "/timeline/:uri",
   TIMELINE_RESOURCE: "/timeline?resource",
