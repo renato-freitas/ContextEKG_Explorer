@@ -83,17 +83,15 @@ export function Properties() {
     let response: any
     try {
       setIsLoading(true)
-      // setProperties([])
       await loadSameAs()
       let _uri = encodeURIComponent(uri as string)
       response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
+      setIsLoading(false)
       console.log('recurso', response.data)
       setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
-    } finally {
-      setIsLoading(false)
-    }
+    } 
   }
 
   async function loadOnlyPropertiesOfSelectedResource() {
@@ -103,11 +101,10 @@ export function Properties() {
       // setProperties([])
       let _uri = encodeURIComponent(uri as string)
       response = await api.get(`/properties/?resourceURI=${_uri}&typeOfView=${global_context.view}&language=${global_context.language}`)
+      setIsLoading(false)
       setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
-    } finally {
-      setIsLoading(false)
     }
   }
   /** Quando uma VSE é selecionada no menu de contexto, deve setar a classe especifica do recurso no redux.
@@ -128,11 +125,11 @@ export function Properties() {
     let response: any
     try {
       setIsLoading(true)
-      // setProperties([])
       let resources_with_sameas = await loadSameAs()
       response = await api.post(`/properties/unification?language=${global_context.language}`, { resources: resources_with_sameas })
-      setAgroupedProperties(response.data)
+      console.log('-SAMEAS UNIF VIEW', response.data)
       setIsLoading(false)
+      setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } 
@@ -143,10 +140,9 @@ export function Properties() {
     let response: any
     try {
       setIsLoading(true)
-      // setProperties([])
       response = await api.post(`/properties/unification?language=${global_context.language}`, { resources: linksSameAs })
-      setAgroupedProperties(response.data)
       setIsLoading(false)
+      setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } 
@@ -156,11 +152,10 @@ export function Properties() {
     let response: any
     try {
       setIsLoading(true)
-      // setProperties([])
       let resources_with_sameas = await loadSameAs()
       response = await api.post(`/properties/fusion?language=${global_context.language}`, { resources: resources_with_sameas })
-      setAgroupedProperties(response.data)
       setIsLoading(false)
+      setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } 
@@ -170,10 +165,9 @@ export function Properties() {
     let response: any
     try {
       setIsLoading(true)
-      // setProperties([])
       response = await api.post(`/properties/fusion?language=${global_context.language}`, { resources: linksSameAs })
-      setAgroupedProperties(response.data)
       setIsLoading(false)
+      setAgroupedProperties(response.data)
     } catch (error) {
       alert(JSON.stringify(error));
     } 
