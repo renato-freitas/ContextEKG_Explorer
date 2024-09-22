@@ -5,8 +5,6 @@ RUN yarn install
 COPY . .
 RUN yarn run build
 
-# CONFIGURANO O NGNIX
-# https://www.youtube.com/watch?v=F2au3FXq9Y4
 FROM nginx:alpine
 RUN rm /etc/nginx/conf.d/default.conf
 
