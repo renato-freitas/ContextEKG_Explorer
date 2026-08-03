@@ -52,9 +52,9 @@ svm:MusicalArtist vskg:belongsToESV "Wikidata"
 ```
 
 ## API REST
-A API da ferramenta desenvolvida como _framework_ FastAPI é disponibilizada no arquivo [contextEKG-api.zip](api/contextEKG-api.zip)
+A API da ferramenta desenvolvida como _framework_ FastAPI é disponibilizada no arquivo [backend](backend)
 
-Para rodar a api o usuário deve descompactar o arquivo acima e executar o comando shell ```uvicorn main:app --reload```. 
+Para ``rodar'' a API o usuário deve baixar ou clo o arquivo acima e executar o comando shell ```uvicorn main:app --reload```. 
 
 Importante importar as bibliotecas de dependência como _Pydantic_, _Uvicorn_.
 
